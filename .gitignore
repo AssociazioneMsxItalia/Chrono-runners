@@ -1,0 +1,3 @@
+# Ignora le cartelle di output ed emulazione
+emul/
+out/
