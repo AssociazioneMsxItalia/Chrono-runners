@@ -38,7 +38,7 @@
 u8 g_VBlank = 0;
 u8 sprt= 0;
 u8 sprtOffset = 0;
-
+u8 dirRight = 1; // 1 = destra, 0 = sinistra
 
 //-----------------------------------------------------------------------------
 // H_TIMI interrupt hook
@@ -88,24 +88,14 @@ void main()
 	VDP_LoadPattern_GM2(g_DataMapGM2_Patterns, 255, 0);
 	VDP_LoadColor_GM2(g_DataMapGM2_Colors, 255, 0);
 	
-	// Initialize text
-	//Print_SetTextFont(g_Font_MGL_Sample8, 96);
-	//VDP_FillLayout_GM2(1, 0, 0, 32, 24);
-	
-	// Header
-	//Print_DrawText(MSX_GL " SCREEN 2 SAMPLE");
-	//Print_DrawLineH(0, 1, 32);
-
-
 
 	VDP_WriteLayout_GM2(g_DataMapGM2_Names, 0, 0, 32, 24);
 
 	// Initialize sprite
 	VDP_SetSpriteFlag(VDP_SPRITE_SIZE_16 | VDP_SPRITE_SCALE_1);
 	VDP_LoadSpritePattern(g_DataSprtLayer, 32, 13*4*4);
-	VDP_SetSpriteSM1(sprt+0, 70, 130, 32, COLOR_BLACK);
-	VDP_SetSpriteSM1(sprt+1, 70, 130, 36, COLOR_WHITE);
-	VDP_SetSpriteSM1(sprt+2, 70, 130, 40, COLOR_LIGHT_RED);
+	VDP_SetSpriteSM1(sprt+0, 70, 111, 36, COLOR_BLACK);
+	VDP_SetSpriteSM1(sprt+1, 70, 111, 116, COLOR_WHITE);
 	VDP_DisableSpritesFrom(sprt+3);
 
 	u8 frame = 0;
@@ -118,9 +108,8 @@ void main()
 	
 		VDP_SetSpritePositionX(sprt+0, 70 + sprtOffset);
 		VDP_SetSpritePositionX(sprt+1, 70 + sprtOffset);
-		VDP_SetSpritePositionX(sprt+2, 70 + sprtOffset);
 
-		u8 shape = 6;
+		u8 shape = 1;
 
 		u8 row8 = Keyboard_Read(8);
 		
@@ -135,13 +124,15 @@ void main()
 		
 		if (IS_KEY_PRESSED(row8, KEY_RIGHT))
 		{
+			dirRight = 1;
 			sprtOffset++;
-			shape = (frame >> 2) % 6;
+			shape = (frame >> 2) % 3;
 		}
 		else if (IS_KEY_PRESSED(row8, KEY_LEFT))
 		{
+			dirRight = 0;
 			sprtOffset--;
-			shape = (frame >> 2) % 6;
+			shape = (frame >> 2) % 3;
 		}
 		
 		if (IS_KEY_PRESSED(row8, KEY_DOWN))
@@ -154,9 +145,14 @@ void main()
 		}
 		prevRow8 = row8;
 
-		VDP_SetSpritePattern(sprt+0, 32 + shape * 16);
-		VDP_SetSpritePattern(sprt+1, 36 + shape * 16);
-		VDP_SetSpritePattern(sprt+2, 40 + shape * 16);
+		
+
+		// Selezione base dei pattern in base alla direzione
+		u8 baseBlack  = dirRight ? 36  : 48;
+		u8 baseWhite  = dirRight ? 116 : 128;
+
+		VDP_SetSpritePattern(sprt+0, baseBlack + shape * 4);
+		VDP_SetSpritePattern(sprt+1, baseWhite + shape * 4);
 
 		frame++;
 	}
