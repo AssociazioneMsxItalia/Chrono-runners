@@ -7,3 +7,9 @@ Toolkit/ExtractTilesMagellan/bin/
 
 # Ignora alcuni file di intellij
 .idea/*
+
+# File di sistema macOS
+.DS_Store
+
+# Impostazioni VSCode
+.vscode/
