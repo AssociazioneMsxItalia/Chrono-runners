@@ -1,3 +1,6 @@
 # Ignora le cartelle di output ed emulazione
 emul/
 out/
+
+# Binari tool di estrazione tile
+Toolkit/ExtractTilesMagellan/bin/
