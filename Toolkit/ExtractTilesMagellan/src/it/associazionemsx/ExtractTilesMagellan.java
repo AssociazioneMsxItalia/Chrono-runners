@@ -3,7 +3,7 @@ package it.associazionemsx;
 import java.io.*;
 import java.nio.file.*;
 
-public class ExtarctTilesMagellan {	
+public class ExtractTilesMagellan {
 	public static void main(String[] args) {
         if (args.length < 1) {
             System.out.println("Uso: java Main <file_input>");
