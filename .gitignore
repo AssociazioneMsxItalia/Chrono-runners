@@ -4,3 +4,6 @@ out/
 
 # Binari tool di estrazione tile
 Toolkit/ExtractTilesMagellan/bin/
+
+# Ignora alcuni file di intellij
+.idea/*
