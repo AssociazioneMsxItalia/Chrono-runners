@@ -14,9 +14,18 @@
 
 // Fonts
 //#include "font/font_mgl_sample8.h"  		// Fonts
-#include "content/tile/data_tile_gm2.h"
-#include "content/maps/data_maps_gm2.h"
-#include "content/sprite/data_sprt_layer.h"		// Sprite
+//#include "content/tile/data_tile_gm2.h"
+//#include "content/maps/data_maps_gm2.h"
+//#include "content/sprite/data_sprt_layer.h"		// Sprite
+
+
+//=============================================================================
+// SEGMENT 3, BANK 1
+//=============================================================================
+extern const unsigned char g_DataSprtLayer[];
+extern const unsigned char g_DataMapGM2_Names[];
+extern const unsigned char g_DataMapGM2_Patterns[];
+extern const unsigned char g_DataMapGM2_Colors[];
 
 
 //=============================================================================
@@ -29,11 +38,26 @@ u8 sprt = 0;
 u8 sprtX = 70;
 u8 sprtY = 111;
 u8 dirRight = 1; // 1 = destra, 0 = sinistra
-
+u8 g_PreviousSegment = 0;
 // Sprite grandi 4 pattern
 const u8 sprSize = 4;
 // Due layer per sprite
 const u8 nLayers = 2;
+
+
+/**
+ * @brief Switch dei segmenti nel banco 1
+ *
+ * @param u8 segment, imposta il numero del segmento da assegnare. Se il valore è0, viene ripristinato il segmento precedente
+ */
+void SetActiveSegment(u8 segment) {
+	if(segment == 0) {
+		SET_BANK_SEGMENT(1,g_PreviousSegment);
+	} else {
+		g_PreviousSegment = GET_BANK_SEGMENT(1);
+		SET_BANK_SEGMENT(1,segment);
+	}
+}
 
 //-----------------------------------------------------------------------------
 // H_TIMI interrupt hook
@@ -77,6 +101,7 @@ void main()
 
 	Bios_SetHookCallback(H_TIMI, VBlankHook);
 
+	SetActiveSegment(3);
 	// Load tiles pattern
 	VDP_LoadPattern_GM2(g_DataMapGM2_Patterns, 255, 0);
 	VDP_LoadColor_GM2(g_DataMapGM2_Colors, 255, 0);

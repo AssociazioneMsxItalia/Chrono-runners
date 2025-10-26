@@ -100,10 +100,10 @@ Machine = "1";
 //   - ROM_NEO16        .rom    NEO-16: 16 KB segments for a total of 1 MB to 64 MB
 //   - ROM_YAMANOOTO    .rom    Yamanooto: 8 KB segments for a total up to 8 MB
 //   - ROM_ASCII16X     .rom    ASCII16-X: 16 KB segments for a total up to 64 MB
-Target = "ROM_32K";
+Target = "ROM_ASCII16";
 
 //-- ROM mapper total size in KB (number). Must be a multiple of 8 or 16 depending on the mapper type (from 64 to 4096 for legacy mappers; can be up to 65536 for NEO-16 mapper)
-// ROMSize = 128;
+ROMSize = 128;
 
 //-- Check for ROM boot skipping if a given key is pressed (boolean)
 // ROMSkipBoot = false;
