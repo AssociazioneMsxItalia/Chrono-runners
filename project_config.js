@@ -52,8 +52,7 @@ ProjName = "chronorunners";
 // ProjSegments = ProjName;
 
 //-- List of library modules to build (array)
-//LibModules = [ "system", "bios", "vdp", "print", "input", "memory", "math", "draw" ];
-LibModules = [ "system", "bios", "vdp", "print", "input", "memory" ];
+LibModules = [ "system", "bios", "vdp", "print", "input", "memory", "game/pawn", "game/state" ];
 
 //-- Additional sources to be compiled and linked with the project (array)
 // AddSources = [];
@@ -126,7 +125,7 @@ ROMSize = 128;
 AddROMSignature = true;
 
 //-- Select RAM in slot 0 and install ISR and optional code there (string). For MSX with at least 64 KB of RAM
-//   - RAM0_NONE       Don't install anything in RAM 
+//   - RAM0_NONE       Don't install anything in RAM
 //   - RAM0_ISR        Install only ISR
 //   - RAM0_SEGMENT    Install ISR and segment data (for mapped-ROM)
 // InstallRAMISR = "RAM0_NONE";
