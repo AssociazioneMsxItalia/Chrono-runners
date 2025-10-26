@@ -32,8 +32,6 @@ extern const unsigned char g_DataMapGM2_Colors[];
 // MEMORY DATA
 //=============================================================================
 
-// V-blank synchronization flag
-u8 g_VBlank = 0;
 u8 sprt = 0;
 u8 sprtX = 70;
 u8 sprtY = 111;
@@ -59,6 +57,13 @@ void SetActiveSegment(u8 segment) {
 	}
 }
 
+//=============================================================================
+// VSYNC HANDLING
+//=============================================================================
+
+// V-blank synchronization flag
+u8 g_VBlank = 0;
+
 //-----------------------------------------------------------------------------
 // H_TIMI interrupt hook
 void VBlankHook()
@@ -72,7 +77,6 @@ void WaitVBlank()
 {
 	while (g_VBlank == 0) {}
 	g_VBlank = 0;
-
 }
 
 //=============================================================================
