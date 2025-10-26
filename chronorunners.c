@@ -27,21 +27,7 @@ extern const unsigned char g_DataMapGM2_Names[];
 extern const unsigned char g_DataMapGM2_Patterns[];
 extern const unsigned char g_DataMapGM2_Colors[];
 
-
-//=============================================================================
-// MEMORY DATA
-//=============================================================================
-
-u8 sprt = 0;
-u8 sprtX = 70;
-u8 sprtY = 111;
-u8 dirRight = 1; // 1 = destra, 0 = sinistra
 u8 g_PreviousSegment = 0;
-// Sprite grandi 4 pattern
-const u8 sprSize = 4;
-// Due layer per sprite
-const u8 nLayers = 2;
-
 
 /**
  * @brief Switch dei segmenti nel banco 1
@@ -56,6 +42,20 @@ void SetActiveSegment(u8 segment) {
 		SET_BANK_SEGMENT(1,segment);
 	}
 }
+
+//=============================================================================
+// MEMORY DATA
+//=============================================================================
+
+u8 sprt = 0;
+u8 sprtX = 70;
+u8 sprtY = 111;
+u8 dirRight = 1; // 1 = destra, 0 = sinistra
+
+// Sprite grandi 4 pattern
+const u8 sprSize = 4;
+// Due layer per sprite
+const u8 nLayers = 2;
 
 //=============================================================================
 // VSYNC HANDLING
