@@ -48,7 +48,7 @@ const u8 nLayers = 2;
 /**
  * @brief Switch dei segmenti nel banco 1
  *
- * @param u8 segment, imposta il numero del segmento da assegnare. Se il valore è0, viene ripristinato il segmento precedente
+ * @param u8 segment, imposta il numero del segmento da assegnare. Se il valore è 0, viene ripristinato il segmento precedente
  */
 void SetActiveSegment(u8 segment) {
 	if(segment == 0) {

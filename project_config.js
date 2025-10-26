@@ -269,7 +269,7 @@ LogStdout = true;
 LogFile = true;
 
 //-- Name of the log file (string)
-LogFileName = "cronorunnes";
+LogFileName = "chronorunners";
 
 //*******************************************************************************
 // ANALYZER SETINGS
