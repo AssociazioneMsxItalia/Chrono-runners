@@ -100,6 +100,14 @@ extern const unsigned char g_DataMapGM2_Names[];
 extern const unsigned char g_DataMapGM2_Patterns[];
 extern const unsigned char g_DataMapGM2_Colors[];
 
+//=============================================================================
+// SEGMENT 4, BANK 1
+//=============================================================================
+extern void LoadPatternAndColor();
+extern void SetVRAMTable();
+extern void InitializeSprite();
+
+
 u8 g_PreviousSegment = 0;
 
 /**
@@ -178,28 +186,16 @@ bool PhysicsCollision(u8 tile)
 
 bool State_Initialize()
 {
-	// VRAM Tables Address
-	VDP_SetLayoutTable(0x3800);
-	VDP_SetColorTable(0x2000);
-	VDP_SetPatternTable(0x0000);
-	VDP_SetSpritePatternTable(0x1800);
-	VDP_SetSpriteAttributeTable(0x3E00);
 
-	// Setup video
-	VDP_SetColor(0xF0);
-	VDP_ClearVRAM();
-
-	// Tiles and nametable data
+	// Switch Segment 3
 	SetActiveSegment(3);
-	VDP_LoadPattern_GM2(g_DataMapGM2_Patterns, 255, 0);
-	VDP_LoadColor_GM2(g_DataMapGM2_Colors, 255, 0);
-	VDP_WriteLayout_GM2(g_DataMapGM2_Names, 0, 0, 32, 24);
 
-	// Initialize sprite
-	VDP_SetSpriteFlag(VDP_SPRITE_SIZE_16 | VDP_SPRITE_SCALE_1);
+	SetVRAMTable();			// RAM Tables Address and Setup video
+	LoadPatternAndColor();  // Load Pattern and color
+	InitializeSprite();	    // Initialize sprite and set 15 fotogrammi per adesso
 
-	// 15 fotogrammi per adesso
-	VDP_LoadSpritePattern(g_DataSprtLayer, 0, 15 * sprSize);
+	VDP_WriteLayout_GM2(g_DataMapGM2_Names, 0, 0, 32, 24);  
+
 	SetActiveSegment(0);
 
 	// Init player pawn
@@ -228,14 +224,7 @@ bool State_Game()
 	else if (g_bMovingLeft)
 		act = ACTION_MOVELEFT;
 
-	// Blocca su bordo sinistro
-	if (g_PlayerPawn.PositionX == 0 && g_DX < 0)
-		g_DX = 0;
-
-	// Blocca su bordo destro
-	if (g_PlayerPawn.PositionX >= 240 && g_DX > 0)
-		g_DX = 0;
-
+	
 	Pawn_SetAction(&g_PlayerPawn, act);
 	Pawn_SetMovement(&g_PlayerPawn, g_DX, g_DY);
 	Pawn_Update(&g_PlayerPawn);

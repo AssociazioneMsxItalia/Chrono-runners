@@ -289,7 +289,7 @@
 // - PAWN_BORDER_RIGHT
 // - PAWN_BORDER_LEFT
 #define PAWN_BORDER_EVENT			(PAWN_BORDER_DOWN|PAWN_BORDER_RIGHT)
-#define PAWN_BORDER_BLOCK			(PAWN_BORDER_UP|PAWN_BORDER_LEFT)
+#define PAWN_BORDER_BLOCK			(PAWN_BORDER_UP|PAWN_BORDER_LEFT|PAWN_BORDER_RIGHT)
 // Top/bottom border position (in pixel)
 #define PAWN_BORDER_MIN_Y			0		// High border Y coordinade
 #define PAWN_BORDER_MAX_Y			191		// Low border Y coordinate
