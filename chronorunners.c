@@ -99,14 +99,15 @@ extern const unsigned char g_DataSprtLayer[];
 extern const unsigned char g_DataMapGM2_Names[];
 extern const unsigned char g_DataMapGM2_Patterns[];
 extern const unsigned char g_DataMapGM2_Colors[];
-
-//=============================================================================
-// SEGMENT 4, BANK 1
-//=============================================================================
 extern void LoadPatternAndColor();
 extern void SetVRAMTable();
 extern void InitializeSprite();
 
+
+//=============================================================================
+// SEGMENT 4, BANK 1
+//=============================================================================
+extern void UpdateMovment();
 
 u8 g_PreviousSegment = 0;
 
@@ -230,40 +231,10 @@ bool State_Game()
 	Pawn_Update(&g_PlayerPawn);
 	Pawn_Draw(&g_PlayerPawn);
 
-	// Update movement
-	g_DX = 0;
-	g_DY = 0;
-	u8 row8 = Keyboard_Read(8);
-
-	g_bMovingRight = g_bMovingLeft = FALSE;
-
-	if (IS_KEY_PRESSED(row8, KEY_RIGHT))
-	{
-		g_DX++;
-		g_bMovingRight = TRUE;
-	}
-	else if (IS_KEY_PRESSED(row8, KEY_LEFT))
-	{
-		g_DX--;
-		g_bMovingLeft = TRUE;
-	}
-
-	if (g_bJumping)
-	{
-		g_DY -= g_VelocityY / 4;
-
-		g_VelocityY -= GRAVITY;
-		if (g_VelocityY < -FORCE)
-			g_VelocityY = -FORCE;
-
-	}
-	else if (IS_KEY_PRESSED(row8, KEY_SPACE) || IS_KEY_PRESSED(row8, KEY_UP))
-	{
-		g_bJumping = TRUE;
-		g_VelocityY = FORCE;
-	}
-
-	g_PrevRow8 = row8;
+	// Switch Segment 4
+	SetActiveSegment(4);
+	UpdateMovment();	// Update movement
+	SetActiveSegment(0);
 
 	return TRUE;
 }
