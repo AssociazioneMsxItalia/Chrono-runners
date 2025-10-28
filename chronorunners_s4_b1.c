@@ -8,6 +8,7 @@
 // INCLUDES
 //=============================================================================
 #include "msxgl.h"
+#include "PawnData.h"
 
 //=============================================================================
 // EXTERN MEMORY DATA
@@ -22,6 +23,12 @@ extern i8   g_DY;
 extern u8   FORCE;
 extern u8   GRAVITY;
 
+
+//=============================================================================
+// PROTOTYPES
+//=============================================================================
+void UpdateMovment();
+u8 UpdateAction(u8 act);
 
 //=============================================================================
 // FUNCTION
@@ -66,4 +73,28 @@ void UpdateMovment() {
 	}
 
 	g_PrevRow8 = row8;    
+}
+
+
+/**
+ * @brief Update action Pawn
+ * @param u8 Current action
+ * @return new action
+ */
+u8 UpdateAction(u8 act) {
+	if (g_bJumping && (g_VelocityY >= 0))
+	{
+		if (g_bMovingRight)
+			act = ACTION_JUMPRIGHT;
+		else
+			act = ACTION_JUMPLEFT;
+	}
+	else if (g_bJumping)
+		act = ACTION_FALL;
+	else if (g_bMovingRight)
+		act = ACTION_MOVERIGHT;
+	else if (g_bMovingLeft)
+		act = ACTION_MOVELEFT;
+
+	return act;
 }

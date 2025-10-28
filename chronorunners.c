@@ -5,6 +5,8 @@
 #include "game/state.h"
 #include "game/pawn.h"
 
+#include "PawnData.h"
+
 //=============================================================================
 // DEFINES
 //=============================================================================
@@ -70,7 +72,7 @@ const Pawn_Frame g_FramesFall[] =
 	{ 14 * sprSize,	4,	NULL },
 };
 
-// Actions id
+/* Actions id
 enum ANIM_ACTION_ID
 {
 	ACTION_IDLE = 0,
@@ -80,6 +82,7 @@ enum ANIM_ACTION_ID
 	ACTION_JUMPLEFT,
 	ACTION_FALL,
 };
+*/
 
 // List of all player actions
 const Pawn_Action g_AnimActions[] =
@@ -108,6 +111,7 @@ extern void InitializeSprite();
 // SEGMENT 4, BANK 1
 //=============================================================================
 extern void UpdateMovment();
+extern u8 UpdateAction(u8 act);
 
 u8 g_PreviousSegment = 0;
 
@@ -211,30 +215,18 @@ bool State_Initialize()
 bool State_Game()
 {
 	u8 act = ACTION_IDLE;
-	if (g_bJumping && (g_VelocityY >= 0))
-	{
-		if (g_bMovingRight)
-			act = ACTION_JUMPRIGHT;
-		else
-			act = ACTION_JUMPLEFT;
-	}
-	else if (g_bJumping)
-		act = ACTION_FALL;
-	else if (g_bMovingRight)
-		act = ACTION_MOVERIGHT;
-	else if (g_bMovingLeft)
-		act = ACTION_MOVELEFT;
-
-	
-	Pawn_SetAction(&g_PlayerPawn, act);
-	Pawn_SetMovement(&g_PlayerPawn, g_DX, g_DY);
-	Pawn_Update(&g_PlayerPawn);
-	Pawn_Draw(&g_PlayerPawn);
 
 	// Switch Segment 4
 	SetActiveSegment(4);
 	UpdateMovment();	// Update movement
+	act = UpdateAction(act);
 	SetActiveSegment(0);
+
+
+	Pawn_SetAction(&g_PlayerPawn, act);
+	Pawn_SetMovement(&g_PlayerPawn, g_DX, g_DY);
+	Pawn_Update(&g_PlayerPawn);
+	Pawn_Draw(&g_PlayerPawn);
 
 	return TRUE;
 }
