@@ -72,18 +72,6 @@ const Pawn_Frame g_FramesFall[] =
 	{ 14 * sprSize,	4,	NULL },
 };
 
-/* Actions id
-enum ANIM_ACTION_ID
-{
-	ACTION_IDLE = 0,
-	ACTION_MOVERIGHT,
-	ACTION_MOVELEFT,
-	ACTION_JUMPRIGHT,
-	ACTION_JUMPLEFT,
-	ACTION_FALL,
-};
-*/
-
 // List of all player actions
 const Pawn_Action g_AnimActions[] =
 {//   Frames             Number                       Loop? Interrupt?
@@ -110,7 +98,7 @@ extern void InitializeSprite();
 //=============================================================================
 // SEGMENT 4, BANK 1
 //=============================================================================
-extern void UpdateMovment();
+extern void UpdateMovement();
 extern u8 UpdateAction(u8 act);
 
 u8 g_PreviousSegment = 0;
@@ -199,7 +187,7 @@ bool State_Initialize()
 	LoadPatternAndColor();  // Load Pattern and color
 	InitializeSprite();	    // Initialize sprite and set 15 fotogrammi per adesso
 
-	VDP_WriteLayout_GM2(g_DataMapGM2_Names, 0, 0, 32, 24);  
+	VDP_WriteLayout_GM2(g_DataMapGM2_Names, 0, 0, 32, 24);
 
 	SetActiveSegment(0);
 
@@ -218,10 +206,9 @@ bool State_Game()
 
 	// Switch Segment 4
 	SetActiveSegment(4);
-	UpdateMovment();	// Update movement
+	UpdateMovement();
 	act = UpdateAction(act);
 	SetActiveSegment(0);
-
 
 	Pawn_SetAction(&g_PlayerPawn, act);
 	Pawn_SetMovement(&g_PlayerPawn, g_DX, g_DY);

@@ -27,7 +27,7 @@ extern u8   GRAVITY;
 //=============================================================================
 // PROTOTYPES
 //=============================================================================
-void UpdateMovment();
+void UpdateMovement();
 u8 UpdateAction(u8 act);
 
 //=============================================================================
@@ -39,7 +39,7 @@ u8 UpdateAction(u8 act);
  * @param void
  * @return void
  */
-void UpdateMovment() {
+void UpdateMovement() {
     g_DX = 0;
 	g_DY = 0;
 	u8 row8 = Keyboard_Read(8);
@@ -72,7 +72,7 @@ void UpdateMovment() {
 		g_VelocityY = FORCE;
 	}
 
-	g_PrevRow8 = row8;    
+	g_PrevRow8 = row8;
 }
 
 
