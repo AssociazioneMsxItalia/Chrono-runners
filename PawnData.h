@@ -1,5 +1,4 @@
-#ifndef PAWNDATA_H
-#define PAWNDATA_H
+#pragma once
 
 // Actions id
 enum ANIM_ACTION_ID
@@ -11,6 +10,3 @@ enum ANIM_ACTION_ID
 	ACTION_JUMPLEFT,
 	ACTION_FALL,
 };
-
-
-#endif
