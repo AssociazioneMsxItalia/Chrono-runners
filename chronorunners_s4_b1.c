@@ -17,7 +17,6 @@ extern bool g_bMovingRight;
 extern bool g_bMovingLeft;
 extern bool g_bJumping;
 extern i8   g_VelocityY;
-extern u8   g_PrevRow8;
 extern i8   g_DX;
 extern i8   g_DY;
 extern u8   FORCE;
@@ -64,15 +63,12 @@ void UpdateMovement() {
 		g_VelocityY -= GRAVITY;
 		if (g_VelocityY < -FORCE)
 			g_VelocityY = -FORCE;
-
 	}
-	else if (IS_KEY_PRESSED(row8, KEY_SPACE) || IS_KEY_PRESSED(row8, KEY_UP))
+	else if (IS_KEY_PRESSED(row8, KEY_UP))
 	{
 		g_bJumping = TRUE;
 		g_VelocityY = FORCE;
 	}
-
-	g_PrevRow8 = row8;
 }
 
 

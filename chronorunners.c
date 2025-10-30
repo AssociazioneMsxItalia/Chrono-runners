@@ -21,6 +21,7 @@
 // Function prototypes
 bool State_Initialize();
 bool State_Game();
+bool State_Rewind();
 
 //=============================================================================
 // READ-ONLY DATA
@@ -126,12 +127,28 @@ bool g_bMovingRight = FALSE;
 bool g_bMovingLeft = FALSE;
 bool g_bJumping = FALSE;
 i8   g_VelocityY;
-u8   g_PrevRow8 = 0xFF;
 i8   g_DX = 0;
 i8   g_DY = 0;
 u8   g_LastEvent = 0;
 u8   FORCE = 15;
 u8   GRAVITY = 1;
+
+// 5 secondi * 50 fps per coordinata
+#define rewindSize 250
+u8 x_rewind[rewindSize];
+u8 y_rewind[rewindSize];
+u8 f_rewind[rewindSize];
+u8 rewind_start;
+u8 rewind_end;
+u8 rewind_ptr;
+
+bool isRewindCharged() {
+	return (rewind_end + 1) % rewindSize == rewind_start;
+}
+
+void rewindReset() {
+	rewind_start = rewind_end = 0;
+}
 
 //=============================================================================
 // PHYSICS
@@ -179,7 +196,6 @@ bool PhysicsCollision(u8 tile)
 
 bool State_Initialize()
 {
-
 	// Switch Segment 3
 	SetActiveSegment(3);
 
@@ -195,6 +211,8 @@ bool State_Initialize()
 	Pawn_Initialize(&g_PlayerPawn, g_SpriteLayers, numberof(g_SpriteLayers), 0, g_AnimActions);
 	Pawn_SetPosition(&g_PlayerPawn, 70, 111);
 	Pawn_InitializePhysics(&g_PlayerPawn, PhysicsEvent, PhysicsCollision, 16, 16);
+
+	rewindReset();
 
 	Game_SetState(State_Game);
 	return FALSE;
@@ -215,6 +233,51 @@ bool State_Game()
 	Pawn_Update(&g_PlayerPawn);
 	Pawn_Draw(&g_PlayerPawn);
 
+	// Array pieno, consuma la posizione acquisita più vecchia
+	if (isRewindCharged()) {
+		rewind_start = (rewind_start + 1) % rewindSize;
+		VDP_Poke_GM2(0, 0, 57);
+	} else {
+		VDP_Poke_GM2(0, 0, 59);
+	}
+
+	rewind_end = (rewind_end + 1) % rewindSize;
+	x_rewind[rewind_end] = g_PlayerPawn.PositionX;
+	y_rewind[rewind_end] = g_PlayerPawn.PositionY;
+	f_rewind[rewind_end] = g_PlayerPawn.AnimFrame;
+
+	u8 row8 = Keyboard_Read(8);
+	if (IS_KEY_PRESSED(row8, KEY_SPACE) && isRewindCharged()) {
+		rewind_ptr = (rewind_end - 1) % rewindSize;
+		VDP_Poke_GM2(0, 0, 65);
+		Game_SetState(State_Rewind);
+	}
+
+	return TRUE;
+}
+
+bool State_Rewind()
+{
+	Pawn_SetPosition(&g_PlayerPawn, x_rewind[rewind_ptr], y_rewind[rewind_ptr]);
+	// Per forzare il fotogramma, imposta a mano il flag di aggiornamento pattern
+	g_PlayerPawn.Update |= PAWN_UPDATE_PATTERN;
+	g_PlayerPawn.AnimFrame = f_rewind[rewind_ptr];
+	Pawn_Draw(&g_PlayerPawn);
+
+	if (rewind_ptr == 0) {
+		rewind_ptr = rewindSize - 1;
+	} else {
+		rewind_ptr = (rewind_ptr - 1) % rewindSize;
+	}
+
+	// Fine del rewind
+	if (rewind_ptr == rewind_end) {
+
+		// Svuota il rewind
+		rewindReset();
+
+		Game_SetState(State_Game);
+	}
 	return TRUE;
 }
 
