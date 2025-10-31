@@ -4,6 +4,7 @@
 #include "msxgl.h"
 #include "game/state.h"
 #include "game/pawn.h"
+#include "debug.h"
 
 #include "PawnData.h"
 
@@ -300,6 +301,8 @@ bool State_Rewind()
 
 void main()
 {
+	DEBUG_INIT();
+
 	Bios_SetKeyClick(FALSE);
 
 	Game_SetState(State_Initialize);

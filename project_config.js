@@ -52,7 +52,7 @@ ProjName = "chronorunners";
 // ProjSegments = ProjName;
 
 //-- List of library modules to build (array)
-LibModules = [ "system", "bios", "vdp", "print", "input", "memory", "game/pawn", "game/state" ];
+LibModules = [ "system", "bios", "vdp", "print", "input", "memory", "game/pawn", "game/state", "debug" ];
 
 //-- Additional sources to be compiled and linked with the project (array)
 // AddSources = [];
@@ -318,7 +318,7 @@ LogFileName = "chronorunners";
 // EmulTurbo      = false;				//-- Start emulator in turbo mode (boolean)
 
 //-- Emulator extra parameters to be add to command-line (string). Emulator sotfware specific
-// EmulExtraParam = "";
+EmulExtraParam= `-script ${ToolsDir}script/openMSX/debugger_pvm.tcl`;
 
 //-------------------------------------------------------------------------------
 // Extension options

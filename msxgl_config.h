@@ -152,7 +152,7 @@
 #define INPUT_USE_DETECT			TRUE	// Add feature to detect device plugged in General purpose ports
 #define INPUT_USE_ISR_PROTECTION	TRUE	// Disable interruptions while access PSG registers (needed if you use BIOS or access PSG in your own ISR)
 #define INPUT_JOY_UPDATE			FALSE	// Add function to update all joystick states at once
-#define INPUT_HOLD_SIGNAL			FALSE	// Determines whether functions that modify signals should keep the state of those they don't need to modify (which slows functions down a bit) 
+#define INPUT_HOLD_SIGNAL			FALSE	// Determines whether functions that modify signals should keep the state of those they don't need to modify (which slows functions down a bit)
 // Key update handler
 #define INPUT_KB_UPDATE				FALSE	// Add function to update all keyboard rows at once
 #define INPUT_KB_UPDATE_MIN			0		// First row to update
@@ -192,7 +192,7 @@
 
 #define RTC_USE_CLOCK				TRUE	// Add functions to handle date and time
 #define RTC_USE_CLOCK_EXTRA			TRUE	// Add extra date and time functions that require additional data
-#define RTC_USE_SAVEDATA			TRUE	// Add functions to read/write into the CMOS 
+#define RTC_USE_SAVEDATA			TRUE	// Add functions to read/write into the CMOS
 #define RTC_USE_SAVESIGNED			TRUE	// Add signature handling to validate CMOS I/O
 
 //-----------------------------------------------------------------------------
@@ -564,7 +564,7 @@
 //-----------------------------------------------------------------------------
 
 #define PAC_USE_SIGNATURE			TRUE	// Handle application signature to validate saved data
-#define PAC_USE_VALIDATOR			TRUE	// Add code to validate input parameters 
+#define PAC_USE_VALIDATOR			TRUE	// Add code to validate input parameters
 #define PAC_DEVICE_MAX				4		// Maximum number of supported PAC devices
 // SRAM access method
 // - PAC_ACCESS_DIRECT ............ Direct access to SRAM (must be selected in page 1)
@@ -611,7 +611,7 @@
 // - DEBUG_EMULICIOUS ............. Debug features for Emulicious
 // - DEBUG_OPENMSX ................ Debug features for openMSX using 'debugdevice' extension
 // - DEBUG_OPENMSX_P .............. Debug features for openMSX using PVM script (tools/script/openMSX/debugger_pvm.tcl)
-#define DEBUG_TOOL					DEBUG_DISABLE
+#define DEBUG_TOOL					DEBUG_OPENMSX_P
 // Profiler options
 // - PROFILE_DISABLE .............. No profile tool
 // - PROFILE_OPENMSX_G ............ Profiler features for openMSX using Grauw script (tools/script/openMSX/profiler_grauw.tcl)
