@@ -153,7 +153,7 @@ u8 y_rewind[rewindSize];
 u8 f_rewind[rewindSize];
 u8 rewind_start;
 u8 rewind_end;
-i16 rewind_ptr;
+u8 rewind_ptr;
 
 bool isRewindCharged() {
 	return (rewind_end + 1) % rewindSize == rewind_start;
@@ -277,33 +277,20 @@ bool State_Rewind()
 	g_PlayerPawn.AnimFrame = f_rewind[rewind_ptr];
 	Pawn_Draw(&g_PlayerPawn);
 
-	if (rewind_ptr <= 0) {
+	if (rewind_ptr == 0) {
 		rewind_ptr = rewindSize - 1;
-
 	} else {
-
-		// Definisce di quanto spingere il rewind a questo passo, in funzione
-		// di quanto ancora distiamo dalla fine (attenzione: cast a u8
-		// necessario per evitare di dividere un numero negativo)
-		u8 delta = (u8)(rewind_ptr - rewind_end) / 10;
-		if (delta == 0)
-			delta = 1;
-
-		// Nuova posizione a cui stiamo per saltare
-		i16 new_ptr = (rewind_ptr - delta) % rewindSize;
-
-		// Ha superato la fine del buffer di rewind, siamo arrivati
-		if (rewind_ptr >= rewind_end && new_ptr <= rewind_end) {
-
-			// Svuota il rewind
-			rewindReset();
-
-			Game_SetState(State_Game);
-		} else {
-			rewind_ptr = new_ptr;
-		}
+		rewind_ptr = (rewind_ptr - 1) % rewindSize;
 	}
 
+	// Fine del rewind
+	if (rewind_ptr == rewind_end) {
+
+		// Svuota il rewind
+		rewindReset();
+
+		Game_SetState(State_Game);
+	}
 	return TRUE;
 }
 
