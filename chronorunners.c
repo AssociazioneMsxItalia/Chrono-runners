@@ -35,6 +35,13 @@ const Pawn_Sprite g_SpriteLayers[] =
 	{ 0, 0, laySize,      COLOR_LIGHT_RED, 0 },
 };
 
+// Pawn sprite layers
+const Pawn_Sprite g_SpriteRewindLayers[] =
+{//   X  Y  Pattern       Color            Option
+	{ 0, 0, 0,            COLOR_WHITE,     0 },
+	{ 0, 0, laySize,      COLOR_GRAY,      0 },
+};
+
 // Idle animation frames
 const Pawn_Frame g_FramesIdle[] =
 {//   Pattern          Time  Function
@@ -263,6 +270,11 @@ bool State_Game()
 	if (IS_KEY_PRESSED(row8, KEY_SPACE) && isRewindCharged()) {
 		rewind_ptr = (rewind_end - 1) % rewindSize;
 		VDP_Poke_GM2(0, 0, 65);
+
+		// Sostituisce i colori dello sprite principale
+		Pawn_Initialize(&g_PlayerPawn, g_SpriteRewindLayers, numberof(g_SpriteRewindLayers), 0, g_AnimActions);
+		Pawn_InitializePhysics(&g_PlayerPawn, PhysicsEvent, PhysicsCollision, 16, 16);
+
 		Game_SetState(State_Rewind);
 	}
 
@@ -271,7 +283,9 @@ bool State_Game()
 
 bool State_Rewind()
 {
+	// Aggiorna la posizione
 	Pawn_SetPosition(&g_PlayerPawn, x_rewind[rewind_ptr], y_rewind[rewind_ptr]);
+
 	// Per forzare il fotogramma, imposta a mano il flag di aggiornamento pattern
 	g_PlayerPawn.Update |= PAWN_UPDATE_PATTERN;
 	g_PlayerPawn.AnimFrame = f_rewind[rewind_ptr];
@@ -288,6 +302,12 @@ bool State_Rewind()
 
 		// Svuota il rewind
 		rewindReset();
+
+		// Reimposta colori e posizione originale
+		Pawn_Initialize(&g_PlayerPawn, g_SpriteLayers, numberof(g_SpriteLayers), 0, g_AnimActions);
+		Pawn_InitializePhysics(&g_PlayerPawn, PhysicsEvent, PhysicsCollision, 16, 16);
+		u8 orig_ptr = (rewind_ptr + 1) % rewindSize;
+		Pawn_SetPosition(&g_PlayerPawn, x_rewind[orig_ptr], y_rewind[orig_ptr]);
 
 		Game_SetState(State_Game);
 	}
