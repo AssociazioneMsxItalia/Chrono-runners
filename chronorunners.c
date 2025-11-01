@@ -149,9 +149,6 @@ bool g_bJumping = FALSE;
 i8   g_VelocityY;
 i8   g_DX = 0;
 i8   g_DY = 0;
-u8   g_LastEvent = 0;
-u8   FORCE = 15;
-u8   GRAVITY = 1;
 
 // 5 secondi * 50 fps per coordinata
 #define rewindSize 250
@@ -162,11 +159,11 @@ u8 rewind_start;
 u8 rewind_end;
 u8 rewind_ptr;
 
-bool isRewindCharged() {
+bool IsRewindCharged() {
 	return (rewind_end + 1) % rewindSize == rewind_start;
 }
 
-void rewindReset() {
+void ResetRewind() {
 	rewind_start = rewind_end = 0;
 }
 
@@ -180,11 +177,6 @@ void PhysicsEvent(u8 event, u8 tile)
 	tile;
 	switch (event)
 	{
-	case PAWN_PHYSICS_BORDER_LEFT:
-	case PAWN_PHYSICS_BORDER_RIGHT:
-		g_LastEvent = event;
-		break;
-
 	case PAWN_PHYSICS_COL_DOWN: // Handle downward collision
 		g_bJumping = FALSE;
 		break;
@@ -211,16 +203,20 @@ bool PhysicsCollision(u8 tile)
 }
 
 //=============================================================================
-// STATES
+// UTILITIES
 //=============================================================================
 
-void reinitPawn(Pawn *pawn, Pawn_Sprite *spr_layers, u8 x, u8 y) {
+void ReinitPawn(Pawn *pawn, Pawn_Sprite *spr_layers, u8 x, u8 y) {
 	// Passa sempre g_SpriteLayers a numberof, tanto il numero di fotogrammi
 	// non può comunque cambiare
 	Pawn_Initialize(pawn, spr_layers, numberof(g_SpriteLayers), 0, g_AnimActions);
 	Pawn_InitializePhysics(pawn, PhysicsEvent, PhysicsCollision, 16, 16);
 	Pawn_SetPosition(pawn, x, y);
 }
+
+//=============================================================================
+// STATES
+//=============================================================================
 
 bool State_Initialize()
 {
@@ -236,9 +232,9 @@ bool State_Initialize()
 	SetActiveSegment(0);
 
 	// Init player pawn
-	reinitPawn(&g_PlayerPawn, g_SpriteLayers, 70, 111);
+	ReinitPawn(&g_PlayerPawn, g_SpriteLayers, 70, 111);
 
-	rewindReset();
+	ResetRewind();
 
 	Game_SetState(State_Game);
 	return FALSE;
@@ -260,7 +256,7 @@ bool State_Game()
 	Pawn_Draw(&g_PlayerPawn);
 
 	// Array pieno, consuma la posizione acquisita più vecchia
-	if (isRewindCharged()) {
+	if (IsRewindCharged()) {
 		rewind_start = (rewind_start + 1) % rewindSize;
 		VDP_Poke_GM2(0, 0, 57);
 	} else {
@@ -273,12 +269,12 @@ bool State_Game()
 	f_rewind[rewind_end] = g_PlayerPawn.AnimFrame;
 
 	u8 row8 = Keyboard_Read(8);
-	if (IS_KEY_PRESSED(row8, KEY_SPACE) && isRewindCharged()) {
+	if (IS_KEY_PRESSED(row8, KEY_SPACE) && IsRewindCharged()) {
 		rewind_ptr = (rewind_end - 1) % rewindSize;
 		VDP_Poke_GM2(0, 0, 65);
 
 		// Sostituisce i colori dello sprite principale
-		reinitPawn(&g_PlayerPawn, g_SpriteRewindLayers, x_rewind[rewind_ptr], y_rewind[rewind_ptr]);
+		ReinitPawn(&g_PlayerPawn, g_SpriteRewindLayers, x_rewind[rewind_ptr], y_rewind[rewind_ptr]);
 
 		Game_SetState(State_Rewind);
 	}
@@ -306,12 +302,12 @@ bool State_Rewind()
 	if (rewind_ptr == rewind_end) {
 
 		// Svuota il rewind
-		rewindReset();
+		ResetRewind();
 
 		u8 prev_ptr = (rewind_ptr + 1) % rewindSize;
 
 		// Reimposta colori e posizione originale
-		reinitPawn(&g_PlayerPawn, g_SpriteLayers, x_rewind[prev_ptr], y_rewind[prev_ptr]);
+		ReinitPawn(&g_PlayerPawn, g_SpriteLayers, x_rewind[prev_ptr], y_rewind[prev_ptr]);
 
 		Game_SetState(State_Game);
 	}
