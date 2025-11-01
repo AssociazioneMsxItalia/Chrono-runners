@@ -214,6 +214,14 @@ bool PhysicsCollision(u8 tile)
 // STATES
 //=============================================================================
 
+void reinitPawn(Pawn *pawn, Pawn_Sprite *spr_layers, u8 x, u8 y) {
+	// Passa sempre g_SpriteLayers a numberof, tanto il numero di fotogrammi
+	// non può comunque cambiare
+	Pawn_Initialize(pawn, spr_layers, numberof(g_SpriteLayers), 0, g_AnimActions);
+	Pawn_InitializePhysics(pawn, PhysicsEvent, PhysicsCollision, 16, 16);
+	Pawn_SetPosition(pawn, x, y);
+}
+
 bool State_Initialize()
 {
 	// Switch Segment 3
@@ -228,9 +236,7 @@ bool State_Initialize()
 	SetActiveSegment(0);
 
 	// Init player pawn
-	Pawn_Initialize(&g_PlayerPawn, g_SpriteLayers, numberof(g_SpriteLayers), 0, g_AnimActions);
-	Pawn_SetPosition(&g_PlayerPawn, 70, 111);
-	Pawn_InitializePhysics(&g_PlayerPawn, PhysicsEvent, PhysicsCollision, 16, 16);
+	reinitPawn(&g_PlayerPawn, g_SpriteLayers, 70, 111);
 
 	rewindReset();
 
@@ -272,8 +278,7 @@ bool State_Game()
 		VDP_Poke_GM2(0, 0, 65);
 
 		// Sostituisce i colori dello sprite principale
-		Pawn_Initialize(&g_PlayerPawn, g_SpriteRewindLayers, numberof(g_SpriteRewindLayers), 0, g_AnimActions);
-		Pawn_InitializePhysics(&g_PlayerPawn, PhysicsEvent, PhysicsCollision, 16, 16);
+		reinitPawn(&g_PlayerPawn, g_SpriteRewindLayers, x_rewind[rewind_ptr], y_rewind[rewind_ptr]);
 
 		Game_SetState(State_Rewind);
 	}
@@ -303,11 +308,10 @@ bool State_Rewind()
 		// Svuota il rewind
 		rewindReset();
 
+		u8 prev_ptr = (rewind_ptr + 1) % rewindSize;
+
 		// Reimposta colori e posizione originale
-		Pawn_Initialize(&g_PlayerPawn, g_SpriteLayers, numberof(g_SpriteLayers), 0, g_AnimActions);
-		Pawn_InitializePhysics(&g_PlayerPawn, PhysicsEvent, PhysicsCollision, 16, 16);
-		u8 orig_ptr = (rewind_ptr + 1) % rewindSize;
-		Pawn_SetPosition(&g_PlayerPawn, x_rewind[orig_ptr], y_rewind[orig_ptr]);
+		reinitPawn(&g_PlayerPawn, g_SpriteLayers, x_rewind[prev_ptr], y_rewind[prev_ptr]);
 
 		Game_SetState(State_Game);
 	}
