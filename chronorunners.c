@@ -68,10 +68,14 @@ const Pawn_Frame g_FramesJumpLeft[] =
 };
 
 // Fall animation frames
-const Pawn_Frame g_FramesFall[] =
+const Pawn_Frame g_FramesFallRight[] =
 {
-	{ 13 * sprSize,	4,	NULL },
-	{ 14 * sprSize,	4,	NULL },
+	{ 1 * sprSize,	4,	NULL },
+};
+
+const Pawn_Frame g_FramesFallLeft[] =
+{
+	{ 4 * sprSize,	4,	NULL },
 };
 
 // List of all player actions
@@ -82,7 +86,8 @@ const Pawn_Action g_AnimActions[] =
 	{ g_FramesMoveLeft,  numberof(g_FramesMoveRight), TRUE, TRUE },
 	{ g_FramesJumpRight, numberof(g_FramesJumpRight), TRUE, TRUE },
 	{ g_FramesJumpLeft,  numberof(g_FramesJumpLeft),  TRUE, TRUE },
-	{ g_FramesFall,      numberof(g_FramesFall),      TRUE, TRUE },
+	{ g_FramesFallRight, numberof(g_FramesFallRight), TRUE, TRUE },
+	{ g_FramesFallLeft,  numberof(g_FramesFallLeft),  TRUE, TRUE },
 };
 
 //=============================================================================

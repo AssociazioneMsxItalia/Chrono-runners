@@ -1,8 +1,7 @@
 import sys
 
-n_sprites = 15
+n_sprites = 13
 n_layers = 2
-layer_offset = 20
 
 sprites = []
 
@@ -27,6 +26,8 @@ with open(sys.argv[1], "r") as fp:
             sprite.append(int(w[0:2], 16))
             sprite.append(int(w[2:4], 16))
 
+    sprites.append(sprite)
+
 # Scrive i dati nel file header in formato MSXgl
 with open("data_sprt_layer.h", "w") as fp:
 
@@ -37,7 +38,7 @@ with open("data_sprt_layer.h", "w") as fp:
         fp.write("// Frame %d\n" % n_spr)
         for n_lay in range(n_layers):
             fp.write("// Layer %d\n" % n_lay)
-            for i_val, val in enumerate(sprites[n_spr + n_lay * layer_offset]):
+            for i_val, val in enumerate(sprites[n_spr * n_layers + n_lay]):
 
                 # Ogni 8 byte va a capo per leggibilità
                 if i_val != 0 and i_val % 8 == 0:

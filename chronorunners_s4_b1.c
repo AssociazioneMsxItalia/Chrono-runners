@@ -85,8 +85,12 @@ u8 UpdateAction(u8 act) {
 		else
 			act = ACTION_JUMPLEFT;
 	}
-	else if (g_bJumping)
-		act = ACTION_FALL;
+	else if (g_bJumping) {
+		if (g_bMovingRight)
+			act = ACTION_FALLRIGHT;
+		else
+			act = ACTION_FALLLEFT;
+	}
 	else if (g_bMovingRight)
 		act = ACTION_MOVERIGHT;
 	else if (g_bMovingLeft)
