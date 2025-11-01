@@ -37,8 +37,15 @@ const Pawn_Sprite g_SpriteLayers[] =
 
 // Idle animation frames
 const Pawn_Frame g_FramesIdle[] =
-{//   Pattern       Time Function
-	{ 0 * sprSize, 	48,  NULL },
+{//   Pattern          Time  Function
+	{  0 * sprSize,    250,  NULL },
+	{ 11 * sprSize,     10,  NULL },
+	{ 12 * sprSize,     10,  NULL },
+	{ 11 * sprSize,     10,  NULL },
+	{ 12 * sprSize,     10,  NULL },
+	{ 11 * sprSize,     10,  NULL },
+	{ 12 * sprSize,     10,  NULL },
+	{ 11 * sprSize,     10,  NULL },
 };
 
 // Move animation frames
