@@ -10,12 +10,12 @@ Eseguire lo script Python mag2msx.py per convertire gli sprite nel formato MSXgl
 
 macOS:
 ```console
-python3 Toolkit/mag2msx.py <file assembly>
+python3 Toolkit/spr2msx.py <file assembly>
 ````
 
 Windows
 ```console
-py Toolkit/mag2msx.py <file assembly>
+py Toolkit/spr2msx.py <file assembly>
 ````
 
 Il programma produrrà automaticamente un file `data_sprt_layer.h` nella directory corrente; spostare quest'ultimo nella directory `content/sprite`.

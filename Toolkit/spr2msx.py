@@ -1,7 +1,7 @@
 import sys
 
-n_sprites = 13
-n_layers = 2
+n_sprites = 2
+n_layers = 1
 
 sprites = []
 
