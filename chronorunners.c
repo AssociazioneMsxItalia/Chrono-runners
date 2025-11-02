@@ -58,16 +58,16 @@ const Pawn_Frame g_FramesIdle[] =
 // Move animation frames
 const Pawn_Frame g_FramesMoveRight[] =
 {
-	{ 1 * sprSize,	4,	NULL },
-	{ 2 * sprSize,	4,	NULL },
-	{ 3 * sprSize,	4,	NULL },
+	{ 1 * sprSize,	8,	NULL },
+	{ 2 * sprSize,	8,	NULL },
+	{ 3 * sprSize,	8,	NULL },
 };
 
 const Pawn_Frame g_FramesMoveLeft[] =
 {
-	{ 4 * sprSize,	4,	NULL },
-	{ 5 * sprSize,	4,	NULL },
-	{ 6 * sprSize,	4,	NULL },
+	{ 4 * sprSize,	8,	NULL },
+	{ 5 * sprSize,	8,	NULL },
+	{ 6 * sprSize,	8,	NULL },
 };
 
 // Jump animation frames
