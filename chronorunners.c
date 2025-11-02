@@ -108,9 +108,9 @@ const Pawn_Action g_AnimActions[] =
 // SEGMENT 3, BANK 1
 //=============================================================================
 extern const unsigned char g_DataSprtLayer[];
-extern const unsigned char g_DataMapGM2_Names[];
 extern const unsigned char g_DataMapGM2_Patterns[];
 extern const unsigned char g_DataMapGM2_Colors[];
+extern const unsigned char g_Level001[];
 extern void LoadPatternAndColor();
 extern void SetVRAMTable();
 extern void InitializeSprite();
@@ -199,9 +199,9 @@ void DrawRewindGauge() {
 	u8 i;
 	for (i = 1; i < 11; i++) {
 		if (rewind_count >= 25 * i)
-			VDP_Poke_GM2(i, 1, 48);
+			VDP_Poke_GM2(i, 1, 64);
 		else
-			VDP_Poke_GM2(i, 1, 52);
+			VDP_Poke_GM2(i, 1, 68);
 	}
 }
 
@@ -235,9 +235,7 @@ void PhysicsEvent(u8 event, u8 tile)
 // Collision callback
 bool PhysicsCollision(u8 tile)
 {
-	return (tile == 214 || tile == 215
-		 || tile == 216 || tile == 217 || tile == 218
-		 || tile == 221);
+	return ((tile >= 228 && tile <= 237) || tile == 248 || tile == 249);
 }
 
 //=============================================================================
@@ -265,7 +263,7 @@ bool State_Initialize()
 	LoadPatternAndColor();  // Load Pattern and color
 	InitializeSprite();	    // Initialize sprite and set 15 fotogrammi per adesso
 
-	VDP_WriteLayout_GM2(g_DataMapGM2_Names, 0, 0, 32, 24);
+	VDP_WriteLayout_GM2(g_Level001, 0, 2, 32, 24);
 
 	SetActiveSegment(0);
 

@@ -9,8 +9,8 @@
 //=============================================================================
 #include "msxgl.h"
 #include "content/sprite/data_sprt_layer.h"		// Sprite
-#include "content/maps/data_maps_gm2.h"
 #include "content/tile/data_tile_gm2.h"
+#include "content/levels/level01.h"
 
 //=============================================================================
 // DEFINE
@@ -61,6 +61,5 @@ void InitializeSprite() {
 	// Initialize sprite
 	VDP_SetSpriteFlag(VDP_SPRITE_SIZE_16 | VDP_SPRITE_SCALE_1);
 
-	// 15 fotogrammi per adesso
-	VDP_LoadSpritePattern(g_DataSprtLayer, 0, 15 * sprSize);    
+	VDP_LoadSpritePattern(g_DataSprtLayer, 0, 13 * sprSize);
 }
