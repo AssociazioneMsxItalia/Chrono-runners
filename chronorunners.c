@@ -7,6 +7,7 @@
 #include "debug.h"
 
 #include "PawnData.h"
+#include "level_defs.h"
 
 //=============================================================================
 // DEFINES
@@ -110,7 +111,6 @@ const Pawn_Action g_AnimActions[] =
 extern const unsigned char g_DataSprtLayer[];
 extern const unsigned char g_DataMapGM2_Patterns[];
 extern const unsigned char g_DataMapGM2_Colors[];
-extern const unsigned char g_Level001[];
 extern void LoadPatternAndColor();
 extern void SetVRAMTable();
 extern void InitializeSprite();
@@ -251,6 +251,12 @@ void ReinitPawn(Pawn *pawn, Pawn_Sprite *spr_layers, u8 x, u8 y) {
 }
 
 //=============================================================================
+// LEVELS
+//=============================================================================
+
+u8 g_CurrentLevel = 0;
+
+//=============================================================================
 // STATES
 //=============================================================================
 
@@ -261,14 +267,14 @@ bool State_Initialize()
 
 	SetVRAMTable();			// RAM Tables Address and Setup video
 	LoadPatternAndColor();  // Load Pattern and color
-	InitializeSprite();	    // Initialize sprite and set 15 fotogrammi per adesso
+	InitializeSprite();	    // Initialize sprite
 
-	VDP_WriteLayout_GM2(g_Level001, 0, 2, 32, 24);
+	VDP_WriteLayout_GM2(g_Levels[g_CurrentLevel].layout, 0, 2, 32, 24);
 
 	SetActiveSegment(0);
 
 	// Init player pawn
-	ReinitPawn(&g_PlayerPawn, g_SpriteLayers, 70, 111);
+	ReinitPawn(&g_PlayerPawn, g_SpriteLayers, g_Levels[g_CurrentLevel].start_x, g_Levels[g_CurrentLevel].start_y);
 
 	rewind_head = rewind_tail = rewind_count = 0;
 

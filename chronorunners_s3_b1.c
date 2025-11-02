@@ -10,7 +10,6 @@
 #include "msxgl.h"
 #include "content/sprite/data_sprt_layer.h"		// Sprite
 #include "content/tile/data_tile_gm2.h"
-#include "content/levels/level01.h"
 
 //=============================================================================
 // DEFINE
