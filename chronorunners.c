@@ -150,21 +150,59 @@ i8   g_VelocityY;
 i8   g_DX = 0;
 i8   g_DY = 0;
 
+//=============================================================================
+// REWIND DATA
+//=============================================================================
+
+/*
+
+Il personaggio principale può riavvolgere il tempo per sé stesso, ripercorrendo
+lo spazio che ha attraversato nella direzione inversa. Noi ogni fotogramma del
+gioco ci salviamo posizione e fotogramma.
+
+Usiamo un buffer circolare, implementato con strategia a contatore, che ha due
+vantaggi in questo caso:
+ * permette di usare tutto lo spazio a disposizione (anche l'ultimo slot);
+ * permette di risparmiare un po' di codice che sarebbe altrimenti servito per
+   calcolare il numero degli elementi contenuti.
+
+Le invarianti di questo buffer sono:
+
+ * head cresce verso "destra";
+ * tail logicamente si trova sempre a "sinistra" di head;
+ * head punta alla posizione vuota che ospiterà il prossimo valore;
+ * il buffer è vuoto quando count = 0
+ * il buffer è pieno quando count = rewindSize;
+
+ tail           head
+   |              |
+   v              v
+|--0123456789ABCDE-----------|
+
+  head           tail
+   |              |
+   v              v
+|BC---------------0123456789A|
+
+*/
+
 // 5 secondi * 50 fps per coordinata
 #define rewindSize 250
 u8 x_rewind[rewindSize];
 u8 y_rewind[rewindSize];
 u8 f_rewind[rewindSize];
-u8 rewind_start;
-u8 rewind_end;
-u8 rewind_ptr;
+u8 rewind_head;
+u8 rewind_tail;
+u8 rewind_count;
 
-bool IsRewindCharged() {
-	return (rewind_end + 1) % rewindSize == rewind_start;
-}
-
-void ResetRewind() {
-	rewind_start = rewind_end = 0;
+void DrawRewindGauge() {
+	u8 i;
+	for (i = 1; i < 11; i++) {
+		if (rewind_count >= 25 * i)
+			VDP_Poke_GM2(i, 1, 48);
+		else
+			VDP_Poke_GM2(i, 1, 52);
+	}
 }
 
 //=============================================================================
@@ -234,7 +272,7 @@ bool State_Initialize()
 	// Init player pawn
 	ReinitPawn(&g_PlayerPawn, g_SpriteLayers, 70, 111);
 
-	ResetRewind();
+	rewind_head = rewind_tail = rewind_count = 0;
 
 	Game_SetState(State_Game);
 	return FALSE;
@@ -255,27 +293,30 @@ bool State_Game()
 	Pawn_Update(&g_PlayerPawn);
 	Pawn_Draw(&g_PlayerPawn);
 
-	// Array pieno, consuma la posizione acquisita più vecchia
-	if (IsRewindCharged()) {
-		rewind_start = (rewind_start + 1) % rewindSize;
-		VDP_Poke_GM2(0, 0, 57);
+	// Inserisce la posizione attuale nel buffer circolare
+	x_rewind[rewind_head] = g_PlayerPawn.PositionX;
+	y_rewind[rewind_head] = g_PlayerPawn.PositionY;
+	f_rewind[rewind_head] = g_PlayerPawn.AnimFrame;
+	rewind_head = (rewind_head + 1) % rewindSize;
+
+	// L'array era già pieno?
+	if (rewind_count == rewindSize) {
+		// Se sì, deve consumare la posizione acquisita più vecchia
+		rewind_tail = (rewind_tail + 1) % rewindSize;
 	} else {
-		VDP_Poke_GM2(0, 0, 59);
+		// Altrimenti si limita a incrementare il contatore di elementi
+		rewind_count++;
 	}
 
-	rewind_end = (rewind_end + 1) % rewindSize;
-	x_rewind[rewind_end] = g_PlayerPawn.PositionX;
-	y_rewind[rewind_end] = g_PlayerPawn.PositionY;
-	f_rewind[rewind_end] = g_PlayerPawn.AnimFrame;
+	DrawRewindGauge();
 
 	u8 row8 = Keyboard_Read(8);
-	if (IS_KEY_PRESSED(row8, KEY_SPACE) && IsRewindCharged()) {
-		rewind_ptr = (rewind_end - 1) % rewindSize;
-		VDP_Poke_GM2(0, 0, 65);
+	if (IS_KEY_PRESSED(row8, KEY_SPACE)) {
 
 		// Sostituisce i colori dello sprite principale
-		ReinitPawn(&g_PlayerPawn, g_SpriteRewindLayers, x_rewind[rewind_ptr], y_rewind[rewind_ptr]);
+		ReinitPawn(&g_PlayerPawn, g_SpriteRewindLayers, x_rewind[rewind_head], y_rewind[rewind_head]);
 
+		// Entra in modalità rewind
 		Game_SetState(State_Rewind);
 	}
 
@@ -284,33 +325,31 @@ bool State_Game()
 
 bool State_Rewind()
 {
-	// Aggiorna la posizione
-	Pawn_SetPosition(&g_PlayerPawn, x_rewind[rewind_ptr], y_rewind[rewind_ptr]);
+	// Usciamo dal rewind in due casi: se non abbiamo più elementi, o se il
+	// giocatore lo ha interrotto
 
-	// Per forzare il fotogramma, imposta a mano il flag di aggiornamento pattern
+	u8 row8 = Keyboard_Read(8);
+	if (rewind_count == 0 || IS_KEY_RELEASED(row8, KEY_SPACE)) {
+
+		// Reimposta colori originali
+		ReinitPawn(&g_PlayerPawn, g_SpriteLayers, g_PlayerPawn.PositionX, g_PlayerPawn.PositionY);
+		Game_SetState(State_Game);
+		return TRUE;
+	}
+
+	// Ogni passo di rewind consuma un elemento dell'array circolare
+	rewind_head = (rewind_head - 1 + rewindSize) % rewindSize;
+	rewind_count--;
+
+	DrawRewindGauge();
+
+	// Aggiorna la posizione e il fotogramma. Per forzare quest'ultimo,
+	// imposta a mano il flag di aggiornamento pattern.
+	Pawn_SetPosition(&g_PlayerPawn, x_rewind[rewind_head], y_rewind[rewind_head]);
 	g_PlayerPawn.Update |= PAWN_UPDATE_PATTERN;
-	g_PlayerPawn.AnimFrame = f_rewind[rewind_ptr];
+	g_PlayerPawn.AnimFrame = f_rewind[rewind_head];
 	Pawn_Draw(&g_PlayerPawn);
 
-	if (rewind_ptr == 0) {
-		rewind_ptr = rewindSize - 1;
-	} else {
-		rewind_ptr = (rewind_ptr - 1) % rewindSize;
-	}
-
-	// Fine del rewind
-	if (rewind_ptr == rewind_end) {
-
-		// Svuota il rewind
-		ResetRewind();
-
-		u8 prev_ptr = (rewind_ptr + 1) % rewindSize;
-
-		// Reimposta colori e posizione originale
-		ReinitPawn(&g_PlayerPawn, g_SpriteLayers, x_rewind[prev_ptr], y_rewind[prev_ptr]);
-
-		Game_SetState(State_Game);
-	}
 	return TRUE;
 }
 
