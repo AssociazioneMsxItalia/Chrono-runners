@@ -8,7 +8,8 @@
 // INCLUDES
 //=============================================================================
 #include "msxgl.h"
-#include "content/sprite/data_sprt_layer.h"		// Sprite
+#include "content/sprite/data_sprt_layer.h"	// Player
+#include "content/sprite/key_sprt_layer.h"	// Key
 #include "content/tile/data_tile_gm2.h"
 
 //=============================================================================
@@ -60,5 +61,6 @@ void InitializeSprite() {
 	// Initialize sprite
 	VDP_SetSpriteFlag(VDP_SPRITE_SIZE_16 | VDP_SPRITE_SCALE_1);
 
-	VDP_LoadSpritePattern(g_DataSprtLayer, 0, 13 * sprSize);
+	VDP_LoadSpritePattern(g_DataSprtLayer,           0, 13 * sprSize);
+	VDP_LoadSpritePattern(g_KeySprtLayer, 13 * sprSize,  2 * laySize);
 }

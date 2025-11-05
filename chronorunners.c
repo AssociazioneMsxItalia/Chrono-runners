@@ -29,22 +29,25 @@ bool State_Rewind();
 // READ-ONLY DATA
 //=============================================================================
 
-// Pawn sprite layers
-const Pawn_Sprite g_SpriteLayers[] =
-{//   X  Y  Pattern       Color            Option
+// Per ora il player è visualizzato usando gli sprite 0 e 1
+#define PLAYER_SPRITE_ID 0
+
+// Player sprite layers
+const Pawn_Sprite g_PlayerLayers[] =
+{//   X  Y  DataOffset    Color            Flag
 	{ 0, 0, 0,            COLOR_BLACK,     0 },
 	{ 0, 0, laySize,      COLOR_LIGHT_RED, 0 },
 };
 
-// Pawn sprite layers
-const Pawn_Sprite g_SpriteRewindLayers[] =
-{//   X  Y  Pattern       Color            Option
+// Player sprite layers in rewind mode
+const Pawn_Sprite g_PlayerRewindLayers[] =
+{//   X  Y  DataOffset    Color            Flag
 	{ 0, 0, 0,            COLOR_WHITE,     0 },
 	{ 0, 0, laySize,      COLOR_GRAY,      0 },
 };
 
 // Idle animation frames
-const Pawn_Frame g_FramesIdle[] =
+const Pawn_Frame g_PlayerFramesIdle[] =
 {//   Pattern          Time  Function
 	{  0 * sprSize,    250,  NULL },
 	{ 11 * sprSize,     10,  NULL },
@@ -57,52 +60,74 @@ const Pawn_Frame g_FramesIdle[] =
 };
 
 // Move animation frames
-const Pawn_Frame g_FramesMoveRight[] =
+const Pawn_Frame g_PlayerFramesMoveRight[] =
 {
-	{ 1 * sprSize,	8,	NULL },
-	{ 2 * sprSize,	8,	NULL },
-	{ 3 * sprSize,	8,	NULL },
+	{ 1 * sprSize,	6,	NULL },
+	{ 2 * sprSize,	6,	NULL },
+	{ 3 * sprSize,	6,	NULL },
 };
 
-const Pawn_Frame g_FramesMoveLeft[] =
+const Pawn_Frame g_PlayerFramesMoveLeft[] =
 {
-	{ 4 * sprSize,	8,	NULL },
-	{ 5 * sprSize,	8,	NULL },
-	{ 6 * sprSize,	8,	NULL },
+	{ 4 * sprSize,	6,	NULL },
+	{ 5 * sprSize,	6,	NULL },
+	{ 6 * sprSize,	6,	NULL },
 };
 
 // Jump animation frames
-const Pawn_Frame g_FramesJumpRight[] =
+const Pawn_Frame g_PlayerFramesJumpRight[] =
 {
 	{ 3 * sprSize,	4,	NULL },
 };
 
-const Pawn_Frame g_FramesJumpLeft[] =
+const Pawn_Frame g_PlayerFramesJumpLeft[] =
 {
 	{ 6 * sprSize,	4,	NULL },
 };
 
 // Fall animation frames
-const Pawn_Frame g_FramesFallRight[] =
+const Pawn_Frame g_PlayerFramesFallRight[] =
 {
 	{ 1 * sprSize,	4,	NULL },
 };
 
-const Pawn_Frame g_FramesFallLeft[] =
+const Pawn_Frame g_PlayerFramesFallLeft[] =
 {
 	{ 4 * sprSize,	4,	NULL },
 };
 
 // List of all player actions
 const Pawn_Action g_AnimActions[] =
-{//   Frames             Number                       Loop? Interrupt?
-	{ g_FramesIdle,      numberof(g_FramesIdle),      TRUE, TRUE },
-	{ g_FramesMoveRight, numberof(g_FramesMoveRight), TRUE, TRUE },
-	{ g_FramesMoveLeft,  numberof(g_FramesMoveRight), TRUE, TRUE },
-	{ g_FramesJumpRight, numberof(g_FramesJumpRight), TRUE, TRUE },
-	{ g_FramesJumpLeft,  numberof(g_FramesJumpLeft),  TRUE, TRUE },
-	{ g_FramesFallRight, numberof(g_FramesFallRight), TRUE, TRUE },
-	{ g_FramesFallLeft,  numberof(g_FramesFallLeft),  TRUE, TRUE },
+{//   Frames                   Number                             Loop? Interrupt?
+	{ g_PlayerFramesIdle,      numberof(g_PlayerFramesIdle),      TRUE, TRUE },
+	{ g_PlayerFramesMoveRight, numberof(g_PlayerFramesMoveRight), TRUE, TRUE },
+	{ g_PlayerFramesMoveLeft,  numberof(g_PlayerFramesMoveRight), TRUE, TRUE },
+	{ g_PlayerFramesJumpRight, numberof(g_PlayerFramesJumpRight), TRUE, TRUE },
+	{ g_PlayerFramesJumpLeft,  numberof(g_PlayerFramesJumpLeft),  TRUE, TRUE },
+	{ g_PlayerFramesFallRight, numberof(g_PlayerFramesFallRight), TRUE, TRUE },
+	{ g_PlayerFramesFallLeft,  numberof(g_PlayerFramesFallLeft),  TRUE, TRUE },
+};
+
+// Per ora la chiave è visualizzata usando lo sprite 2
+#define KEY_SPRITE_ID 2
+
+// Key sprite layers
+const Pawn_Sprite g_KeyLayers[] =
+{//   X  Y  DataOffset    Color            Flag
+	{ 0, 0, 0,            COLOR_BLACK,     0 },
+};
+
+// Idle animation frames
+const Pawn_Frame g_KeyFramesIdle[] =
+{//   Pattern                   Time Function
+	{ 13 * sprSize,          	20,  NULL },
+	{ 13 * sprSize + laySize,	20,  NULL },
+};
+
+// List of all key actions
+const Pawn_Action g_KeyAnimActions[] =
+{//   Frames             Number                          Loop? Interrupt?
+	{ g_KeyFramesIdle,   numberof(g_KeyFramesIdle),      TRUE, TRUE },
 };
 
 //=============================================================================
@@ -149,6 +174,8 @@ bool g_bJumping = FALSE;
 i8   g_VelocityY;
 i8   g_DX = 0;
 i8   g_DY = 0;
+
+Pawn g_KeyPawn;
 
 //=============================================================================
 // REWIND DATA
@@ -210,7 +237,7 @@ void DrawRewindGauge() {
 //=============================================================================
 
 // Physics callback
-void PhysicsEvent(u8 event, u8 tile)
+void PlayerPhysicsEvent(u8 event, u8 tile)
 {
 	tile;
 	switch (event)
@@ -233,20 +260,28 @@ void PhysicsEvent(u8 event, u8 tile)
 }
 
 // Collision callback
-bool PhysicsCollision(u8 tile)
+bool PlayerPhysicsCollision(u8 tile)
 {
 	return ((tile >= 228 && tile <= 237) || tile == 248 || tile == 249);
+}
+
+void KeyPhysicsEvent(u8 event, u8 tile)
+{
+
+}
+
+bool KeyPhysicsCollision(u8 tile)
+{
+	return TRUE;
 }
 
 //=============================================================================
 // UTILITIES
 //=============================================================================
 
-void ReinitPawn(Pawn *pawn, Pawn_Sprite *spr_layers, u8 x, u8 y) {
-	// Passa sempre g_SpriteLayers a numberof, tanto il numero di fotogrammi
-	// non può comunque cambiare
-	Pawn_Initialize(pawn, spr_layers, numberof(g_SpriteLayers), 0, g_AnimActions);
-	Pawn_InitializePhysics(pawn, PhysicsEvent, PhysicsCollision, 16, 16);
+void ReinitPlayer(Pawn *pawn, Pawn_Sprite *spr_layers, u8 n_spr_layers, u8 x, u8 y) {
+	Pawn_Initialize(pawn, spr_layers, n_spr_layers, PLAYER_SPRITE_ID, g_AnimActions);
+	Pawn_InitializePhysics(pawn, PlayerPhysicsEvent, PlayerPhysicsCollision, 16, 16);
 	Pawn_SetPosition(pawn, x, y);
 }
 
@@ -274,7 +309,16 @@ bool State_Initialize()
 	SetActiveSegment(0);
 
 	// Init player pawn
-	ReinitPawn(&g_PlayerPawn, g_SpriteLayers, g_Levels[g_CurrentLevel].start_x, g_Levels[g_CurrentLevel].start_y);
+	ReinitPlayer(&g_PlayerPawn,
+		         g_PlayerLayers, numberof(g_PlayerLayers),
+				 g_Levels[g_CurrentLevel].start_x, g_Levels[g_CurrentLevel].start_y);
+
+	// Init key pawn
+	Pawn_Initialize(&g_KeyPawn,
+		            g_KeyLayers, numberof(g_KeyLayers),
+					KEY_SPRITE_ID, g_KeyAnimActions);
+	Pawn_InitializePhysics(&g_KeyPawn, KeyPhysicsEvent, KeyPhysicsCollision, 16, 16);
+	Pawn_SetPosition(&g_KeyPawn, 2*8, 4*8);
 
 	rewind_head = rewind_tail = rewind_count = 0;
 
@@ -297,6 +341,10 @@ bool State_Game()
 	Pawn_Update(&g_PlayerPawn);
 	Pawn_Draw(&g_PlayerPawn);
 
+	Pawn_SetAction(&g_KeyPawn, ACTION_IDLE);
+	Pawn_Update(&g_KeyPawn);
+	Pawn_Draw(&g_KeyPawn);
+
 	// Inserisce la posizione attuale nel buffer circolare
 	x_rewind[rewind_head] = g_PlayerPawn.PositionX;
 	y_rewind[rewind_head] = g_PlayerPawn.PositionY;
@@ -318,7 +366,9 @@ bool State_Game()
 	if (IS_KEY_PRESSED(row8, KEY_SPACE)) {
 
 		// Sostituisce i colori dello sprite principale
-		ReinitPawn(&g_PlayerPawn, g_SpriteRewindLayers, x_rewind[rewind_head], y_rewind[rewind_head]);
+		ReinitPlayer(&g_PlayerPawn,
+			         g_PlayerRewindLayers, numberof(g_PlayerRewindLayers),
+					 x_rewind[rewind_head], y_rewind[rewind_head]);
 
 		// Entra in modalità rewind
 		Game_SetState(State_Rewind);
@@ -336,7 +386,10 @@ bool State_Rewind()
 	if (rewind_count == 0 || IS_KEY_RELEASED(row8, KEY_SPACE)) {
 
 		// Reimposta colori originali
-		ReinitPawn(&g_PlayerPawn, g_SpriteLayers, g_PlayerPawn.PositionX, g_PlayerPawn.PositionY);
+		ReinitPlayer(&g_PlayerPawn,
+			         g_PlayerLayers, numberof(g_PlayerLayers),
+					 g_PlayerPawn.PositionX, g_PlayerPawn.PositionY);
+
 		Game_SetState(State_Game);
 		return TRUE;
 	}
