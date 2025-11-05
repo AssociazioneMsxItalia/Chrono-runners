@@ -168,14 +168,21 @@ void SetActiveSegment(u8 segment) {
 //=============================================================================
 
 Pawn g_PlayerPawn;
-bool g_bMovingRight = FALSE;
-bool g_bMovingLeft = FALSE;
-bool g_bJumping = FALSE;
+bool g_PlayerMovingRight = FALSE;
+bool g_PlayerMovingLeft = FALSE;
+bool g_PlayerJumping = FALSE;
 i8   g_VelocityY;
 i8   g_DX = 0;
 i8   g_DY = 0;
+bool g_PlayerHasKey = FALSE;
 
 Pawn g_KeyPawn;
+
+//=============================================================================
+// LEVELS
+//=============================================================================
+
+u8 g_CurrentLevel = 0;
 
 //=============================================================================
 // REWIND DATA
@@ -243,7 +250,7 @@ void PlayerPhysicsEvent(u8 event, u8 tile)
 	switch (event)
 	{
 	case PAWN_PHYSICS_COL_DOWN: // Handle downward collision
-		g_bJumping = FALSE;
+		g_PlayerJumping = FALSE;
 		break;
 
 	case PAWN_PHYSICS_COL_UP: // Handle upward collisions
@@ -251,9 +258,9 @@ void PlayerPhysicsEvent(u8 event, u8 tile)
 		break;
 
 	case PAWN_PHYSICS_FALL: // Handle falling
-		if (!g_bJumping)
+		if (!g_PlayerJumping)
 		{
-			g_bJumping = TRUE;
+			g_PlayerJumping = TRUE;
 		}
 		break;
 	};
@@ -267,11 +274,12 @@ bool PlayerPhysicsCollision(u8 tile)
 
 void KeyPhysicsEvent(u8 event, u8 tile)
 {
-
+	event; tile;
 }
 
 bool KeyPhysicsCollision(u8 tile)
 {
+	tile;
 	return TRUE;
 }
 
@@ -285,11 +293,30 @@ void ReinitPlayer(Pawn *pawn, Pawn_Sprite *spr_layers, u8 n_spr_layers, u8 x, u8
 	Pawn_SetPosition(pawn, x, y);
 }
 
-//=============================================================================
-// LEVELS
-//=============================================================================
+i16 abs(i16 a)
+{
+	return (a > 0) ? a : -a;
+}
 
-u8 g_CurrentLevel = 0;
+// Semplice rilevazione di collisioni a bounding box
+bool doPawnsCollide(Pawn *p1, Pawn *p2) {
+	if (abs((i16)p1->PositionX - p2->PositionX) < 16
+     && abs((i16)p1->PositionY - p2->PositionY) < 16) {
+		return TRUE;
+	}
+	return FALSE;
+}
+
+void TakeKey() {
+	g_PlayerHasKey = TRUE;
+
+	// Disegna la chiave nell'HUD
+	VDP_Poke_GM2(16, 0, 46);
+
+	// Luce verde sopra l'uscita
+	VDP_Poke_GM2(g_Levels[g_CurrentLevel].end_x, g_Levels[g_CurrentLevel].end_y - 1, 48);
+	VDP_Poke_GM2(g_Levels[g_CurrentLevel].end_x + 1, g_Levels[g_CurrentLevel].end_y - 1, 49);
+}
 
 //=============================================================================
 // STATES
@@ -311,14 +338,15 @@ bool State_Initialize()
 	// Init player pawn
 	ReinitPlayer(&g_PlayerPawn,
 		         g_PlayerLayers, numberof(g_PlayerLayers),
-				 g_Levels[g_CurrentLevel].start_x, g_Levels[g_CurrentLevel].start_y);
+				 g_Levels[g_CurrentLevel].start_x * 8, g_Levels[g_CurrentLevel].start_y * 8);
 
 	// Init key pawn
 	Pawn_Initialize(&g_KeyPawn,
 		            g_KeyLayers, numberof(g_KeyLayers),
 					KEY_SPRITE_ID, g_KeyAnimActions);
 	Pawn_InitializePhysics(&g_KeyPawn, KeyPhysicsEvent, KeyPhysicsCollision, 16, 16);
-	Pawn_SetPosition(&g_KeyPawn, 2*8, 4*8);
+	Pawn_SetPosition(&g_KeyPawn,
+		             g_Levels[g_CurrentLevel].key_pos_x * 8, g_Levels[g_CurrentLevel].key_pos_y * 8);
 
 	rewind_head = rewind_tail = rewind_count = 0;
 
@@ -339,10 +367,17 @@ bool State_Game()
 	Pawn_SetAction(&g_PlayerPawn, act);
 	Pawn_SetMovement(&g_PlayerPawn, g_DX, g_DY);
 	Pawn_Update(&g_PlayerPawn);
-	Pawn_Draw(&g_PlayerPawn);
 
 	Pawn_SetAction(&g_KeyPawn, ACTION_IDLE);
 	Pawn_Update(&g_KeyPawn);
+
+	// Controlla la collisione tra giocatore e chiave
+	if (doPawnsCollide(&g_PlayerPawn, &g_KeyPawn)) {
+		TakeKey();
+		Pawn_Disable(&g_KeyPawn);
+	}
+
+	Pawn_Draw(&g_PlayerPawn);
 	Pawn_Draw(&g_KeyPawn);
 
 	// Inserisce la posizione attuale nel buffer circolare

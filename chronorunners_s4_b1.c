@@ -20,9 +20,9 @@
 //=============================================================================
 // EXTERN MEMORY DATA
 //=============================================================================
-extern bool g_bMovingRight;
-extern bool g_bMovingLeft;
-extern bool g_bJumping;
+extern bool g_PlayerMovingRight;
+extern bool g_PlayerMovingLeft;
+extern bool g_PlayerJumping;
 extern i8   g_VelocityY;
 extern i8   g_DX;
 extern i8   g_DY;
@@ -47,20 +47,20 @@ void UpdateMovement() {
 	g_DY = 0;
 	u8 row8 = Keyboard_Read(8);
 
-	g_bMovingRight = g_bMovingLeft = FALSE;
+	g_PlayerMovingRight = g_PlayerMovingLeft = FALSE;
 
 	if (IS_KEY_PRESSED(row8, KEY_RIGHT))
 	{
 		g_DX++;
-		g_bMovingRight = TRUE;
+		g_PlayerMovingRight = TRUE;
 	}
 	else if (IS_KEY_PRESSED(row8, KEY_LEFT))
 	{
 		g_DX--;
-		g_bMovingLeft = TRUE;
+		g_PlayerMovingLeft = TRUE;
 	}
 
-	if (g_bJumping)
+	if (g_PlayerJumping)
 	{
 		g_DY -= g_VelocityY / 4;
 
@@ -70,7 +70,7 @@ void UpdateMovement() {
 	}
 	else if (IS_KEY_PRESSED(row8, KEY_UP))
 	{
-		g_bJumping = TRUE;
+		g_PlayerJumping = TRUE;
 		g_VelocityY = FORCE;
 	}
 }
@@ -82,22 +82,22 @@ void UpdateMovement() {
  * @return new action
  */
 u8 UpdateAction(u8 act) {
-	if (g_bJumping && (g_VelocityY >= 0))
+	if (g_PlayerJumping && (g_VelocityY >= 0))
 	{
-		if (g_bMovingRight)
+		if (g_PlayerMovingRight)
 			act = ACTION_JUMPRIGHT;
 		else
 			act = ACTION_JUMPLEFT;
 	}
-	else if (g_bJumping) {
-		if (g_bMovingRight)
+	else if (g_PlayerJumping) {
+		if (g_PlayerMovingRight)
 			act = ACTION_FALLRIGHT;
 		else
 			act = ACTION_FALLLEFT;
 	}
-	else if (g_bMovingRight)
+	else if (g_PlayerMovingRight)
 		act = ACTION_MOVERIGHT;
-	else if (g_bMovingLeft)
+	else if (g_PlayerMovingLeft)
 		act = ACTION_MOVELEFT;
 
 	return act;

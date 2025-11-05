@@ -5,6 +5,10 @@ struct Level
 {
     u8 start_x;
     u8 start_y;
+    u8 end_x;
+    u8 end_y;
+    u8 key_pos_x;
+    u8 key_pos_y;
     u8 next_level;
     u8 *layout;
 };
