@@ -24,6 +24,7 @@
 bool State_Initialize();
 bool State_Game();
 bool State_Rewind();
+bool State_ChangeLevel();
 
 //=============================================================================
 // READ-ONLY DATA
@@ -183,6 +184,7 @@ Pawn g_KeyPawn;
 //=============================================================================
 
 u8 g_CurrentLevel = 0;
+u8 g_NextLevel = 0;
 
 //=============================================================================
 // REWIND DATA
@@ -269,7 +271,7 @@ void PlayerPhysicsEvent(u8 event, u8 tile)
 // Collision callback
 bool PlayerPhysicsCollision(u8 tile)
 {
-	return ((tile >= 228 && tile <= 237) || tile == 248 || tile == 249);
+	return (tile >= 208 && tile <= 210) || (tile >= 224 && tile <= 255);
 }
 
 void KeyPhysicsEvent(u8 event, u8 tile)
@@ -298,24 +300,45 @@ i16 abs(i16 a)
 	return (a > 0) ? a : -a;
 }
 
-// Semplice rilevazione di collisioni a bounding box
-bool doPawnsCollide(Pawn *p1, Pawn *p2) {
-	if (abs((i16)p1->PositionX - p2->PositionX) < 16
-     && abs((i16)p1->PositionY - p2->PositionY) < 16) {
+// Semplice rilevazione di collisioni a bounding box. Assume oggetti 16x16
+bool bboxCollide(u8 x1, u8 y1, u8 x2, u8 y2) {
+	if (abs((i16)x1 - x2) < 16 && abs((i16)y1 - y2) < 16)
 		return TRUE;
-	}
+
 	return FALSE;
+}
+
+bool doPawnsCollide(Pawn *p1, Pawn *p2) {
+	return bboxCollide(p1->PositionX, p1->PositionY, p2->PositionX, p2->PositionY);
 }
 
 void TakeKey() {
 	g_PlayerHasKey = TRUE;
 
-	// Disegna la chiave nell'HUD
-	VDP_Poke_GM2(16, 0, 46);
+	u8 door_x = g_Levels[g_CurrentLevel].end_x;
+	u8 door_y = g_Levels[g_CurrentLevel].end_y;
 
 	// Luce verde sopra l'uscita
-	VDP_Poke_GM2(g_Levels[g_CurrentLevel].end_x, g_Levels[g_CurrentLevel].end_y - 1, 48);
-	VDP_Poke_GM2(g_Levels[g_CurrentLevel].end_x + 1, g_Levels[g_CurrentLevel].end_y - 1, 49);
+	VDP_Poke_GM2(door_x, door_y - 1, 48);
+	VDP_Poke_GM2(door_x + 1, door_y - 1, 49);
+
+	// Porta si apre
+	VDP_Poke_GM2(door_x, door_y, 44);
+	VDP_Poke_GM2(door_x + 1, door_y, 44);
+	VDP_Poke_GM2(door_x, door_y + 1, 44);
+	VDP_Poke_GM2(door_x + 1, door_y + 1, 44);
+}
+
+bool isPlayerAtExit() {
+	if (!g_PlayerHasKey)
+		return FALSE;
+
+	u8 door_x = g_Levels[g_CurrentLevel].end_x;
+	u8 door_y = g_Levels[g_CurrentLevel].end_y;
+
+	bool collide = bboxCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY, door_x * 8, door_y * 8);
+
+	return collide;
 }
 
 //=============================================================================
@@ -331,9 +354,21 @@ bool State_Initialize()
 	LoadPatternAndColor();  // Load Pattern and color
 	InitializeSprite();	    // Initialize sprite
 
-	VDP_WriteLayout_GM2(g_Levels[g_CurrentLevel].layout, 0, 2, 32, 24);
-
 	SetActiveSegment(0);
+
+	Game_SetState(State_ChangeLevel);
+
+	return FALSE;
+}
+
+bool State_ChangeLevel()
+{
+	// Passa al livello successivo
+	g_CurrentLevel = g_NextLevel;
+
+	g_NextLevel = g_Levels[g_CurrentLevel].next_level - 1;
+
+	VDP_WriteLayout_GM2(g_Levels[g_CurrentLevel].layout, 0, 2, 32, 24);
 
 	// Init player pawn
 	ReinitPlayer(&g_PlayerPawn,
@@ -351,7 +386,8 @@ bool State_Initialize()
 	rewind_head = rewind_tail = rewind_count = 0;
 
 	Game_SetState(State_Game);
-	return FALSE;
+
+	return TRUE;
 }
 
 bool State_Game()
@@ -375,6 +411,12 @@ bool State_Game()
 	if (doPawnsCollide(&g_PlayerPawn, &g_KeyPawn)) {
 		TakeKey();
 		Pawn_Disable(&g_KeyPawn);
+	}
+
+	// Controlla se il giocatore ha raggiunto l'uscita
+	if (isPlayerAtExit()) {
+		Game_SetState(State_ChangeLevel);
+		return FALSE;
 	}
 
 	Pawn_Draw(&g_PlayerPawn);
