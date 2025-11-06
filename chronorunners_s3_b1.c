@@ -30,8 +30,17 @@
  * @return void
  */
 void LoadPatternAndColor() {
-   	VDP_LoadPattern_GM2(g_DataMapGM2_Patterns, 255, 0);
-	VDP_LoadColor_GM2(g_DataMapGM2_Colors, 255, 0);
+	// XXX: bug in MSXgl?
+	//VDP_LoadPattern_GM2(g_DataMapGM2_Patterns, 0, 0);
+	//VDP_LoadColor_GM2(g_DataMapGM2_Colors, 0, 0);
+	for (u16 i=0; i<256*8; ++i) {
+		VDP_Poke(g_DataMapGM2_Patterns[i], 0x0 + i, 0);
+		VDP_Poke(g_DataMapGM2_Colors[i],   0x2000 + i, 0);
+		VDP_Poke(g_DataMapGM2_Patterns[i], 0x0 + 0x800 + i, 0);
+		VDP_Poke(g_DataMapGM2_Colors[i],   0x2000 + 0x800 + i, 0);
+		VDP_Poke(g_DataMapGM2_Patterns[i], 0x0 + 0x1000 + i, 0);
+		VDP_Poke(g_DataMapGM2_Colors[i],   0x2000 + 0x1000 + i, 0);
+	}
 }
 
 /**
