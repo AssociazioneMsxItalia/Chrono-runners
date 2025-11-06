@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Utility essenziale per convertire un file dati (formato MD4)
+Utility essenziale per convertire un file dati (formato MD)
 in un file header C (.h) contenente un array di byte.
 
 Uso: python3 map2msx.py <input_file> <output_file>
@@ -12,18 +12,18 @@ import sys
 
 def convert_to_c_header(input_file, output_file):
     """
-    Legge il file di input, processa i dati dalla sezione MD4
+    Legge il file di input, processa i dati dalla sezione MD
     e scrive l'header C nel file di output.
     """
     byte_list = []
-    processing = False  # Flag per sezione MD4
+    processing = False  # Flag per sezione MD
 
     with open(input_file, 'r', encoding='utf-8') as infile:
         for line in infile:
             line = line.strip()
 
-            # Attiva il processing alla prima riga MD4
-            if not processing and line.startswith("MD4"):
+            # Attiva il processing alla prima riga MD
+            if not processing and line.startswith("MD"):
                 processing = True
 
             # Se stiamo processando e la riga contiene "DATA"
@@ -45,7 +45,7 @@ def convert_to_c_header(input_file, output_file):
                         byte_list.append(f"0x{word[2:4].lower()}")
 
     if not byte_list:
-        print("Attenzione: Nessun dato 'MD4' trovato.", file=sys.stderr)
+        print("Attenzione: Nessun dato 'MD' trovato.", file=sys.stderr)
 
     # Scrittura del file di output
     with open(output_file, 'w', encoding='utf-8') as outfile:
@@ -53,7 +53,7 @@ def convert_to_c_header(input_file, output_file):
 
         if byte_list:
             outfile.write("    ")  # Indentazione
-            bytes_per_line = 16
+            bytes_per_line = 32
 
             for i, byte_val in enumerate(byte_list):
                 outfile.write(byte_val)
