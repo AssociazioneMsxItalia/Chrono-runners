@@ -1,4 +1,4 @@
-const unsigned char g_DataSprtLayer[] =
+const unsigned char g_PlayerSprtLayer[] =
 {
 // Frame 0
 // Layer 0

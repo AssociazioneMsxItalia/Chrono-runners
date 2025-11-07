@@ -235,9 +235,9 @@ void DrawRewindGauge() {
 	u8 i;
 	for (i = 1; i < 11; i++) {
 		if (rewind_count >= 25 * i)
-			VDP_Poke_GM2(i, 1, 64);
+			VDP_Poke_GM2(i, 1, 45);
 		else
-			VDP_Poke_GM2(i, 1, 68);
+			VDP_Poke_GM2(i, 1, 47);
 	}
 }
 
