@@ -34,8 +34,8 @@ extern i8   g_DY;
 //=============================================================================
 // PROTOTYPES
 //=============================================================================
-void UpdateMovement();
-u8 UpdateAction(u8 act);
+void UpdatePlayerMovement();
+u8 UpdatePlayerAction(u8 act);
 
 //=============================================================================
 // EXTERN PROTOTYPES
@@ -51,7 +51,7 @@ i16 abs(i16 a);
  * @param void
  * @return void
  */
-void UpdateMovement() {
+void UpdatePlayerMovement() {
 	g_DX = 0;
 	g_DY = 0;
 	u8 row8 = Keyboard_Read(8);
@@ -106,7 +106,7 @@ void UpdateMovement() {
  * @param u8 Current action
  * @return new action
  */
-u8 UpdateAction(u8 act) {
+u8 UpdatePlayerAction(u8 act) {
 	if (g_PlayerJumping && (g_VelocityY >= 0))
 	{
 		if (g_PlayerMovingRight)

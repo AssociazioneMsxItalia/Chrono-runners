@@ -32,6 +32,8 @@ bool State_ChangeLevel();
 
 // Per ora il player è visualizzato usando gli sprite 0 e 1
 #define PLAYER_SPRITE_ID 0
+#define PLAYER_PATTERN_OFFSET 0
+#define PLAYER_PATTERN_SIZE laySize * nLayers
 
 // Player sprite layers
 const Pawn_Sprite g_PlayerLayers[] =
@@ -49,52 +51,52 @@ const Pawn_Sprite g_PlayerRewindLayers[] =
 
 // Idle animation frames
 const Pawn_Frame g_PlayerFramesIdle[] =
-{//   Pattern          Time  Function
-	{  0 * sprSize,    250,  NULL },
-	{ 11 * sprSize,     10,  NULL },
-	{ 12 * sprSize,     10,  NULL },
-	{ 11 * sprSize,     10,  NULL },
-	{ 12 * sprSize,     10,  NULL },
-	{ 11 * sprSize,     10,  NULL },
-	{ 12 * sprSize,     10,  NULL },
-	{ 11 * sprSize,     10,  NULL },
+{//   Pattern                                              Time  Function
+	{  0 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,    250,  NULL },
+	{ 11 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,     10,  NULL },
+	{ 12 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,     10,  NULL },
+	{ 11 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,     10,  NULL },
+	{ 12 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,     10,  NULL },
+	{ 11 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,     10,  NULL },
+	{ 12 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,     10,  NULL },
+	{ 11 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,     10,  NULL },
 };
 
 // Move animation frames
 const Pawn_Frame g_PlayerFramesMoveRight[] =
 {
-	{ 1 * sprSize,	6,	NULL },
-	{ 2 * sprSize,	6,	NULL },
-	{ 3 * sprSize,	6,	NULL },
+	{ 1 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,	6,	NULL },
+	{ 2 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,	6,	NULL },
+	{ 3 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,	6,	NULL },
 };
 
 const Pawn_Frame g_PlayerFramesMoveLeft[] =
 {
-	{ 4 * sprSize,	6,	NULL },
-	{ 5 * sprSize,	6,	NULL },
-	{ 6 * sprSize,	6,	NULL },
+	{ 4 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,	6,	NULL },
+	{ 5 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,	6,	NULL },
+	{ 6 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,	6,	NULL },
 };
 
 // Jump animation frames
 const Pawn_Frame g_PlayerFramesJumpRight[] =
 {
-	{ 3 * sprSize,	4,	NULL },
+	{ 3 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,	4,	NULL },
 };
 
 const Pawn_Frame g_PlayerFramesJumpLeft[] =
 {
-	{ 6 * sprSize,	4,	NULL },
+	{ 6 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,	4,	NULL },
 };
 
 // Fall animation frames
 const Pawn_Frame g_PlayerFramesFallRight[] =
 {
-	{ 1 * sprSize,	4,	NULL },
+	{ 1 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,	4,	NULL },
 };
 
 const Pawn_Frame g_PlayerFramesFallLeft[] =
 {
-	{ 4 * sprSize,	4,	NULL },
+	{ 4 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,	4,	NULL },
 };
 
 // List of all player actions
@@ -111,6 +113,8 @@ const Pawn_Action g_AnimActions[] =
 
 // Per ora la chiave è visualizzata usando lo sprite 2
 #define KEY_SPRITE_ID 2
+#define KEY_PATTERN_OFFSET 13 * sprSize
+#define KEY_PATTERN_SIZE laySize
 
 // Key sprite layers
 const Pawn_Sprite g_KeyLayers[] =
@@ -120,15 +124,56 @@ const Pawn_Sprite g_KeyLayers[] =
 
 // Idle animation frames
 const Pawn_Frame g_KeyFramesIdle[] =
-{//   Pattern                   Time Function
-	{ 13 * sprSize,          	20,  NULL },
-	{ 13 * sprSize + laySize,	20,  NULL },
+{//   Pattern                                       Time Function
+	{ 0 * KEY_PATTERN_SIZE + KEY_PATTERN_OFFSET,          	20,  NULL },
+	{ 1 * KEY_PATTERN_SIZE + KEY_PATTERN_OFFSET,	20,  NULL },
 };
 
 // List of all key actions
 const Pawn_Action g_KeyAnimActions[] =
 {//   Frames             Number                          Loop? Interrupt?
 	{ g_KeyFramesIdle,   numberof(g_KeyFramesIdle),      TRUE, TRUE },
+};
+
+#define ENEMY_SPRITE_ID 3
+#define ENEMY_PATTERN_OFFSET 13 * sprSize + 2 * laySize
+#define ENEMY_PATTERN_SIZE laySize
+
+// Enemy sprite layers
+const Pawn_Sprite g_EnemyLayers[] =
+{//   X  Y  DataOffset    Color            Flag
+	{ 0, 0, 0,            COLOR_BLACK,     0 },
+};
+
+const Pawn_Frame g_EnemyFramesIdle[] =
+{//   Pattern                                           Time Function
+	{ 2 * ENEMY_PATTERN_SIZE + ENEMY_PATTERN_OFFSET,	20,  NULL },
+};
+
+const Pawn_Frame g_EnemyFramesMoveLeft[] =
+{//   Pattern                                           Time Function
+	{ 0 * ENEMY_PATTERN_SIZE + ENEMY_PATTERN_OFFSET,	20,  NULL },
+	{ 1 * ENEMY_PATTERN_SIZE + ENEMY_PATTERN_OFFSET,	20,  NULL },
+};
+
+const Pawn_Frame g_EnemyFramesMoveRight[] =
+{//   Pattern                                           Time Function
+	{ 3 * ENEMY_PATTERN_SIZE + ENEMY_PATTERN_OFFSET,	20,  NULL },
+	{ 4 * ENEMY_PATTERN_SIZE + ENEMY_PATTERN_OFFSET,	20,  NULL },
+};
+
+const Pawn_Frame g_EnemyFramesShocked[] =
+{//   Pattern                                           Time Function
+	{ 5 * ENEMY_PATTERN_SIZE + ENEMY_PATTERN_OFFSET,	20,  NULL },
+	{ 6 * ENEMY_PATTERN_SIZE + ENEMY_PATTERN_OFFSET,	20,  NULL },
+};
+
+const Pawn_Action g_EnemyAnimActions[] =
+{//   Frames                    Number                              Loop? Interrupt?
+	{ g_EnemyFramesIdle,		numberof(g_EnemyFramesIdle),		TRUE, TRUE },
+	{ g_EnemyFramesMoveLeft,	numberof(g_EnemyFramesMoveLeft),	TRUE, TRUE },
+	{ g_EnemyFramesMoveRight,	numberof(g_EnemyFramesMoveRight),	TRUE, TRUE },
+	{ g_EnemyFramesShocked,		numberof(g_EnemyFramesShocked),		TRUE, TRUE },
 };
 
 //=============================================================================
@@ -145,8 +190,8 @@ extern void InitializeSprite();
 //=============================================================================
 // SEGMENT 4, BANK 1
 //=============================================================================
-extern void UpdateMovement();
-extern u8 UpdateAction(u8 act);
+extern void UpdatePlayerMovement();
+extern u8 UpdatePlayerAction(u8 act);
 
 u8 g_PreviousSegment = 0;
 
@@ -180,6 +225,8 @@ i8   g_DY = 0;
 bool g_PlayerHasKey = FALSE;
 
 Pawn g_KeyPawn;
+
+Pawn g_EnemyPawn;
 
 //=============================================================================
 // LEVELS
@@ -287,6 +334,17 @@ bool KeyPhysicsCollision(u8 tile)
 	return TRUE;
 }
 
+void EnemyPhysicsEvent(u8 event, u8 tile)
+{
+	event; tile;
+}
+
+bool EnemyPhysicsCollision(u8 tile)
+{
+	tile;
+	return TRUE;
+}
+
 //=============================================================================
 // UTILITIES
 //=============================================================================
@@ -383,14 +441,16 @@ bool State_ChangeLevel()
 	g_CurrentLevel = g_NextLevel;
 	g_NextLevel = g_Levels[g_CurrentLevel].next_level - 1;
 
+	struct Level lvl = g_Levels[g_CurrentLevel];
+
 	g_PlayerHasKey = FALSE;
 
-	VDP_WriteLayout_GM2(g_Levels[g_CurrentLevel].layout, 0, 2, 32, 24);
+	VDP_WriteLayout_GM2(lvl.layout, 0, 2, 32, 24);
 
 	// Init player pawn
 	ReinitPlayer(&g_PlayerPawn,
 		         g_PlayerLayers, numberof(g_PlayerLayers),
-				 g_Levels[g_CurrentLevel].start_x * 8, g_Levels[g_CurrentLevel].start_y * 8);
+				 lvl.start_x * 8, lvl.start_y * 8);
 
 	// Init key pawn
 	Pawn_Initialize(&g_KeyPawn,
@@ -398,7 +458,19 @@ bool State_ChangeLevel()
 					KEY_SPRITE_ID, g_KeyAnimActions);
 	Pawn_InitializePhysics(&g_KeyPawn, KeyPhysicsEvent, KeyPhysicsCollision, 16, 16);
 	Pawn_SetPosition(&g_KeyPawn,
-		             g_Levels[g_CurrentLevel].key_pos_x * 8, g_Levels[g_CurrentLevel].key_pos_y * 8);
+		             lvl.key_pos_x * 8, lvl.key_pos_y * 8);
+
+	// Init enemy pawn
+	Pawn_Initialize(&g_EnemyPawn,
+		            g_EnemyLayers, numberof(g_EnemyLayers),
+					ENEMY_SPRITE_ID, g_EnemyAnimActions);
+	Pawn_InitializePhysics(&g_EnemyPawn, EnemyPhysicsEvent, EnemyPhysicsCollision, 16, 16);
+	Pawn_SetPosition(&g_EnemyPawn,
+		             lvl.enemy_x * 8, lvl.enemy_y * 8);
+
+	if (lvl.enemy_x == 0 && lvl.enemy_y == 0) {
+		Pawn_Disable(&g_EnemyPawn);
+	}
 
 	rewind_head = rewind_tail = rewind_count = 0;
 
@@ -413,8 +485,8 @@ bool State_Game()
 
 	// Switch Segment 4
 	SetActiveSegment(4);
-	UpdateMovement();
-	act = UpdateAction(act);
+	UpdatePlayerMovement();
+	act = UpdatePlayerAction(act);
 	SetActiveSegment(0);
 
 	Pawn_SetAction(&g_PlayerPawn, act);
@@ -423,6 +495,9 @@ bool State_Game()
 
 	Pawn_SetAction(&g_KeyPawn, ACTION_IDLE);
 	Pawn_Update(&g_KeyPawn);
+
+	Pawn_SetAction(&g_EnemyPawn, ACTION_IDLE);
+	Pawn_Update(&g_EnemyPawn);
 
 	// Controlla la collisione tra giocatore e chiave
 	if (doPawnsCollide(&g_PlayerPawn, &g_KeyPawn)) {
@@ -441,6 +516,7 @@ bool State_Game()
 
 	Pawn_Draw(&g_PlayerPawn);
 	Pawn_Draw(&g_KeyPawn);
+	Pawn_Draw(&g_EnemyPawn);
 
 	// Inserisce la posizione attuale nel buffer circolare
 	x_rewind[rewind_head] = g_PlayerPawn.PositionX;
