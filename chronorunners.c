@@ -441,7 +441,8 @@ bool State_ChangeLevel()
 	g_CurrentLevel = g_NextLevel;
 	g_NextLevel = g_Levels[g_CurrentLevel].next_level - 1;
 
-	struct Level lvl = g_Levels[g_CurrentLevel];
+	struct Level lvl;
+	lvl = g_Levels[g_CurrentLevel];
 
 	g_PlayerHasKey = FALSE;
 
