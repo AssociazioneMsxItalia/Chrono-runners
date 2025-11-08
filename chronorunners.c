@@ -172,7 +172,9 @@ Pawn g_PlayerPawn;
 bool g_PlayerMovingRight = FALSE;
 bool g_PlayerMovingLeft = FALSE;
 bool g_PlayerJumping = FALSE;
+bool g_PlayerDamped = FALSE;
 i8   g_VelocityY;
+i8   g_mDX = 0;
 i8   g_DX = 0;
 i8   g_DY = 0;
 bool g_PlayerHasKey = FALSE;
@@ -271,7 +273,7 @@ void PlayerPhysicsEvent(u8 event, u8 tile)
 // Collision callback
 bool PlayerPhysicsCollision(u8 tile)
 {
-	return (tile >= 208 && tile <= 210) || (tile >= 224 && tile <= 255);
+	return (tile >= 208 && tile <= 210) || (tile >= 224);
 }
 
 void KeyPhysicsEvent(u8 event, u8 tile)
@@ -329,6 +331,20 @@ void TakeKey() {
 	VDP_Poke_GM2(door_x + 1, door_y + 1, 44);
 }
 
+void CheckPlayerOnDampers() {
+	g_PlayerDamped = FALSE;
+	u8 tx = (g_PlayerPawn.PositionX + 8) / 8;
+	u8 ty = (g_PlayerPawn.PositionY) / 8;
+
+	// Controlla la tile sotto i piedi del personaggio
+	u8 tile = VDP_Peek_GM2(tx, ty + 2);
+
+	if (tile == 210) {
+		// Se sta passando dal terreno accidentato deve rallentare
+		g_PlayerDamped = TRUE;
+	}
+}
+
 bool isPlayerAtExit() {
 	if (!g_PlayerHasKey)
 		return FALSE;
@@ -365,8 +381,9 @@ bool State_ChangeLevel()
 {
 	// Passa al livello successivo
 	g_CurrentLevel = g_NextLevel;
-
 	g_NextLevel = g_Levels[g_CurrentLevel].next_level - 1;
+
+	g_PlayerHasKey = FALSE;
 
 	VDP_WriteLayout_GM2(g_Levels[g_CurrentLevel].layout, 0, 2, 32, 24);
 
@@ -412,6 +429,9 @@ bool State_Game()
 		TakeKey();
 		Pawn_Disable(&g_KeyPawn);
 	}
+
+	// Controlla se il giocatore è sul terreno accidentato
+	CheckPlayerOnDampers();
 
 	// Controlla se il giocatore ha raggiunto l'uscita
 	if (isPlayerAtExit()) {

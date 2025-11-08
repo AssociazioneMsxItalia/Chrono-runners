@@ -8,6 +8,8 @@
 // INCLUDES
 //=============================================================================
 #include "msxgl.h"
+#include "debug.h"
+
 #include "PawnData.h"
 
 //=============================================================================
@@ -23,7 +25,9 @@
 extern bool g_PlayerMovingRight;
 extern bool g_PlayerMovingLeft;
 extern bool g_PlayerJumping;
+extern bool g_PlayerDamped;
 extern i8   g_VelocityY;
+extern i8   g_mDX;
 extern i8   g_DX;
 extern i8   g_DY;
 
@@ -32,6 +36,11 @@ extern i8   g_DY;
 //=============================================================================
 void UpdateMovement();
 u8 UpdateAction(u8 act);
+
+//=============================================================================
+// EXTERN PROTOTYPES
+//=============================================================================
+i16 abs(i16 a);
 
 //=============================================================================
 // FUNCTION
@@ -43,21 +52,37 @@ u8 UpdateAction(u8 act);
  * @return void
  */
 void UpdateMovement() {
-    g_DX = 0;
+	g_DX = 0;
 	g_DY = 0;
 	u8 row8 = Keyboard_Read(8);
 
 	g_PlayerMovingRight = g_PlayerMovingLeft = FALSE;
 
+	u8 x_incr = g_PlayerDamped ? 5 : 10;
+
 	if (IS_KEY_PRESSED(row8, KEY_RIGHT))
 	{
-		g_DX++;
+		g_mDX += x_incr;
 		g_PlayerMovingRight = TRUE;
 	}
 	else if (IS_KEY_PRESSED(row8, KEY_LEFT))
 	{
-		g_DX--;
+		g_mDX -= x_incr;
 		g_PlayerMovingLeft = TRUE;
+	}
+
+	// Lo spostamento in orizzontale è espresso in decimi di pixel. In questo modo
+	// può rallentare fino alla velocità di 0.1 pixel per fotogramma
+	if (abs(g_mDX) >= 10) {
+		g_DX = g_mDX / 10;
+
+		while (g_mDX >= 10) {
+			g_mDX -= 10;
+		}
+
+		while (g_mDX <= -10) {
+			g_mDX += 10;
+		}
 	}
 
 	if (g_PlayerJumping)
