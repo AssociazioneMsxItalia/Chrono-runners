@@ -8,6 +8,7 @@
 // INCLUDES
 //=============================================================================
 #include "msxgl.h"
+#include "game/pawn.h"
 #include "debug.h"
 
 #include "PawnData.h"
@@ -22,6 +23,7 @@
 //=============================================================================
 // EXTERN MEMORY DATA
 //=============================================================================
+extern u8	g_PlayerAction;
 extern bool g_PlayerMovingRight;
 extern bool g_PlayerMovingLeft;
 extern bool g_PlayerJumping;
@@ -31,11 +33,21 @@ extern i8   g_mDX;
 extern i8   g_DX;
 extern i8   g_DY;
 
+extern Pawn g_EnemyPawn;
+extern u8	g_EnemyAction;
+extern bool g_EnemyMovingRight;
+extern bool g_EnemyMovingLeft;
+extern i8   g_EnemymDX;
+extern i8   g_EnemyDX;
+
 //=============================================================================
 // PROTOTYPES
 //=============================================================================
 void UpdatePlayerMovement();
-u8 UpdatePlayerAction(u8 act);
+void UpdatePlayerAction();
+
+void UpdateEnemyMovement();
+void UpdateEnemyAction();
 
 //=============================================================================
 // EXTERN PROTOTYPES
@@ -46,11 +58,6 @@ i16 abs(i16 a);
 // FUNCTION
 //=============================================================================
 
-/**
- * @brief
- * @param void
- * @return void
- */
 void UpdatePlayerMovement() {
 	g_DX = 0;
 	g_DY = 0;
@@ -100,30 +107,72 @@ void UpdatePlayerMovement() {
 	}
 }
 
-
-/**
- * @brief Update action Pawn
- * @param u8 Current action
- * @return new action
- */
-u8 UpdatePlayerAction(u8 act) {
+void UpdatePlayerAction() {
+	g_PlayerAction = ACTION_IDLE;
 	if (g_PlayerJumping && (g_VelocityY >= 0))
 	{
 		if (g_PlayerMovingRight)
-			act = ACTION_JUMPRIGHT;
+			g_PlayerAction = ACTION_JUMPRIGHT;
 		else
-			act = ACTION_JUMPLEFT;
+			g_PlayerAction = ACTION_JUMPLEFT;
 	}
 	else if (g_PlayerJumping) {
 		if (g_PlayerMovingRight)
-			act = ACTION_FALLRIGHT;
+			g_PlayerAction = ACTION_FALLRIGHT;
 		else
-			act = ACTION_FALLLEFT;
+			g_PlayerAction = ACTION_FALLLEFT;
 	}
 	else if (g_PlayerMovingRight)
-		act = ACTION_MOVERIGHT;
+		g_PlayerAction = ACTION_MOVERIGHT;
 	else if (g_PlayerMovingLeft)
-		act = ACTION_MOVELEFT;
+		g_PlayerAction = ACTION_MOVELEFT;
+}
 
-	return act;
+void UpdateEnemyMovement() {
+
+	if (!g_EnemyMovingRight && !g_EnemyMovingLeft) {
+		// Situazione iniziale, se non si muove partiamo verso sinistra
+		g_EnemyMovingLeft = TRUE;
+	} else if (g_EnemyMovingLeft) {
+		// Se sta andando verso sinistra ed è arrivato a un certo punto, cambia direzione
+		if (g_EnemyPawn.PositionX < 30) {
+			g_EnemyMovingLeft = FALSE;
+			g_EnemyMovingRight = TRUE;
+		}
+	} else if (g_EnemyMovingRight) {
+		// Se sta andando verso destra ed è arrivato a un certo punto, cambia direzione
+		if (g_EnemyPawn.PositionX > 170) {
+			g_EnemyMovingLeft = TRUE;
+			g_EnemyMovingRight = FALSE;
+		}
+	}
+
+	if (g_EnemyMovingLeft) {
+		g_EnemymDX -= 3;
+	} else if (g_EnemyMovingRight) {
+		g_EnemymDX += 3;
+	}
+
+	// XXX: unificare questo codice con la versione sopra
+	g_EnemyDX = 0;
+	if (abs(g_EnemymDX) >= 10) {
+		g_EnemyDX = g_EnemymDX / 10;
+
+		while (g_EnemymDX >= 10) {
+			g_EnemymDX -= 10;
+		}
+
+		while (g_EnemymDX <= -10) {
+			g_EnemymDX += 10;
+		}
+	}
+}
+
+void UpdateEnemyAction() {
+	g_EnemyAction = ACTION_IDLE;
+	if (g_EnemyMovingRight) {
+		g_EnemyAction = ACTION_MOVERIGHT;
+	} else if (g_EnemyMovingLeft) {
+		g_EnemyAction = ACTION_MOVELEFT;
+	}
 }

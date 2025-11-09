@@ -171,8 +171,8 @@ const Pawn_Frame g_EnemyFramesShocked[] =
 const Pawn_Action g_EnemyAnimActions[] =
 {//   Frames                    Number                              Loop? Interrupt?
 	{ g_EnemyFramesIdle,		numberof(g_EnemyFramesIdle),		TRUE, TRUE },
-	{ g_EnemyFramesMoveLeft,	numberof(g_EnemyFramesMoveLeft),	TRUE, TRUE },
 	{ g_EnemyFramesMoveRight,	numberof(g_EnemyFramesMoveRight),	TRUE, TRUE },
+	{ g_EnemyFramesMoveLeft,	numberof(g_EnemyFramesMoveLeft),	TRUE, TRUE },
 	{ g_EnemyFramesShocked,		numberof(g_EnemyFramesShocked),		TRUE, TRUE },
 };
 
@@ -191,7 +191,9 @@ extern void InitializeSprite();
 // SEGMENT 4, BANK 1
 //=============================================================================
 extern void UpdatePlayerMovement();
-extern u8 UpdatePlayerAction(u8 act);
+extern void UpdatePlayerAction();
+extern void UpdateEnemyMovement();
+extern void UpdateEnemyAction();
 
 u8 g_PreviousSegment = 0;
 
@@ -214,6 +216,7 @@ void SetActiveSegment(u8 segment) {
 //=============================================================================
 
 Pawn g_PlayerPawn;
+u8	 g_PlayerAction;
 bool g_PlayerMovingRight = FALSE;
 bool g_PlayerMovingLeft = FALSE;
 bool g_PlayerJumping = FALSE;
@@ -227,13 +230,19 @@ bool g_PlayerHasKey = FALSE;
 Pawn g_KeyPawn;
 
 Pawn g_EnemyPawn;
+u8   g_EnemyAction;
+bool g_EnemyMovingRight = FALSE;
+bool g_EnemyMovingLeft = FALSE;
+i8   g_EnemymDX = 0;
+i8   g_EnemyDX = 0;
+i8	 g_EnemyDY = 0;
 
 //=============================================================================
 // LEVELS
 //=============================================================================
 
-u8 g_CurrentLevel = 0;
-u8 g_NextLevel = 0;
+u8 g_CurrentLevel = 1;
+u8 g_NextLevel = 1;
 
 //=============================================================================
 // REWIND DATA
@@ -342,7 +351,7 @@ void EnemyPhysicsEvent(u8 event, u8 tile)
 bool EnemyPhysicsCollision(u8 tile)
 {
 	tile;
-	return TRUE;
+	return FALSE;
 }
 
 //=============================================================================
@@ -469,9 +478,10 @@ bool State_ChangeLevel()
 	Pawn_SetPosition(&g_EnemyPawn,
 		             lvl.enemy_x * 8, lvl.enemy_y * 8);
 
-	if (lvl.enemy_x == 0 && lvl.enemy_y == 0) {
+	if (lvl.enemy_x == 0 && lvl.enemy_y == 0)
 		Pawn_Disable(&g_EnemyPawn);
-	}
+	else
+		Pawn_Enable(&g_EnemyPawn);
 
 	rewind_head = rewind_tail = rewind_count = 0;
 
@@ -482,22 +492,23 @@ bool State_ChangeLevel()
 
 bool State_Game()
 {
-	u8 act = ACTION_IDLE;
-
 	// Switch Segment 4
 	SetActiveSegment(4);
 	UpdatePlayerMovement();
-	act = UpdatePlayerAction(act);
+	UpdatePlayerAction();
+	UpdateEnemyMovement();
+	UpdateEnemyAction();
 	SetActiveSegment(0);
 
-	Pawn_SetAction(&g_PlayerPawn, act);
+	Pawn_SetAction(&g_PlayerPawn, g_PlayerAction);
 	Pawn_SetMovement(&g_PlayerPawn, g_DX, g_DY);
 	Pawn_Update(&g_PlayerPawn);
 
 	Pawn_SetAction(&g_KeyPawn, ACTION_IDLE);
 	Pawn_Update(&g_KeyPawn);
 
-	Pawn_SetAction(&g_EnemyPawn, ACTION_IDLE);
+	Pawn_SetAction(&g_EnemyPawn, g_EnemyAction);
+	Pawn_SetMovement(&g_EnemyPawn, g_EnemyDX, g_EnemyDY);
 	Pawn_Update(&g_EnemyPawn);
 
 	// Controlla la collisione tra giocatore e chiave
