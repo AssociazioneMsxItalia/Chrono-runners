@@ -17,8 +17,8 @@
 // MEMORY DATA
 //=============================================================================
 
-#define FORCE	15
-#define GRAVITY	1
+#define GRAVITY	5
+#define FORCE	75
 
 //=============================================================================
 // EXTERN MEMORY DATA
@@ -28,12 +28,18 @@ extern bool g_PlayerMovingRight;
 extern bool g_PlayerMovingLeft;
 extern bool g_PlayerJumping;
 extern bool g_PlayerDamped;
+extern bool g_PlayerDying;
+extern bool g_PlayerInputRight;
+extern bool g_PlayerInputLeft;
+extern bool g_PlayerInputUp;
 extern i8   g_VelocityY;
 extern i8   g_mDX;
+extern i8	g_mDY;
 extern i8   g_DX;
 extern i8   g_DY;
 
 extern Pawn g_EnemyPawn;
+extern bool g_EnemyEnabled;
 extern u8	g_EnemyAction;
 extern bool g_EnemyMovingRight;
 extern bool g_EnemyMovingLeft;
@@ -43,9 +49,12 @@ extern i8   g_EnemyDX;
 //=============================================================================
 // PROTOTYPES
 //=============================================================================
+void UpdatePlayerInput();
+void UpdatePlayerGravity(u8 gravity, u8 force);
 void UpdatePlayerMovement();
 void UpdatePlayerAction();
 
+void UpdateEnemyInput();
 void UpdateEnemyMovement();
 void UpdateEnemyAction();
 
@@ -58,58 +67,83 @@ i16 abs(i16 a);
 // FUNCTION
 //=============================================================================
 
-void UpdatePlayerMovement() {
-	g_DX = 0;
-	g_DY = 0;
+i8 GetDPos(i8* m) {
+	i8 rv = (*m) / 10;
+
+	while ((*m) >= 10)
+		(*m) -= 10;
+
+	while ((*m) <= -10)
+		(*m) += 10;
+
+	return rv;
+}
+
+void UpdatePlayerInput() {
+	g_PlayerInputRight = FALSE;
+	g_PlayerInputLeft = FALSE;
+	g_PlayerInputUp = FALSE;
+
 	u8 row8 = Keyboard_Read(8);
+
+	if (IS_KEY_PRESSED(row8, KEY_RIGHT)) {
+		g_PlayerInputRight = TRUE;
+	} else if (IS_KEY_PRESSED(row8, KEY_LEFT)) {
+		g_PlayerInputLeft = TRUE;
+	}
+
+	if (IS_KEY_PRESSED(row8, KEY_UP)) {
+		g_PlayerInputUp = TRUE;
+	}
+}
+
+void UpdatePlayerGravity(u8 gravity, u8 force) {
+	g_mDY -= g_VelocityY / 2;
+
+	g_VelocityY -= gravity;
+	if (g_VelocityY < -force)
+		g_VelocityY = -force;
+}
+
+void UpdatePlayerMovement() {
 
 	g_PlayerMovingRight = g_PlayerMovingLeft = FALSE;
 
-	u8 x_incr = g_PlayerDamped ? 5 : 10;
+	u8 x_incr = g_PlayerDamped ? 3 : 10;
 
-	if (IS_KEY_PRESSED(row8, KEY_RIGHT))
+	if (g_PlayerInputRight)
 	{
 		g_mDX += x_incr;
 		g_PlayerMovingRight = TRUE;
 	}
-	else if (IS_KEY_PRESSED(row8, KEY_LEFT))
+	else if (g_PlayerInputLeft)
 	{
 		g_mDX -= x_incr;
 		g_PlayerMovingLeft = TRUE;
 	}
 
-	// Lo spostamento in orizzontale è espresso in decimi di pixel. In questo modo
-	// può rallentare fino alla velocità di 0.1 pixel per fotogramma
-	if (abs(g_mDX) >= 10) {
-		g_DX = g_mDX / 10;
-
-		while (g_mDX >= 10) {
-			g_mDX -= 10;
-		}
-
-		while (g_mDX <= -10) {
-			g_mDX += 10;
-		}
-	}
-
 	if (g_PlayerJumping)
 	{
-		g_DY -= g_VelocityY / 4;
-
-		g_VelocityY -= GRAVITY;
-		if (g_VelocityY < -FORCE)
-			g_VelocityY = -FORCE;
+		UpdatePlayerGravity(GRAVITY, FORCE);
 	}
-	else if (IS_KEY_PRESSED(row8, KEY_UP))
+	else if (g_PlayerInputUp)
 	{
 		g_PlayerJumping = TRUE;
 		g_VelocityY = FORCE;
 	}
+
+	// Gli spostamenti sono espressi in decimi di pixel. In questo modo può
+	// rallentare fino alla velocità di 0.1 pixel per fotogramma
+	g_DX = GetDPos(&g_mDX);
+	g_DY = GetDPos(&g_mDY);
 }
 
 void UpdatePlayerAction() {
 	g_PlayerAction = ACTION_IDLE;
-	if (g_PlayerJumping && (g_VelocityY >= 0))
+	if (g_PlayerDying) {
+		g_PlayerAction = ACTION_DEATH;
+	}
+	else if (g_PlayerJumping && (g_VelocityY >= 0))
 	{
 		if (g_PlayerMovingRight)
 			g_PlayerAction = ACTION_JUMPRIGHT;
@@ -128,8 +162,7 @@ void UpdatePlayerAction() {
 		g_PlayerAction = ACTION_MOVELEFT;
 }
 
-void UpdateEnemyMovement() {
-
+void UpdateEnemyInput() {
 	if (!g_EnemyMovingRight && !g_EnemyMovingLeft) {
 		// Situazione iniziale, se non si muove partiamo verso sinistra
 		g_EnemyMovingLeft = TRUE;
@@ -146,6 +179,9 @@ void UpdateEnemyMovement() {
 			g_EnemyMovingRight = FALSE;
 		}
 	}
+}
+
+void UpdateEnemyMovement() {
 
 	if (g_EnemyMovingLeft) {
 		g_EnemymDX -= 3;
@@ -153,19 +189,7 @@ void UpdateEnemyMovement() {
 		g_EnemymDX += 3;
 	}
 
-	// XXX: unificare questo codice con la versione sopra
-	g_EnemyDX = 0;
-	if (abs(g_EnemymDX) >= 10) {
-		g_EnemyDX = g_EnemymDX / 10;
-
-		while (g_EnemymDX >= 10) {
-			g_EnemymDX -= 10;
-		}
-
-		while (g_EnemymDX <= -10) {
-			g_EnemymDX += 10;
-		}
-	}
+	g_EnemyDX = GetDPos(&g_EnemymDX);
 }
 
 void UpdateEnemyAction() {

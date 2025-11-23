@@ -23,6 +23,7 @@
 // Function prototypes
 bool State_Initialize();
 bool State_Game();
+bool State_Death();
 bool State_Rewind();
 bool State_ChangeLevel();
 
@@ -99,6 +100,12 @@ const Pawn_Frame g_PlayerFramesFallLeft[] =
 	{ 4 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,	4,	NULL },
 };
 
+const Pawn_Frame g_PlayerFramesDeath[] =
+{
+	{  9 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,	10,	NULL },
+	{ 10 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,	10,	NULL },
+};
+
 // List of all player actions
 const Pawn_Action g_AnimActions[] =
 {//   Frames                   Number                             Loop? Interrupt?
@@ -109,6 +116,7 @@ const Pawn_Action g_AnimActions[] =
 	{ g_PlayerFramesJumpLeft,  numberof(g_PlayerFramesJumpLeft),  TRUE, TRUE },
 	{ g_PlayerFramesFallRight, numberof(g_PlayerFramesFallRight), TRUE, TRUE },
 	{ g_PlayerFramesFallLeft,  numberof(g_PlayerFramesFallLeft),  TRUE, TRUE },
+	{ g_PlayerFramesDeath,     numberof(g_PlayerFramesDeath),     TRUE, TRUE },
 };
 
 // Per ora la chiave è visualizzata usando lo sprite 2
@@ -190,10 +198,14 @@ extern void InitializeSprite();
 //=============================================================================
 // SEGMENT 4, BANK 1
 //=============================================================================
+extern void UpdatePlayerInput();
+extern void UpdatePlayerGravity(u8 gravity, u8 force);
 extern void UpdatePlayerMovement();
 extern void UpdatePlayerAction();
+extern void UpdateEnemyInput();
 extern void UpdateEnemyMovement();
 extern void UpdateEnemyAction();
+i8 GetDPos(i8* m);
 
 u8 g_PreviousSegment = 0;
 
@@ -221,15 +233,21 @@ bool g_PlayerMovingRight = FALSE;
 bool g_PlayerMovingLeft = FALSE;
 bool g_PlayerJumping = FALSE;
 bool g_PlayerDamped = FALSE;
+bool g_PlayerDying = FALSE;
+bool g_PlayerInputRight = FALSE;
+bool g_PlayerInputLeft = FALSE;
+bool g_PlayerInputUp = FALSE;
 i8   g_VelocityY;
 i8   g_mDX = 0;
-i8   g_DX = 0;
-i8   g_DY = 0;
+i8	 g_mDY = 0;
+i8   g_DX;
+i8   g_DY;
 bool g_PlayerHasKey = FALSE;
 
 Pawn g_KeyPawn;
 
 Pawn g_EnemyPawn;
+bool g_EnemyEnabled;
 u8   g_EnemyAction;
 bool g_EnemyMovingRight = FALSE;
 bool g_EnemyMovingLeft = FALSE;
@@ -318,10 +336,7 @@ void PlayerPhysicsEvent(u8 event, u8 tile)
 		break;
 
 	case PAWN_PHYSICS_FALL: // Handle falling
-		if (!g_PlayerJumping)
-		{
-			g_PlayerJumping = TRUE;
-		}
+		g_PlayerJumping = TRUE;
 		break;
 	};
 }
@@ -444,6 +459,20 @@ bool State_Initialize()
 	return FALSE;
 }
 
+void PlayerRestart() {
+	struct Level lvl;
+	lvl = g_Levels[g_CurrentLevel];
+
+	// Init player pawn
+	ReinitPlayer(&g_PlayerPawn,
+		         g_PlayerLayers, numberof(g_PlayerLayers),
+				 lvl.start_x * 8, lvl.start_y * 8);
+
+	g_PlayerDying = FALSE;
+
+	rewind_head = rewind_tail = rewind_count = 0;
+}
+
 bool State_ChangeLevel()
 {
 	// Passa al livello successivo
@@ -457,10 +486,7 @@ bool State_ChangeLevel()
 
 	VDP_WriteLayout_GM2(lvl.layout, 0, 2, 32, 24);
 
-	// Init player pawn
-	ReinitPlayer(&g_PlayerPawn,
-		         g_PlayerLayers, numberof(g_PlayerLayers),
-				 lvl.start_x * 8, lvl.start_y * 8);
+	PlayerRestart();
 
 	// Init key pawn
 	Pawn_Initialize(&g_KeyPawn,
@@ -479,11 +505,10 @@ bool State_ChangeLevel()
 		             lvl.enemy_x * 8, lvl.enemy_y * 8);
 
 	if (lvl.enemy_x == 0 && lvl.enemy_y == 0)
-		Pawn_Disable(&g_EnemyPawn);
+		g_EnemyEnabled = FALSE;
 	else
-		Pawn_Enable(&g_EnemyPawn);
-
-	rewind_head = rewind_tail = rewind_count = 0;
+		g_EnemyEnabled = TRUE;
+	Pawn_SetEnable(&g_EnemyPawn, g_EnemyEnabled);
 
 	Game_SetState(State_Game);
 
@@ -492,12 +517,15 @@ bool State_ChangeLevel()
 
 bool State_Game()
 {
-	// Switch Segment 4
 	SetActiveSegment(4);
+	UpdatePlayerInput();
 	UpdatePlayerMovement();
 	UpdatePlayerAction();
-	UpdateEnemyMovement();
-	UpdateEnemyAction();
+	if (g_EnemyEnabled) {
+		UpdateEnemyInput();
+		UpdateEnemyMovement();
+		UpdateEnemyAction();
+	}
 	SetActiveSegment(0);
 
 	Pawn_SetAction(&g_PlayerPawn, g_PlayerAction);
@@ -515,6 +543,17 @@ bool State_Game()
 	if (doPawnsCollide(&g_PlayerPawn, &g_KeyPawn)) {
 		TakeKey();
 		Pawn_Disable(&g_KeyPawn);
+	}
+
+	// Controlla la collisione tra giocatore e nemico
+	if (doPawnsCollide(&g_PlayerPawn, &g_EnemyPawn)) {
+		// Effetto "morte" del giocatore.
+		g_mDX = 0;
+		g_mDY = 0;
+		g_VelocityY = 75;
+		g_PlayerDying = TRUE;
+		Game_SetState(State_Death);
+		return FALSE;
 	}
 
 	// Controlla se il giocatore è sul terreno accidentato
@@ -560,6 +599,27 @@ bool State_Game()
 	}
 
 	return TRUE;
+}
+
+bool State_Death()
+{
+	SetActiveSegment(4);
+	UpdatePlayerGravity(5, 75);
+	g_DY = GetDPos(&g_mDY);
+	SetActiveSegment(0);
+
+	Pawn_SetAction(&g_PlayerPawn, ACTION_DEATH);
+	Pawn_SetPosition(&g_PlayerPawn,
+		g_PlayerPawn.PositionX,
+		g_PlayerPawn.PositionY + g_DY);
+	Pawn_Update(&g_PlayerPawn);
+
+	Pawn_Draw(&g_PlayerPawn);
+
+	if (g_PlayerPawn.PositionY > 240) {
+		PlayerRestart();
+		Game_SetState(State_Game);
+	}
 }
 
 bool State_Rewind()
