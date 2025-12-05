@@ -347,17 +347,6 @@ bool PlayerPhysicsCollision(u8 tile)
 	return (tile >= 208 && tile <= 210) || (tile >= 224);
 }
 
-void KeyPhysicsEvent(u8 event, u8 tile)
-{
-	event; tile;
-}
-
-bool KeyPhysicsCollision(u8 tile)
-{
-	tile;
-	return TRUE;
-}
-
 void EnemyPhysicsEvent(u8 event, u8 tile)
 {
 	event; tile;
@@ -492,7 +481,6 @@ bool State_ChangeLevel()
 	Pawn_Initialize(&g_KeyPawn,
 		            g_KeyLayers, numberof(g_KeyLayers),
 					KEY_SPRITE_ID, g_KeyAnimActions);
-	Pawn_InitializePhysics(&g_KeyPawn, KeyPhysicsEvent, KeyPhysicsCollision, 16, 16);
 	Pawn_SetPosition(&g_KeyPawn,
 		             lvl.key_pos_x * 8, lvl.key_pos_y * 8);
 
