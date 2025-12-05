@@ -11,6 +11,7 @@
 #include "content/sprite/player_sprt_layer.h"
 #include "content/sprite/key_sprt_layer.h"
 #include "content/sprite/enemy_sprt_layer.h"
+#include "content/sprite/crystal_sprt_layer.h"
 #include "content/tile/data_tile_gm2.h"
 
 //=============================================================================
@@ -70,7 +71,8 @@ void InitializeSprite() {
 	// Initialize sprite
 	VDP_SetSpriteFlag(VDP_SPRITE_SIZE_16 | VDP_SPRITE_SCALE_1);
 
-	VDP_LoadSpritePattern(g_PlayerSprtLayer,           0,               13 * sprSize);
-	VDP_LoadSpritePattern(g_KeySprtLayer,   13 * sprSize,                2 * laySize);
-	VDP_LoadSpritePattern(g_EnemySprtLayer, 13 * sprSize + 2 * laySize,  7 * laySize);
+	VDP_LoadSpritePattern(g_PlayerSprtLayer,                                         0, 13 * sprSize);
+	VDP_LoadSpritePattern(g_KeySprtLayer,                                 13 * sprSize,  2 * laySize);
+	VDP_LoadSpritePattern(g_EnemySprtLayer,                 13 * sprSize + 2 * laySize,  7 * laySize);
+	VDP_LoadSpritePattern(g_CrystalSprtLayer, 13 * sprSize + 2 * laySize + 7 * laySize,  2 * laySize);
 }

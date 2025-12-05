@@ -184,6 +184,28 @@ const Pawn_Action g_EnemyAnimActions[] =
 	{ g_EnemyFramesShocked,		numberof(g_EnemyFramesShocked),		TRUE, TRUE },
 };
 
+#define CRYSTAL_SPRITE_ID 4
+#define CRYSTAL_PATTERN_OFFSET 13 * sprSize + 2 * laySize + 7 * laySize
+#define CRYSTAL_PATTERN_SIZE laySize
+
+// Enemy sprite layers
+const Pawn_Sprite g_CrystalLayers[] =
+{//   X  Y  DataOffset    Color              Flag
+	{ 0, 0, 0,            COLOR_MEDIUM_RED,     0 },
+};
+
+const Pawn_Frame g_CrystalFramesIdle[] =
+{//   Pattern                                           Time Function
+	{ 0 * CRYSTAL_PATTERN_SIZE + CRYSTAL_PATTERN_OFFSET,	16,  NULL },
+	{ 1 * CRYSTAL_PATTERN_SIZE + CRYSTAL_PATTERN_OFFSET,	16,  NULL },
+};
+
+// List of all crystal actions
+const Pawn_Action g_CrystalAnimActions[] =
+{//   Frames             Number                          Loop? Interrupt?
+	{ g_CrystalFramesIdle,   numberof(g_CrystalFramesIdle),      TRUE, TRUE },
+};
+
 //=============================================================================
 // SEGMENT 3, BANK 1
 //=============================================================================
@@ -243,6 +265,8 @@ i8	 g_mDY = 0;
 i8   g_DX;
 i8   g_DY;
 bool g_PlayerHasKey = FALSE;
+u8 g_PlayerMaxRewindEnergy = 0;
+u8 g_PlayerRewindEnergy = 0;
 
 Pawn g_KeyPawn;
 
@@ -255,12 +279,15 @@ i8   g_EnemymDX = 0;
 i8   g_EnemyDX = 0;
 i8	 g_EnemyDY = 0;
 
+Pawn g_CrystalPawn;
+bool g_CrystalEnabled;
+
 //=============================================================================
 // LEVELS
 //=============================================================================
 
-u8 g_CurrentLevel = 1;
-u8 g_NextLevel = 1;
+u8 g_CurrentLevel = 0;
+u8 g_NextLevel = 0;
 
 //=============================================================================
 // REWIND DATA
@@ -310,7 +337,7 @@ u8 rewind_count;
 void DrawRewindGauge() {
 	u8 i;
 	for (i = 1; i < 11; i++) {
-		if (rewind_count >= 25 * i)
+		if (g_PlayerRewindEnergy >= 25 * i)
 			VDP_Poke_GM2(i, 1, 45);
 		else
 			VDP_Poke_GM2(i, 1, 47);
@@ -400,6 +427,11 @@ void TakeKey() {
 	VDP_Poke_GM2(door_x + 1, door_y, 44);
 	VDP_Poke_GM2(door_x, door_y + 1, 44);
 	VDP_Poke_GM2(door_x + 1, door_y + 1, 44);
+}
+
+void TakeCrystal() {
+	g_CrystalEnabled = FALSE;
+	g_PlayerMaxRewindEnergy += 60;
 }
 
 void CheckPlayerOnDampers() {
@@ -498,6 +530,19 @@ bool State_ChangeLevel()
 		g_EnemyEnabled = TRUE;
 	Pawn_SetEnable(&g_EnemyPawn, g_EnemyEnabled);
 
+	// Init crystal pawn
+	Pawn_Initialize(&g_CrystalPawn,
+		            g_CrystalLayers, numberof(g_CrystalLayers),
+					CRYSTAL_SPRITE_ID, g_CrystalAnimActions);
+	Pawn_SetPosition(&g_CrystalPawn,
+		             lvl.crystal_x * 8, lvl.crystal_y * 8);
+
+	if (lvl.crystal_x == 0 && lvl.crystal_y == 0)
+		g_CrystalEnabled = FALSE;
+	else
+		g_CrystalEnabled = TRUE;
+	Pawn_SetEnable(&g_CrystalPawn, g_CrystalEnabled);
+
 	Game_SetState(State_Game);
 
 	return TRUE;
@@ -527,21 +572,36 @@ bool State_Game()
 	Pawn_SetMovement(&g_EnemyPawn, g_EnemyDX, g_EnemyDY);
 	Pawn_Update(&g_EnemyPawn);
 
+	Pawn_SetAction(&g_CrystalPawn, ACTION_IDLE);
+	Pawn_Update(&g_CrystalPawn);
+
 	// Controlla la collisione tra giocatore e chiave
 	if (doPawnsCollide(&g_PlayerPawn, &g_KeyPawn)) {
 		TakeKey();
 		Pawn_Disable(&g_KeyPawn);
 	}
 
+	// Controlla la collisione tra giocatore e cristallo
+	if (g_CrystalEnabled && doPawnsCollide(&g_PlayerPawn, &g_CrystalPawn)) {
+		TakeCrystal();
+		Pawn_Disable(&g_CrystalPawn);
+	}
+
 	// Controlla la collisione tra giocatore e nemico
-	if (doPawnsCollide(&g_PlayerPawn, &g_EnemyPawn)) {
-		// Effetto "morte" del giocatore.
-		g_mDX = 0;
-		g_mDY = 0;
-		g_VelocityY = 75;
-		g_PlayerDying = TRUE;
-		Game_SetState(State_Death);
-		return FALSE;
+	if (g_EnemyEnabled && doPawnsCollide(&g_PlayerPawn, &g_EnemyPawn)) {
+
+		if (g_PlayerPawn.PositionY < g_EnemyPawn.PositionY) {
+			g_EnemyEnabled = FALSE;
+			Pawn_Disable(&g_EnemyPawn);
+		} else {
+			// Effetto "morte" del giocatore.
+			g_mDX = 0;
+			g_mDY = 0;
+			g_VelocityY = 75;
+			g_PlayerDying = TRUE;
+			Game_SetState(State_Death);
+			return FALSE;
+		}
 	}
 
 	// Controlla se il giocatore è sul terreno accidentato
@@ -556,6 +616,7 @@ bool State_Game()
 	Pawn_Draw(&g_PlayerPawn);
 	Pawn_Draw(&g_KeyPawn);
 	Pawn_Draw(&g_EnemyPawn);
+	Pawn_Draw(&g_CrystalPawn);
 
 	// Inserisce la posizione attuale nel buffer circolare
 	x_rewind[rewind_head] = g_PlayerPawn.PositionX;
@@ -572,10 +633,14 @@ bool State_Game()
 		rewind_count++;
 	}
 
+	if (g_PlayerRewindEnergy < g_PlayerMaxRewindEnergy) {
+		g_PlayerRewindEnergy++;
+	}
+
 	DrawRewindGauge();
 
 	u8 row8 = Keyboard_Read(8);
-	if (IS_KEY_PRESSED(row8, KEY_SPACE)) {
+	if (IS_KEY_PRESSED(row8, KEY_SPACE) && g_PlayerRewindEnergy > 1) {
 
 		// Sostituisce i colori dello sprite principale
 		ReinitPlayer(&g_PlayerPawn,
@@ -607,7 +672,9 @@ bool State_Death()
 	if (g_PlayerPawn.PositionY > 240) {
 		PlayerRestart();
 		Game_SetState(State_Game);
+		return FALSE;
 	}
+	return TRUE;
 }
 
 bool State_Rewind()
@@ -616,7 +683,7 @@ bool State_Rewind()
 	// giocatore lo ha interrotto
 
 	u8 row8 = Keyboard_Read(8);
-	if (rewind_count == 0 || IS_KEY_RELEASED(row8, KEY_SPACE)) {
+	if (g_PlayerRewindEnergy == 0 || IS_KEY_RELEASED(row8, KEY_SPACE)) {
 
 		// Reimposta colori originali
 		ReinitPlayer(&g_PlayerPawn,
@@ -630,6 +697,9 @@ bool State_Rewind()
 	// Ogni passo di rewind consuma un elemento dell'array circolare
 	rewind_head = (rewind_head - 1 + rewindSize) % rewindSize;
 	rewind_count--;
+
+	// e anche l'energia di rewind del giocatore
+	g_PlayerRewindEnergy--;
 
 	DrawRewindGauge();
 
