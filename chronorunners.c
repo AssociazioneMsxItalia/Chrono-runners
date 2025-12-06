@@ -229,6 +229,9 @@ extern void UpdateEnemyMovement();
 extern void UpdateEnemyAction();
 i8 GetDPos(i8* m);
 
+extern void PrintGFXText(c8 *text, u8 x, u8 y);
+extern void PrintGFXNumber(u8 number, u8 x, u8 y);
+
 u8 g_PreviousSegment = 0;
 
 /**
@@ -248,6 +251,9 @@ void SetActiveSegment(u8 segment) {
 //=============================================================================
 // MEMORY DATA
 //=============================================================================
+
+// Tempo rimanente in 50mi di secondo
+u16 g_RemainingTime = 0;
 
 Pawn g_PlayerPawn;
 u8	 g_PlayerAction;
@@ -269,6 +275,7 @@ u8 g_PlayerMaxRewindEnergy = 0;
 u8 g_PlayerRewindEnergy = 0;
 
 Pawn g_KeyPawn;
+bool g_KeyEnabled;
 
 Pawn g_EnemyPawn;
 bool g_EnemyEnabled;
@@ -335,12 +342,13 @@ u8 rewind_tail;
 u8 rewind_count;
 
 void DrawRewindGauge() {
-	u8 i;
-	for (i = 1; i < 11; i++) {
+	u8 tile;
+	for (u8 i = 1; i < 11; i++) {
 		if (g_PlayerRewindEnergy >= 25 * i)
-			VDP_Poke_GM2(i, 1, 45);
+			tile = 45;
 		else
-			VDP_Poke_GM2(i, 1, 47);
+			tile = 47;
+		VDP_Poke_GM2(i+1, 1, tile);
 	}
 }
 
@@ -430,7 +438,6 @@ void TakeKey() {
 }
 
 void TakeCrystal() {
-	g_CrystalEnabled = FALSE;
 	g_PlayerMaxRewindEnergy += 60;
 }
 
@@ -475,6 +482,9 @@ bool State_Initialize()
 
 	SetActiveSegment(0);
 
+	// Cinque minuti
+	g_RemainingTime = 5 * 60 * 50;
+
 	Game_SetState(State_ChangeLevel);
 
 	return FALSE;
@@ -505,6 +515,10 @@ bool State_ChangeLevel()
 
 	g_PlayerHasKey = FALSE;
 
+	SetActiveSegment(4);
+	PrintGFXText("TIME   '  \"", 2, 0);
+	SetActiveSegment(0);
+
 	VDP_WriteLayout_GM2(lvl.layout, 0, 2, 32, 24);
 
 	PlayerRestart();
@@ -515,6 +529,8 @@ bool State_ChangeLevel()
 					KEY_SPRITE_ID, g_KeyAnimActions);
 	Pawn_SetPosition(&g_KeyPawn,
 		             lvl.key_pos_x * 8, lvl.key_pos_y * 8);
+	g_KeyEnabled = TRUE;
+	Pawn_SetEnable(&g_KeyPawn, g_KeyEnabled);
 
 	// Init enemy pawn
 	Pawn_Initialize(&g_EnemyPawn,
@@ -551,6 +567,8 @@ bool State_ChangeLevel()
 bool State_Game()
 {
 	SetActiveSegment(4);
+
+	// Gestione input
 	UpdatePlayerInput();
 	UpdatePlayerMovement();
 	UpdatePlayerAction();
@@ -559,7 +577,20 @@ bool State_Game()
 		UpdateEnemyMovement();
 		UpdateEnemyAction();
 	}
+
+	// Testi a video
+	if (g_RemainingTime % 50 != 0) {
+
+		u8 minutes = (g_RemainingTime / 50) / 60;
+		u8 seconds = (g_RemainingTime / 50) % 60;
+
+		PrintGFXNumber(minutes, 7, 0);
+		PrintGFXNumber(seconds, 10, 0);
+	}
+
 	SetActiveSegment(0);
+
+	g_RemainingTime--;
 
 	Pawn_SetAction(&g_PlayerPawn, g_PlayerAction);
 	Pawn_SetMovement(&g_PlayerPawn, g_DX, g_DY);
@@ -576,14 +607,16 @@ bool State_Game()
 	Pawn_Update(&g_CrystalPawn);
 
 	// Controlla la collisione tra giocatore e chiave
-	if (doPawnsCollide(&g_PlayerPawn, &g_KeyPawn)) {
+	if (g_KeyEnabled && doPawnsCollide(&g_PlayerPawn, &g_KeyPawn)) {
 		TakeKey();
+		g_KeyEnabled = FALSE;
 		Pawn_Disable(&g_KeyPawn);
 	}
 
 	// Controlla la collisione tra giocatore e cristallo
 	if (g_CrystalEnabled && doPawnsCollide(&g_PlayerPawn, &g_CrystalPawn)) {
 		TakeCrystal();
+		g_CrystalEnabled = FALSE;
 		Pawn_Disable(&g_CrystalPawn);
 	}
 
