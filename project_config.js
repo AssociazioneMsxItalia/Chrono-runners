@@ -318,7 +318,7 @@ LogFileName = "chronorunners";
 // EmulTurbo      = false;				//-- Start emulator in turbo mode (boolean)
 
 //-- Emulator extra parameters to be add to command-line (string). Emulator sotfware specific
-EmulExtraParam= `-script ${ToolsDir}script/openMSX/debugger_pvm.tcl`;
+// EmulExtraParam= `-script ${ToolsDir}script/openMSX/debugger_pvm.tcl`;
 
 //-------------------------------------------------------------------------------
 // Extension options
