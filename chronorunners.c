@@ -252,8 +252,11 @@ void SetActiveSegment(u8 segment) {
 // MEMORY DATA
 //=============================================================================
 
-// Tempo rimanente in 50mi di secondo
-u16 g_RemainingTime = 0;
+// Tempo rimanente. Separa le componenti in modo da non dover
+// effettuare divisioni per trovarle.
+u8 g_RemainingMinutes = 0;
+u8 g_RemainingSeconds = 0;
+u8 g_RemainingFS = 0;
 
 Pawn g_PlayerPawn;
 u8	 g_PlayerAction;
@@ -483,11 +486,11 @@ bool State_Initialize()
 	SetActiveSegment(0);
 
 	// Cinque minuti
-	g_RemainingTime = 5 * 60 * 50;
+	g_RemainingMinutes = 5;
 
 	Game_SetState(State_ChangeLevel);
 
-	return FALSE;
+	return TRUE;
 }
 
 void PlayerRestart() {
@@ -579,18 +582,12 @@ bool State_Game()
 	}
 
 	// Testi a video
-	if (g_RemainingTime % 50 != 0) {
-
-		u8 minutes = (g_RemainingTime / 50) / 60;
-		u8 seconds = (g_RemainingTime / 50) % 60;
-
-		PrintGFXNumber(minutes, 7, 0);
-		PrintGFXNumber(seconds, 10, 0);
+	if (g_RemainingFS == 50 - 1) {
+		PrintGFXNumber(g_RemainingMinutes, 7, 0);
+		PrintGFXNumber(g_RemainingSeconds, 10, 0);
 	}
 
 	SetActiveSegment(0);
-
-	g_RemainingTime--;
 
 	Pawn_SetAction(&g_PlayerPawn, g_PlayerAction);
 	Pawn_SetMovement(&g_PlayerPawn, g_DX, g_DY);
@@ -633,7 +630,7 @@ bool State_Game()
 			g_VelocityY = 75;
 			g_PlayerDying = TRUE;
 			Game_SetState(State_Death);
-			return FALSE;
+			return TRUE;
 		}
 	}
 
@@ -643,7 +640,7 @@ bool State_Game()
 	// Controlla se il giocatore ha raggiunto l'uscita
 	if (isPlayerAtExit()) {
 		Game_SetState(State_ChangeLevel);
-		return FALSE;
+		return TRUE;
 	}
 
 	Pawn_Draw(&g_PlayerPawn);
@@ -705,7 +702,6 @@ bool State_Death()
 	if (g_PlayerPawn.PositionY > 240) {
 		PlayerRestart();
 		Game_SetState(State_Game);
-		return FALSE;
 	}
 	return TRUE;
 }
@@ -750,6 +746,25 @@ bool State_Rewind()
 // MAIN LOOP
 //=============================================================================
 
+void InterruptHook() {
+	if (g_RemainingFS == 0) {
+		if (g_RemainingSeconds == 0) {
+			if (g_RemainingMinutes == 0) {
+				// Tempo esaurito
+				return;
+			} else {
+				g_RemainingMinutes--;
+			}
+			g_RemainingSeconds = 59;
+		} else {
+			g_RemainingSeconds--;
+		}
+		g_RemainingFS = 49;
+	} else {
+		g_RemainingFS--;
+	}
+}
+
 void main()
 {
 	DEBUG_INIT();
@@ -757,6 +772,7 @@ void main()
 	Bios_SetKeyClick(FALSE);
 
 	Game_SetState(State_Initialize);
+	Game_SetVSyncCallback(InterruptHook);
 	Game_Start(VDP_MODE_GRAPHIC2, FALSE);
 
 	Bios_Exit(0);
