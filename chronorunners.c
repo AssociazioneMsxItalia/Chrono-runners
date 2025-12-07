@@ -345,14 +345,15 @@ u8 rewind_tail;
 u8 rewind_count;
 
 void DrawRewindGauge() {
-	u8 tile;
-	for (u8 i = 1; i < 11; i++) {
-		if (g_PlayerRewindEnergy >= 25 * i)
-			tile = 45;
-		else
-			tile = 47;
-		VDP_Poke_GM2(i+1, 1, tile);
-	}
+	// La barra di rewind può essere grande fino a 8 slot, due cristalli
+	// per tipo.
+
+	u8 ntiles = g_PlayerRewindEnergy >> 5; // g_PlayerRewindEnergy / 32
+
+	if (ntiles != 0)
+		VDP_FillLayout_GM2(45, 3, 1, ntiles, 1);
+	if (ntiles != 8)
+		VDP_FillLayout_GM2(47, 3 + ntiles, 1, 8 - ntiles, 1);
 }
 
 //=============================================================================
