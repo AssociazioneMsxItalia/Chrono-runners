@@ -12,13 +12,11 @@
 #include "debug.h"
 
 #include "PawnData.h"
+#include "math_utils.h"
 
 //=============================================================================
 // MEMORY DATA
 //=============================================================================
-
-#define GRAVITY	5
-#define FORCE	75
 
 //=============================================================================
 // EXTERN MEMORY DATA
@@ -50,7 +48,7 @@ extern i8   g_EnemyDX;
 // PROTOTYPES
 //=============================================================================
 void UpdatePlayerInput();
-void UpdatePlayerGravity(u8 gravity, u8 force);
+void UpdatePlayerGravity();
 void UpdatePlayerMovement();
 void UpdatePlayerAction();
 
@@ -64,20 +62,19 @@ void PrintGFXNumber(u8 number, u8 x, u8 y);
 //=============================================================================
 // EXTERN PROTOTYPES
 //=============================================================================
-i16 abs(i16 a);
 
 //=============================================================================
 // FUNCTION
 //=============================================================================
 
 i8 GetDPos(i8* m) {
-	i8 rv = (*m) / 10;
+	i8 rv = sdiv((*m), 3);
 
-	while ((*m) >= 10)
-		(*m) -= 10;
+	while ((*m) >= 8)
+		(*m) -= 8;
 
-	while ((*m) <= -10)
-		(*m) += 10;
+	while ((*m) <= -8)
+		(*m) += 8;
 
 	return rv;
 }
@@ -100,19 +97,19 @@ void UpdatePlayerInput() {
 	}
 }
 
-void UpdatePlayerGravity(u8 gravity, u8 force) {
-	g_mDY -= g_VelocityY / 2;
+void UpdatePlayerGravity() {
+	g_mDY -= g_VelocityY;
 
-	g_VelocityY -= gravity;
-	if (g_VelocityY < -force)
-		g_VelocityY = -force;
+	g_VelocityY -= GRAVITY;
+	if (g_VelocityY < -FORCE)
+		g_VelocityY = -FORCE;
 }
 
 void UpdatePlayerMovement() {
 
 	g_PlayerMovingRight = g_PlayerMovingLeft = FALSE;
 
-	u8 x_incr = g_PlayerDamped ? 3 : 10;
+	u8 x_incr = g_PlayerDamped ? 2 : 8;
 
 	if (g_PlayerInputRight)
 	{
@@ -127,7 +124,7 @@ void UpdatePlayerMovement() {
 
 	if (g_PlayerJumping)
 	{
-		UpdatePlayerGravity(GRAVITY, FORCE);
+		UpdatePlayerGravity();
 	}
 	else if (g_PlayerInputUp)
 	{
@@ -135,8 +132,7 @@ void UpdatePlayerMovement() {
 		g_VelocityY = FORCE;
 	}
 
-	// Gli spostamenti sono espressi in decimi di pixel. In questo modo può
-	// rallentare fino alla velocità di 0.1 pixel per fotogramma
+	// Gli spostamenti sono espressi in ottavi di pixel
 	g_DX = GetDPos(&g_mDX);
 	g_DY = GetDPos(&g_mDY);
 }
@@ -187,9 +183,9 @@ void UpdateEnemyInput() {
 void UpdateEnemyMovement() {
 
 	if (g_EnemyMovingLeft) {
-		g_EnemymDX -= 3;
+		g_EnemymDX -= 2;
 	} else if (g_EnemyMovingRight) {
-		g_EnemymDX += 3;
+		g_EnemymDX += 2;
 	}
 
 	g_EnemyDX = GetDPos(&g_EnemymDX);

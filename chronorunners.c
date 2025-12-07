@@ -8,6 +8,7 @@
 
 #include "PawnData.h"
 #include "level_defs.h"
+#include "math_utils.h"
 
 //=============================================================================
 // DEFINES
@@ -221,7 +222,7 @@ extern void InitializeSprite();
 // SEGMENT 4, BANK 1
 //=============================================================================
 extern void UpdatePlayerInput();
-extern void UpdatePlayerGravity(u8 gravity, u8 force);
+extern void UpdatePlayerGravity();
 extern void UpdatePlayerMovement();
 extern void UpdatePlayerAction();
 extern void UpdateEnemyInput();
@@ -407,11 +408,6 @@ void ReinitPlayer(Pawn *pawn, Pawn_Sprite *spr_layers, u8 n_spr_layers, u8 x, u8
 	Pawn_SetPosition(pawn, x, y);
 }
 
-i16 abs(i16 a)
-{
-	return (a > 0) ? a : -a;
-}
-
 // Semplice rilevazione di collisioni a bounding box. Assume oggetti 16x16
 bool bboxCollide(u8 x1, u8 y1, u8 x2, u8 y2) {
 	if (abs((i16)x1 - x2) < 16 && abs((i16)y1 - y2) < 16)
@@ -442,7 +438,7 @@ void TakeKey() {
 }
 
 void TakeCrystal() {
-	g_PlayerMaxRewindEnergy += 60;
+	g_PlayerMaxRewindEnergy += 30;
 }
 
 void CheckPlayerOnDampers() {
@@ -633,7 +629,7 @@ bool State_Game()
 			// Effetto "morte" del giocatore.
 			g_mDX = 0;
 			g_mDY = 0;
-			g_VelocityY = 75;
+			g_VelocityY = FORCE;
 			g_PlayerDying = TRUE;
 			Game_SetState(State_Death);
 			return TRUE;
@@ -696,7 +692,7 @@ bool State_Game()
 bool State_Death()
 {
 	SetActiveSegment(4);
-	UpdatePlayerGravity(5, 75);
+	UpdatePlayerGravity();
 	g_DY = GetDPos(&g_mDY);
 	SetActiveSegment(0);
 

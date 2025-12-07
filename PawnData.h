@@ -1,5 +1,8 @@
 #pragma once
 
+#define GRAVITY	2
+#define FORCE	27
+
 // Actions id
 enum ANIM_ACTION_ID
 {
