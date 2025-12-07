@@ -471,6 +471,11 @@ bool isPlayerAtExit() {
 	return collide;
 }
 
+void PrintTime() {
+	PrintGFXNumber(g_RemainingMinutes, 7, 0);
+	PrintGFXNumber(g_RemainingSeconds, 10, 0);
+}
+
 //=============================================================================
 // STATES
 //=============================================================================
@@ -521,6 +526,7 @@ bool State_ChangeLevel()
 
 	SetActiveSegment(4);
 	PrintGFXText("TIME   '  \"", 2, 0);
+	PrintTime();
 	SetActiveSegment(0);
 
 	VDP_WriteLayout_GM2(lvl.layout, 0, 2, 32, 24);
@@ -583,9 +589,8 @@ bool State_Game()
 	}
 
 	// Testi a video
-	if (g_RemainingFS == 50 - 1) {
-		PrintGFXNumber(g_RemainingMinutes, 7, 0);
-		PrintGFXNumber(g_RemainingSeconds, 10, 0);
+	if (g_RemainingFS == 0) {
+		PrintTime();
 	}
 
 	SetActiveSegment(0);
