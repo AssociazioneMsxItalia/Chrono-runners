@@ -669,23 +669,26 @@ bool State_Game()
 		rewind_count++;
 	}
 
-	if (g_PlayerRewindEnergy < g_PlayerMaxRewindEnergy) {
-		g_PlayerRewindEnergy++;
+	u8 row8 = Keyboard_Read(8);
+	if (IS_KEY_PRESSED(row8, KEY_SPACE)) {
+		if (g_PlayerRewindEnergy > 1) {
+
+			// Sostituisce i colori dello sprite principale
+			ReinitPlayer(&g_PlayerPawn,
+							g_PlayerRewindLayers, numberof(g_PlayerRewindLayers),
+							x_rewind[rewind_head], y_rewind[rewind_head]);
+
+			// Entra in modalità rewind
+			Game_SetState(State_Rewind);
+			return TRUE;
+		}
+	} else {
+		if (g_PlayerRewindEnergy < g_PlayerMaxRewindEnergy) {
+			g_PlayerRewindEnergy++;
+		}
 	}
 
 	DrawRewindGauge();
-
-	u8 row8 = Keyboard_Read(8);
-	if (IS_KEY_PRESSED(row8, KEY_SPACE) && g_PlayerRewindEnergy > 1) {
-
-		// Sostituisce i colori dello sprite principale
-		ReinitPlayer(&g_PlayerPawn,
-			         g_PlayerRewindLayers, numberof(g_PlayerRewindLayers),
-					 x_rewind[rewind_head], y_rewind[rewind_head]);
-
-		// Entra in modalità rewind
-		Game_SetState(State_Rewind);
-	}
 
 	return TRUE;
 }
