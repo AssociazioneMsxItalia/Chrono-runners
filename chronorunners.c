@@ -438,13 +438,13 @@ void TakeKey() {
 }
 
 void TakeCrystal() {
-	g_PlayerMaxRewindEnergy += 30;
+	g_PlayerMaxRewindEnergy += 32;
 }
 
 void CheckPlayerOnDampers() {
 	g_PlayerDamped = FALSE;
-	u8 tx = (g_PlayerPawn.PositionX + 8) / 8;
-	u8 ty = (g_PlayerPawn.PositionY) / 8;
+	u8 tx = (g_PlayerPawn.PositionX + 8) >> 3;
+	u8 ty = (g_PlayerPawn.PositionY) >> 3;
 
 	// Controlla la tile sotto i piedi del personaggio
 	u8 tile = VDP_Peek_GM2(tx, ty + 2);
