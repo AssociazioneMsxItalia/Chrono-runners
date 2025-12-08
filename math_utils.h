@@ -1,4 +1,4 @@
-#include "msxgl.h"
+#include "core.h"
 
 static inline i16 abs(i16 a)
 {
