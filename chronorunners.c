@@ -534,7 +534,7 @@ bool State_ChangeLevel()
 		            g_KeyLayers, numberof(g_KeyLayers),
 					KEY_SPRITE_ID, g_KeyAnimActions);
 	Pawn_SetPosition(&g_KeyPawn,
-		             lvl.key_pos_x * 8, lvl.key_pos_y * 8);
+		             lvl.key_x * 8, lvl.key_y * 8);
 	g_KeyEnabled = TRUE;
 	Pawn_SetEnable(&g_KeyPawn, g_KeyEnabled);
 
