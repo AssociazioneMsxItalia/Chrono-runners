@@ -9,7 +9,7 @@
 
 // Per ora il player è visualizzato usando gli sprite 0 e 1
 #define PLAYER_SPRITE_ID 0
-#define PLAYER_PATTERN_OFFSET 0
+#define PLAYER_PATTERN_OFFSET (u8)0
 #define PLAYER_PATTERN_SIZE laySize * nLayers
 #define PLAYER_PATTERN_NUM 13
 #define PLAYER_PATTERN_TOTAL PLAYER_PATTERN_SIZE * PLAYER_PATTERN_NUM
