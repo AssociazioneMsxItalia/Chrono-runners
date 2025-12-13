@@ -8,18 +8,12 @@
 
 #include "PawnData.h"
 #include "level_defs.h"
+#include "sprite_defs.h"
 #include "math_utils.h"
 
 //=============================================================================
 // DEFINES
 //=============================================================================
-
-// Layer grandi 4 pattern
-#define laySize 4
-// Due layer per sprite
-#define nLayers 2
-// Dimensione sprite
-#define sprSize laySize * nLayers
 
 // Function prototypes
 bool State_Initialize();
@@ -31,11 +25,6 @@ bool State_ChangeLevel();
 //=============================================================================
 // READ-ONLY DATA
 //=============================================================================
-
-// Per ora il player è visualizzato usando gli sprite 0 e 1
-#define PLAYER_SPRITE_ID 0
-#define PLAYER_PATTERN_OFFSET 0
-#define PLAYER_PATTERN_SIZE laySize * nLayers
 
 // Player sprite layers
 const Pawn_Sprite g_PlayerLayers[] =
@@ -54,57 +43,57 @@ const Pawn_Sprite g_PlayerRewindLayers[] =
 // Idle animation frames
 const Pawn_Frame g_PlayerFramesIdle[] =
 {//   Pattern                                              Time  Function
-	{  0 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,    250,  NULL },
-	{ 11 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,     10,  NULL },
-	{ 12 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,     10,  NULL },
-	{ 11 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,     10,  NULL },
-	{ 12 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,     10,  NULL },
-	{ 11 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,     10,  NULL },
-	{ 12 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,     10,  NULL },
-	{ 11 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,     10,  NULL },
+	{ PLAYER_FRAME(0),	250,  NULL },
+	{ PLAYER_FRAME(11),  10,  NULL },
+	{ PLAYER_FRAME(12),  10,  NULL },
+	{ PLAYER_FRAME(11),  10,  NULL },
+	{ PLAYER_FRAME(12),  10,  NULL },
+	{ PLAYER_FRAME(11),  10,  NULL },
+	{ PLAYER_FRAME(12),  10,  NULL },
+	{ PLAYER_FRAME(11),  10,  NULL },
 };
 
 // Move animation frames
 const Pawn_Frame g_PlayerFramesMoveRight[] =
 {
-	{ 1 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,	6,	NULL },
-	{ 2 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,	6,	NULL },
-	{ 3 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,	6,	NULL },
+	{ PLAYER_FRAME(1),	6,	NULL },
+	{ PLAYER_FRAME(2),	6,	NULL },
+	{ PLAYER_FRAME(3),	6,	NULL },
 };
 
 const Pawn_Frame g_PlayerFramesMoveLeft[] =
 {
-	{ 4 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,	6,	NULL },
-	{ 5 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,	6,	NULL },
-	{ 6 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,	6,	NULL },
+	{ PLAYER_FRAME(4),	6,	NULL },
+	{ PLAYER_FRAME(5),	6,	NULL },
+	{ PLAYER_FRAME(6),	6,	NULL },
 };
 
 // Jump animation frames
 const Pawn_Frame g_PlayerFramesJumpRight[] =
 {
-	{ 3 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,	4,	NULL },
+	{ PLAYER_FRAME(3),	4,	NULL },
 };
 
 const Pawn_Frame g_PlayerFramesJumpLeft[] =
 {
-	{ 6 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,	4,	NULL },
+	{ PLAYER_FRAME(6),	4,	NULL },
 };
 
 // Fall animation frames
 const Pawn_Frame g_PlayerFramesFallRight[] =
 {
-	{ 1 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,	4,	NULL },
+	{ PLAYER_FRAME(1),	4,	NULL },
 };
 
 const Pawn_Frame g_PlayerFramesFallLeft[] =
 {
-	{ 4 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,	4,	NULL },
+	{ PLAYER_FRAME(4),	4,	NULL },
 };
 
 const Pawn_Frame g_PlayerFramesDeath[] =
 {
-	{  9 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,	10,	NULL },
-	{ 10 * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET,	10,	NULL },
+	{ PLAYER_FRAME(9),	10,	NULL },
+	{ PLAYER_FRAME(10),	10,	NULL },
 };
 
 // List of all player actions
@@ -120,10 +109,6 @@ const Pawn_Action g_AnimActions[] =
 	{ g_PlayerFramesDeath,     numberof(g_PlayerFramesDeath),     TRUE, TRUE },
 };
 
-// Per ora la chiave è visualizzata usando lo sprite 2
-#define KEY_SPRITE_ID 2
-#define KEY_PATTERN_OFFSET 13 * sprSize
-#define KEY_PATTERN_SIZE laySize
 
 // Key sprite layers
 const Pawn_Sprite g_KeyLayers[] =
@@ -134,8 +119,8 @@ const Pawn_Sprite g_KeyLayers[] =
 // Idle animation frames
 const Pawn_Frame g_KeyFramesIdle[] =
 {//   Pattern                                       Time Function
-	{ 0 * KEY_PATTERN_SIZE + KEY_PATTERN_OFFSET,          	20,  NULL },
-	{ 1 * KEY_PATTERN_SIZE + KEY_PATTERN_OFFSET,	20,  NULL },
+	{ KEY_FRAME(0),	 20,  NULL },
+	{ KEY_FRAME(1),	 20,  NULL },
 };
 
 // List of all key actions
@@ -144,9 +129,6 @@ const Pawn_Action g_KeyAnimActions[] =
 	{ g_KeyFramesIdle,   numberof(g_KeyFramesIdle),      TRUE, TRUE },
 };
 
-#define ENEMY_SPRITE_ID 3
-#define ENEMY_PATTERN_OFFSET 13 * sprSize + 2 * laySize
-#define ENEMY_PATTERN_SIZE laySize
 
 // Enemy sprite layers
 const Pawn_Sprite g_EnemyLayers[] =
@@ -156,25 +138,25 @@ const Pawn_Sprite g_EnemyLayers[] =
 
 const Pawn_Frame g_EnemyFramesIdle[] =
 {//   Pattern                                           Time Function
-	{ 2 * ENEMY_PATTERN_SIZE + ENEMY_PATTERN_OFFSET,	20,  NULL },
+	{ ENEMY_FRAME(2),	20,  NULL },
 };
 
 const Pawn_Frame g_EnemyFramesMoveLeft[] =
 {//   Pattern                                           Time Function
-	{ 0 * ENEMY_PATTERN_SIZE + ENEMY_PATTERN_OFFSET,	20,  NULL },
-	{ 1 * ENEMY_PATTERN_SIZE + ENEMY_PATTERN_OFFSET,	20,  NULL },
+	{ ENEMY_FRAME(0),	20,  NULL },
+	{ ENEMY_FRAME(1),	20,  NULL },
 };
 
 const Pawn_Frame g_EnemyFramesMoveRight[] =
 {//   Pattern                                           Time Function
-	{ 3 * ENEMY_PATTERN_SIZE + ENEMY_PATTERN_OFFSET,	20,  NULL },
-	{ 4 * ENEMY_PATTERN_SIZE + ENEMY_PATTERN_OFFSET,	20,  NULL },
+	{ ENEMY_FRAME(3),	20,  NULL },
+	{ ENEMY_FRAME(4),	20,  NULL },
 };
 
 const Pawn_Frame g_EnemyFramesShocked[] =
 {//   Pattern                                           Time Function
-	{ 5 * ENEMY_PATTERN_SIZE + ENEMY_PATTERN_OFFSET,	20,  NULL },
-	{ 6 * ENEMY_PATTERN_SIZE + ENEMY_PATTERN_OFFSET,	20,  NULL },
+	{ ENEMY_FRAME(5),	20,  NULL },
+	{ ENEMY_FRAME(6),	20,  NULL },
 };
 
 const Pawn_Action g_EnemyAnimActions[] =
@@ -185,11 +167,8 @@ const Pawn_Action g_EnemyAnimActions[] =
 	{ g_EnemyFramesShocked,		numberof(g_EnemyFramesShocked),		TRUE, TRUE },
 };
 
-#define CRYSTAL_SPRITE_ID 4
-#define CRYSTAL_PATTERN_OFFSET 13 * sprSize + 2 * laySize + 7 * laySize
-#define CRYSTAL_PATTERN_SIZE laySize
 
-// Enemy sprite layers
+// Crystal sprite layers
 const Pawn_Sprite g_CrystalLayers[] =
 {//   X  Y  DataOffset    Color              Flag
 	{ 0, 0, 0,            COLOR_MEDIUM_RED,     0 },
@@ -197,14 +176,50 @@ const Pawn_Sprite g_CrystalLayers[] =
 
 const Pawn_Frame g_CrystalFramesIdle[] =
 {//   Pattern                                           Time Function
-	{ 0 * CRYSTAL_PATTERN_SIZE + CRYSTAL_PATTERN_OFFSET,	16,  NULL },
-	{ 1 * CRYSTAL_PATTERN_SIZE + CRYSTAL_PATTERN_OFFSET,	16,  NULL },
+	{ CRYSTAL_FRAME(0),	16,  NULL },
+	{ CRYSTAL_FRAME(1),	16,  NULL },
 };
 
 // List of all crystal actions
 const Pawn_Action g_CrystalAnimActions[] =
 {//   Frames             Number                          Loop? Interrupt?
 	{ g_CrystalFramesIdle,   numberof(g_CrystalFramesIdle),      TRUE, TRUE },
+};
+
+
+// PlatformV sprite layers
+const Pawn_Sprite g_PlatformVLayers[] =
+{//   X  Y  DataOffset    Color              Flag
+	{ 0, 0, 0,            COLOR_BLACK,     0 },
+};
+
+const Pawn_Frame g_PlatformVFramesIdle[] =
+{//   Pattern                                           Time Function
+	{ PLATFORMV_FRAME(0),	16,  NULL },
+};
+
+// List of all PlatformV actions
+const Pawn_Action g_PlatformVAnimActions[] =
+{//   Frames             Number                          Loop? Interrupt?
+	{ g_PlatformVFramesIdle,   numberof(g_PlatformVFramesIdle),      TRUE, TRUE },
+};
+
+
+// PlatformH sprite layers
+const Pawn_Sprite g_PlatformHLayers[] =
+{//   X  Y  DataOffset    Color              Flag
+	{ 0, 0, 0,            COLOR_BLACK,     0 },
+};
+
+const Pawn_Frame g_PlatformHFramesIdle[] =
+{//   Pattern                                           Time Function
+	{ PLATFORMH_FRAME(0),	16,  NULL },
+};
+
+// List of all PlatformH actions
+const Pawn_Action g_PlatformHAnimActions[] =
+{//   Frames             Number                          Loop? Interrupt?
+	{ g_PlatformHFramesIdle,   numberof(g_PlatformHFramesIdle),      TRUE, TRUE },
 };
 
 //=============================================================================
@@ -292,6 +307,12 @@ i8	 g_EnemyDY = 0;
 
 Pawn g_CrystalPawn;
 bool g_CrystalEnabled;
+
+Pawn g_PlatformVPawn;
+bool g_PlatformVEnabled;
+
+Pawn g_PlatformHPawn;
+bool g_PlatformHEnabled;
 
 //=============================================================================
 // LEVELS

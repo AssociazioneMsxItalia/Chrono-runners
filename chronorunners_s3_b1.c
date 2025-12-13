@@ -8,18 +8,18 @@
 // INCLUDES
 //=============================================================================
 #include "msxgl.h"
+#include "sprite_defs.h"
 #include "content/sprite/player_sprt_layer.h"
 #include "content/sprite/key_sprt_layer.h"
 #include "content/sprite/enemy_sprt_layer.h"
 #include "content/sprite/crystal_sprt_layer.h"
+#include "content/sprite/platformv_sprt_layer.h"
+#include "content/sprite/platformh_sprt_layer.h"
 #include "content/tile/data_tile_gm2.h"
 
 //=============================================================================
 // DEFINE
 //=============================================================================
-#define laySize 4  // Layer grandi 4 pattern
-#define nLayers 2  // Due layer per sprite
-#define sprSize laySize * nLayers  // Dimensione sprite
 
 
 //=============================================================================
@@ -71,8 +71,10 @@ void InitializeSprite() {
 	// Initialize sprite
 	VDP_SetSpriteFlag(VDP_SPRITE_SIZE_16 | VDP_SPRITE_SCALE_1);
 
-	VDP_LoadSpritePattern(g_PlayerSprtLayer,                                         0, 13 * sprSize);
-	VDP_LoadSpritePattern(g_KeySprtLayer,                                 13 * sprSize,  2 * laySize);
-	VDP_LoadSpritePattern(g_EnemySprtLayer,                 13 * sprSize + 2 * laySize,  7 * laySize);
-	VDP_LoadSpritePattern(g_CrystalSprtLayer, 13 * sprSize + 2 * laySize + 7 * laySize,  2 * laySize);
+	VDP_LoadSpritePattern(g_PlayerSprtLayer, PLAYER_PATTERN_OFFSET, PLAYER_PATTERN_TOTAL);
+	VDP_LoadSpritePattern(g_KeySprtLayer, KEY_PATTERN_OFFSET, KEY_PATTERN_TOTAL);
+	VDP_LoadSpritePattern(g_EnemySprtLayer, ENEMY_PATTERN_OFFSET, ENEMY_PATTERN_TOTAL);
+	VDP_LoadSpritePattern(g_CrystalSprtLayer, CRYSTAL_PATTERN_OFFSET, CRYSTAL_PATTERN_TOTAL);
+	VDP_LoadSpritePattern(g_PlatformVSprtLayer, PLATFORMV_PATTERN_OFFSET, PLATFORMV_PATTERN_TOTAL);
+	VDP_LoadSpritePattern(g_PlatformHSprtLayer, PLATFORMH_PATTERN_OFFSET, PLATFORMH_PATTERN_TOTAL);
 }
