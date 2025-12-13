@@ -248,6 +248,8 @@ i8 GetDPos(i8* m);
 extern void PrintGFXText(c8 *text, u8 x, u8 y);
 extern void PrintGFXNumber(u8 number, u8 x, u8 y);
 
+extern struct Level g_Levels[];
+
 u8 g_PreviousSegment = 0;
 
 /**
@@ -444,8 +446,10 @@ bool doPawnsCollide(Pawn *p1, Pawn *p2) {
 void TakeKey() {
 	g_PlayerHasKey = TRUE;
 
+	SetActiveSegment(4);
 	u8 door_x = g_Levels[g_CurrentLevel].end_x;
 	u8 door_y = g_Levels[g_CurrentLevel].end_y;
+	SetActiveSegment(0);
 
 	// Luce verde sopra l'uscita
 	VDP_Poke_GM2(door_x, door_y - 1, 48);
@@ -480,8 +484,10 @@ bool isPlayerAtExit() {
 	if (!g_PlayerHasKey)
 		return FALSE;
 
+	SetActiveSegment(4);
 	u8 door_x = g_Levels[g_CurrentLevel].end_x;
 	u8 door_y = g_Levels[g_CurrentLevel].end_y;
+	SetActiveSegment(0);
 
 	bool collide = bboxCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY, door_x * 8, door_y * 8);
 
@@ -517,13 +523,15 @@ bool State_Initialize()
 }
 
 void PlayerRestart() {
-	struct Level lvl;
-	lvl = g_Levels[g_CurrentLevel];
+	SetActiveSegment(4);
+	u8 start_x = g_Levels[g_CurrentLevel].start_x;
+	u8 start_y = g_Levels[g_CurrentLevel].start_y;
+	SetActiveSegment(0);
 
 	// Init player pawn
 	ReinitPlayer(&g_PlayerPawn,
 		         g_PlayerLayers, numberof(g_PlayerLayers),
-				 lvl.start_x * 8, lvl.start_y * 8);
+				 start_x * 8, start_y * 8);
 
 	g_PlayerDying = FALSE;
 
@@ -532,22 +540,27 @@ void PlayerRestart() {
 
 bool State_ChangeLevel()
 {
+	SetActiveSegment(4);
+
 	// Passa al livello successivo
 	g_CurrentLevel = g_NextLevel;
 	g_NextLevel = g_Levels[g_CurrentLevel].next_level - 1;
 
-	struct Level lvl;
-	lvl = g_Levels[g_CurrentLevel];
+	u8 key_x = g_Levels[g_CurrentLevel].key_x;
+	u8 key_y = g_Levels[g_CurrentLevel].key_y;
+	u8 enemy_x = g_Levels[g_CurrentLevel].enemy_x;
+	u8 enemy_y = g_Levels[g_CurrentLevel].enemy_y;
+	u8 crystal_x = g_Levels[g_CurrentLevel].crystal_x;
+	u8 crystal_y = g_Levels[g_CurrentLevel].crystal_y;
 
-	g_PlayerHasKey = FALSE;
-
-	SetActiveSegment(4);
 	PrintGFXText("TIME   '  \"", 2, 0);
 	PrintTime();
+
+	VDP_WriteLayout_GM2(g_Levels[g_CurrentLevel].layout, 0, 2, 32, 24);
+
 	SetActiveSegment(0);
 
-	VDP_WriteLayout_GM2(lvl.layout, 0, 2, 32, 24);
-
+	g_PlayerHasKey = FALSE;
 	PlayerRestart();
 
 	// Init key pawn
@@ -555,7 +568,7 @@ bool State_ChangeLevel()
 		            g_KeyLayers, numberof(g_KeyLayers),
 					KEY_SPRITE_ID, g_KeyAnimActions);
 	Pawn_SetPosition(&g_KeyPawn,
-		             lvl.key_x * 8, lvl.key_y * 8);
+		             key_x * 8, key_y * 8);
 	g_KeyEnabled = TRUE;
 	Pawn_SetEnable(&g_KeyPawn, g_KeyEnabled);
 
@@ -565,9 +578,9 @@ bool State_ChangeLevel()
 					ENEMY_SPRITE_ID, g_EnemyAnimActions);
 	Pawn_InitializePhysics(&g_EnemyPawn, EnemyPhysicsEvent, EnemyPhysicsCollision, 16, 16);
 	Pawn_SetPosition(&g_EnemyPawn,
-		             lvl.enemy_x * 8, lvl.enemy_y * 8);
+		             enemy_x * 8, enemy_y * 8);
 
-	if (lvl.enemy_x == 0 && lvl.enemy_y == 0)
+	if (enemy_x == 0 && enemy_y == 0)
 		g_EnemyEnabled = FALSE;
 	else
 		g_EnemyEnabled = TRUE;
@@ -578,9 +591,9 @@ bool State_ChangeLevel()
 		            g_CrystalLayers, numberof(g_CrystalLayers),
 					CRYSTAL_SPRITE_ID, g_CrystalAnimActions);
 	Pawn_SetPosition(&g_CrystalPawn,
-		             lvl.crystal_x * 8, lvl.crystal_y * 8);
+		             crystal_x * 8, crystal_y * 8);
 
-	if (lvl.crystal_x == 0 && lvl.crystal_y == 0)
+	if (crystal_x == 0 && crystal_y == 0)
 		g_CrystalEnabled = FALSE;
 	else
 		g_CrystalEnabled = TRUE;

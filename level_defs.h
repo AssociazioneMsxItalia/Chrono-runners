@@ -1,4 +1,5 @@
 #pragma once
+
 #include "core.h"
 
 struct Level
@@ -16,5 +17,3 @@ struct Level
     u8 next_level;
     u8 *layout;
 };
-
-extern struct Level g_Levels[];
