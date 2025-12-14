@@ -32,16 +32,17 @@
  * @return void
  */
 void LoadPatternAndColor() {
-	// XXX: bug in MSXgl?
-	//VDP_LoadPattern_GM2(g_DataMapGM2_Patterns, 0, 0);
-	//VDP_LoadColor_GM2(g_DataMapGM2_Colors, 0, 0);
-
+#if defined(FALSE)
+	VDP_LoadColor_GM2(g_DataMapGM2_Colors, 0, 0);
+	VDP_LoadPattern_GM2(g_DataMapGM2_Patterns, 0, 0);
+#else
 	VDP_WriteVRAM(g_DataMapGM2_Patterns, 0x0, 0, 256*8);
 	VDP_WriteVRAM(g_DataMapGM2_Patterns, 0x800, 0, 256*8);
 	VDP_WriteVRAM(g_DataMapGM2_Patterns, 0x1000, 0, 256*8);
 	VDP_WriteVRAM(g_DataMapGM2_Colors, 0x2000, 0, 256*8);
 	VDP_WriteVRAM(g_DataMapGM2_Colors, 0x2800, 0, 256*8);
 	VDP_WriteVRAM(g_DataMapGM2_Colors, 0x3000, 0, 256*8);
+#endif
 }
 
 /**
