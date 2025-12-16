@@ -475,8 +475,8 @@ bool State_Initialize()
 
 	SetActiveSegment(0);
 
-	// Cinque minuti
-	g_RemainingMinutes = 5;
+	// Imposta tempo iniziale
+	g_RemainingMinutes = 60;
 
 	Game_SetState(State_ChangeLevel);
 
