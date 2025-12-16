@@ -336,9 +336,9 @@ void DrawRewindGauge() {
 	u8 ntiles = g_PlayerRewindEnergy >> 5; // g_PlayerRewindEnergy / 32
 
 	if (ntiles != 0)
-		VDP_FillLayout_GM2(45, 3, 1, ntiles, 1);
+		VDP_FillLayout_GM2(45, 21, 0, ntiles, 1);
 	if (ntiles != 8)
-		VDP_FillLayout_GM2(47, 3 + ntiles, 1, 8 - ntiles, 1);
+		VDP_FillLayout_GM2(47, 21 + ntiles, 0, 8 - ntiles, 1);
 }
 
 //=============================================================================
