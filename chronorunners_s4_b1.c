@@ -14,6 +14,7 @@
 #include "PawnData.h"
 #include "math_utils.h"
 #include "level_defs.h"
+#include "sprite_defs.h"
 
 //=============================================================================
 // LEVELS
@@ -23,6 +24,23 @@
 #include "content/levels/level02.h"
 #include "content/levels/level03.h"
 
+struct Platform plat2[] = {
+	{1*8,  9*8,  // pos_x pos_y
+	    0,   1,  // dir_x dir_y
+	 1*8,  6*8,  // min_x min_y
+     1*8, 16*8}, // max_x max_y
+
+	{15*8, 12*8,
+	   -1,    0,
+	  7*8, 12*8,
+     24*8, 12*8},
+
+	{29*8, 19*8,
+	 0, -1,
+	 29*8, 12*8,
+     29*8, 21*8},
+};
+
 struct Level g_Levels[] =
 {
     {
@@ -31,7 +49,9 @@ struct Level g_Levels[] =
              2, 4, // key_x key_y
              0, 0, // enemy_x enemy_y
              0, 0, // crystal_x crystal_y
-                2, // next_level
+                3, // next_level
+				0,
+			 NULL,
         g_Level01, // layout
     },
     {
@@ -40,7 +60,9 @@ struct Level g_Levels[] =
            15, 14,
              0, 0,
              0, 0,
-                3,
+                1,
+				3,
+			plat2,
         g_Level02,
     },
     {
@@ -49,7 +71,9 @@ struct Level g_Levels[] =
             22, 4,
            15, 19,
            16, 11,
-                1,
+                2,
+				0,
+			 NULL,
         g_Level03,
     },
 };
@@ -62,6 +86,10 @@ struct Level g_Levels[] =
 //=============================================================================
 // EXTERN MEMORY DATA
 //=============================================================================
+
+extern u8 g_CurrentLevel;
+
+extern Pawn g_PlayerPawn;
 extern u8	g_PlayerAction;
 extern bool g_PlayerMovingRight;
 extern bool g_PlayerMovingLeft;
@@ -99,6 +127,8 @@ void UpdateEnemyAction();
 
 void PrintGFXText(c8 *text, u8 x, u8 y);
 void PrintGFXNumber(u8 number, u8 x, u8 y);
+
+void DrawPlatforms();
 
 //=============================================================================
 // EXTERN PROTOTYPES
@@ -278,4 +308,14 @@ void PrintGFXNumber(u8 number, u8 x, u8 y) {
 	u8 tile1 = (number % 10) + 1;
 	VDP_Poke_GM2(x, y, tile10);
 	VDP_Poke_GM2(x+1, y, tile1);
+}
+
+void DrawPlatforms() {
+	u8 np = g_Levels[g_CurrentLevel].num_platforms;
+	struct Platform *platforms = g_Levels[g_CurrentLevel].platforms;
+
+	for (u8 p=0; p < np; p++) {
+		u8 index = PLATFORM_SPRITE_BASE_ID + p;
+		u8 shape = platforms[p].dir_x != 0 ? PLATFORMH_PATTERN_OFFSET : PLATFORMV_PATTERN_OFFSET;
+		VDP_SetSpriteSM1(index, platforms[p].pos_x, platforms[p].pos_y, shape, COLOR_BLACK);	}
 }

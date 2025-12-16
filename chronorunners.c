@@ -187,41 +187,6 @@ const Pawn_Action g_CrystalAnimActions[] =
 };
 
 
-// PlatformV sprite layers
-const Pawn_Sprite g_PlatformVLayers[] =
-{//   X  Y  DataOffset    Color              Flag
-	{ 0, 0, 0,            COLOR_BLACK,     0 },
-};
-
-const Pawn_Frame g_PlatformVFramesIdle[] =
-{//   Pattern                                           Time Function
-	{ PLATFORMV_FRAME(0),	16,  NULL },
-};
-
-// List of all PlatformV actions
-const Pawn_Action g_PlatformVAnimActions[] =
-{//   Frames             Number                          Loop? Interrupt?
-	{ g_PlatformVFramesIdle,   numberof(g_PlatformVFramesIdle),      TRUE, TRUE },
-};
-
-
-// PlatformH sprite layers
-const Pawn_Sprite g_PlatformHLayers[] =
-{//   X  Y  DataOffset    Color              Flag
-	{ 0, 0, 0,            COLOR_BLACK,     0 },
-};
-
-const Pawn_Frame g_PlatformHFramesIdle[] =
-{//   Pattern                                           Time Function
-	{ PLATFORMH_FRAME(0),	16,  NULL },
-};
-
-// List of all PlatformH actions
-const Pawn_Action g_PlatformHAnimActions[] =
-{//   Frames             Number                          Loop? Interrupt?
-	{ g_PlatformHFramesIdle,   numberof(g_PlatformHFramesIdle),      TRUE, TRUE },
-};
-
 //=============================================================================
 // SEGMENT 3, BANK 1
 //=============================================================================
@@ -247,6 +212,8 @@ i8 GetDPos(i8* m);
 
 extern void PrintGFXText(c8 *text, u8 x, u8 y);
 extern void PrintGFXNumber(u8 number, u8 x, u8 y);
+
+extern void DrawPlatforms();
 
 extern struct Level g_Levels[];
 
@@ -309,12 +276,6 @@ i8	 g_EnemyDY = 0;
 
 Pawn g_CrystalPawn;
 bool g_CrystalEnabled;
-
-Pawn g_PlatformVPawn;
-bool g_PlatformVEnabled;
-
-Pawn g_PlatformHPawn;
-bool g_PlatformHEnabled;
 
 //=============================================================================
 // LEVELS
@@ -622,6 +583,8 @@ bool State_Game()
 	if (g_RemainingFS == 0) {
 		PrintTime();
 	}
+
+	DrawPlatforms();
 
 	SetActiveSegment(0);
 

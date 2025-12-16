@@ -1,6 +1,15 @@
 #pragma once
 
-#include "core.h"
+struct Platform {
+    u8 pos_x;
+    u8 pos_y;
+    u8 dir_x;
+    u8 dir_y;
+    u8 min_x;
+    u8 min_y;
+    u8 max_x;
+    u8 max_y;
+};
 
 struct Level
 {
@@ -15,5 +24,7 @@ struct Level
     u8 crystal_x;
     u8 crystal_y;
     u8 next_level;
+    u8 num_platforms;
+    struct Platform *platforms;
     u8 *layout;
 };
