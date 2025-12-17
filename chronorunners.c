@@ -213,6 +213,9 @@ i8 GetDPos(i8* m);
 extern void PrintGFXText(c8 *text, u8 x, u8 y);
 extern void PrintGFXNumber(u8 number, u8 x, u8 y);
 
+extern i8 isPlayerOnPlatform();
+
+extern void UpdatePlatforms();
 extern void DrawPlatforms();
 
 extern struct Level g_Levels[];
@@ -282,7 +285,7 @@ bool g_CrystalEnabled;
 //=============================================================================
 
 u8 g_CurrentLevel = 0;
-u8 g_NextLevel = 0;
+u8 g_NextLevel = 1;
 
 //=============================================================================
 // REWIND DATA
@@ -450,9 +453,7 @@ bool isPlayerAtExit() {
 	u8 door_y = g_Levels[g_CurrentLevel].end_y;
 	SetActiveSegment(0);
 
-	bool collide = bboxCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY, door_x * 8, door_y * 8);
-
-	return collide;
+	return bboxCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY, door_x * 8, door_y * 8);
 }
 
 void PrintTime() {
@@ -519,6 +520,10 @@ bool State_ChangeLevel()
 
 	VDP_WriteLayout_GM2(g_Levels[g_CurrentLevel].layout, 0, 2, 32, 24);
 
+	// Disabilita gli sprite piattaforma. A riabilitarli se servono pensa
+	// la State_Game
+	VDP_DisableSpritesFrom(PLATFORM_SPRITE_BASE_ID);
+
 	SetActiveSegment(0);
 
 	g_PlayerHasKey = FALSE;
@@ -584,7 +589,7 @@ bool State_Game()
 		PrintTime();
 	}
 
-	DrawPlatforms();
+	UpdatePlatforms();
 
 	SetActiveSegment(0);
 
@@ -641,6 +646,21 @@ bool State_Game()
 		Game_SetState(State_ChangeLevel);
 		return TRUE;
 	}
+
+	// Controlla se il giocatore è atterrato su una piattaforma mobile. Nel caso,
+	// tiene conto anche dello spostamento sull'asse X
+	SetActiveSegment(4);
+	i8 p = isPlayerOnPlatform();
+	if (p != -1) {
+		struct Platform *platform = &g_Levels[g_CurrentLevel].platforms[p];
+		g_PlayerPawn.PositionX += platform->dir_x;
+		g_PlayerPawn.PositionY = platform->pos_y - 16;
+		g_PlayerJumping = FALSE;
+	}
+
+	DrawPlatforms();
+
+	SetActiveSegment(0);
 
 	Pawn_Draw(&g_PlayerPawn);
 	Pawn_Draw(&g_KeyPawn);

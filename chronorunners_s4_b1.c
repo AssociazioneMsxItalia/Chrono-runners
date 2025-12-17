@@ -25,19 +25,19 @@
 #include "content/levels/level03.h"
 
 struct Platform plat2[] = {
-	{1*8,  9*8,  // pos_x pos_y
-	    0,   1,  // dir_x dir_y
-	 1*8,  6*8,  // min_x min_y
+    {1*8,  9*8,  // pos_x pos_y
+       0,    1,  // dir_x dir_y
+     1*8,  6*8,  // min_x min_y
      1*8, 16*8}, // max_x max_y
 
-	{15*8, 12*8,
-	   -1,    0,
-	  7*8, 12*8,
-     24*8, 12*8},
+    {15*8, 12*8,
+       -1,    0,
+      6*8, 12*8,
+     23*8, 12*8},
 
-	{29*8, 19*8,
-	 0, -1,
-	 29*8, 12*8,
+    {29*8, 19*8,
+        0,   -1,
+     29*8, 12*8,
      29*8, 21*8},
 };
 
@@ -129,6 +129,7 @@ void PrintGFXText(c8 *text, u8 x, u8 y);
 void PrintGFXNumber(u8 number, u8 x, u8 y);
 
 void DrawPlatforms();
+i8 isPlayerOnPlatform();
 
 //=============================================================================
 // EXTERN PROTOTYPES
@@ -308,6 +309,45 @@ void PrintGFXNumber(u8 number, u8 x, u8 y) {
 	u8 tile1 = (number % 10) + 1;
 	VDP_Poke_GM2(x, y, tile10);
 	VDP_Poke_GM2(x+1, y, tile1);
+}
+
+i8 isPlayerOnPlatform() {
+	u8 np = g_Levels[g_CurrentLevel].num_platforms;
+	struct Platform *platforms = g_Levels[g_CurrentLevel].platforms;
+
+	for (u8 p=0; p < np; p++) {
+		bool in_x = g_PlayerPawn.PositionX > platforms[p].pos_x - 16
+		         && g_PlayerPawn.PositionX < platforms[p].pos_x + 16;
+
+		bool in_y = g_PlayerPawn.PositionY > platforms[p].pos_y - 16
+		         && g_PlayerPawn.PositionY < platforms[p].pos_y;
+
+		if (in_x && in_y)
+		{
+			return p;
+		}
+	}
+
+	return -1;
+}
+
+void UpdatePlatforms() {
+	u8 np = g_Levels[g_CurrentLevel].num_platforms;
+	struct Platform *platforms = g_Levels[g_CurrentLevel].platforms;
+
+	for (u8 p=0; p < np; p++) {
+		struct Platform *plat = &platforms[p];
+
+		plat->pos_x += plat->dir_x;
+		if (plat->pos_x == plat->max_x || plat->pos_x == plat->min_x) {
+			plat->dir_x = (-plat->dir_x);
+		}
+
+		plat->pos_y += plat->dir_y;
+		if (plat->pos_y == plat->max_y || plat->pos_y == plat->min_y) {
+			plat->dir_y = (-plat->dir_y);
+		}
+	}
 }
 
 void DrawPlatforms() {
