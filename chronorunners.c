@@ -653,7 +653,9 @@ bool State_Game()
 	i8 p = isPlayerOnPlatform();
 	if (p != -1) {
 		struct Platform *platform = &g_Levels[g_CurrentLevel].platforms[p];
-		g_PlayerPawn.PositionX += platform->dir_x;
+		// XXX: in teoria dovrebbe bastare aggiungere dir_x senza moltiplicare
+		// per due...
+		g_PlayerPawn.PositionX += platform->dir_x * 2;
 		g_PlayerPawn.PositionY = platform->pos_y - 16;
 		g_PlayerJumping = FALSE;
 	}
