@@ -3,8 +3,8 @@
 struct Platform {
     u8 pos_x;
     u8 pos_y;
-    u8 dir_x;
-    u8 dir_y;
+    i8 dir_x;
+    i8 dir_y;
     u8 min_x;
     u8 min_y;
     u8 max_x;

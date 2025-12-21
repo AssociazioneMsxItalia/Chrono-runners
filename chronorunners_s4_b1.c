@@ -23,58 +23,185 @@
 #include "content/levels/level01.h"
 #include "content/levels/level02.h"
 #include "content/levels/level03.h"
+#include "content/levels/level04.h"
+#include "content/levels/level05.h"
+#include "content/levels/level06.h"
+#include "content/levels/level07.h"
+#include "content/levels/level08.h"
 
-struct Platform plat2[] = {
-    {1*8,  9*8,  // pos_x pos_y
+struct Platform plat1[] = {
+   {23*8,  6*8,  // pos_x pos_y
        0,    1,  // dir_x dir_y
-     1*8,  6*8,  // min_x min_y
-     1*8, 16*8}, // max_x max_y
+    23*8,  6*8,  // min_x min_y
+    23*8, 21*8}, // max_x max_y
+};
 
-    {15*8, 12*8,
-       -1,    0,
-      6*8, 12*8,
-     23*8, 12*8},
+struct Platform plat3[] = {
+   {23*8, 13*8,  // pos_x pos_y
+      -1,    0,  // dir_x dir_y
+     7*8, 11*8,  // min_x min_y
+    24*8, 11*8}, // max_x max_y
 
-    {29*8, 19*8,
-        0,   -1,
-     29*8, 12*8,
-     29*8, 21*8},
+   {6*8,  19*8,  // pos_x pos_y
+       1,    0,  // dir_x dir_y
+     1*8, 19*8,  // min_x min_y
+    11*8, 19*8}, // max_x max_y
+
+   {24*8, 19*8,  // pos_x pos_y
+      -1,    0,  // dir_x dir_y
+    19*8, 19*8,  // min_x min_y
+    30*8, 19*8}, // max_x max_y
+};
+
+struct Platform plat4[] = {
+   {1*8,  7*8,  // pos_x pos_y
+      0,    1,  // dir_x dir_y
+    1*8,  5*8,  // min_x min_y
+    1*8, 18*8}, // max_x max_y
+
+   {29*8, 16*8,  // pos_x pos_y
+       0,   -1,  // dir_x dir_y
+    29*8,  5*8,  // min_x min_y
+    29*8, 18*8}, // max_x max_y
+};
+
+struct Platform plat5[] = {
+   {8*8,  20*8,  // pos_x pos_y
+      0,    -1,  // dir_x dir_y
+    8*8,  11*8,  // min_x min_y
+    8*8,  21*8}, // max_x max_y
+
+   {12*8, 15*8,  // pos_x pos_y
+      0,    -1,  // dir_x dir_y
+    12*8, 6*8,  // min_x min_y
+    12*8, 16*8}, // max_x max_y
+
+   {18*8, 6*8,  // pos_x pos_y
+      0,    1,  // dir_x dir_y
+     18*8, 6*8,  // min_x min_y
+     18*8, 16*8}, // max_x max_y
+
+	{22*8, 11*8,  // pos_x pos_y
+      0,    1,  // dir_x dir_y
+     22*8, 9*8,  // min_x min_y
+     22*8, 21*8}, // max_x max_y
+};
+
+struct Platform plat6[] = {
+   {29*8,  8*8,  // pos_x pos_y
+       0,    1,  // dir_x dir_y
+    29*8,  7*8,  // min_x min_y
+    29*8, 14*8}, // max_x max_y
+};
+
+struct Platform plat7[] = {
+   {11*8, 8*8,  // pos_x pos_y
+      0,    1,  // dir_x dir_y
+    11*8, 8*8,  // min_x min_y
+    11*8, 17*8}, // max_x max_y
+
+   {19*8,  20*8,  // pos_x pos_y
+       0,    -1,  // dir_x dir_y
+    19*8,  9*8,  // min_x min_y
+    19*8,  21*8}, // max_x max_y
+};
+
+struct Platform plat8[] = {
+   {15*8, 19*8,  // pos_x pos_y
+       0,   -1,  // dir_x dir_y
+    15*8,  8*8,  // min_x min_y
+    15*8, 20*8}, // max_x max_y
 };
 
 struct Level g_Levels[] =
 {
     {
-            1, 19, // start_x start_y
-           29, 19, // end_x end_y
-             2, 4, // key_x key_y
+            1,  4, // start_x start_y
+            1, 20, // end_x end_y
+           27, 19, // key_x key_y
              0, 0, // enemy_x enemy_y
              0, 0, // crystal_x crystal_y
-                3, // next_level
-				0,
-			 NULL,
+                2, // next_level
+				1, // num_platforms
+			plat1, // platforms
         g_Level01, // layout
     },
     {
-            1, 19,
-            29, 4,
-           15, 14,
-             0, 0,
-             0, 0,
-                1,
-				3,
-			plat2,
+           29,  6,
+            9, 13,
+           29, 11,
+            0,  0,
+            2, 11,
+                3,
+				0,
+			 NULL,
         g_Level02,
     },
     {
-             1, 4,
-            1, 19,
-            22, 4,
-           15, 19,
-           16, 11,
-                2,
-				0,
-			 NULL,
+             9, 8,
+           21,  8,
+           15, 17,
+            0,  0,
+            0,  0,
+                4,
+				3,
+		    plat3,
         g_Level03,
+    },
+	{
+            2, 21,
+           28, 21,
+           15, 11,
+            0,  0,
+           15, 21,
+                5,
+				2,
+		    plat4,
+        g_Level04,
+    },
+	{
+            2,  4,
+           28,  4,
+           15, 20,
+            0,  0,
+            0,  0,
+                6,
+				4,
+		    plat5,
+        g_Level05,
+    },
+	{
+            1, 20,
+           29, 20,
+            1,  3,
+            0,  0,
+            13, 3,
+                7,
+				1,
+		    plat6,
+        g_Level06,
+    },
+	{
+            1, 10,
+           29, 10,
+           15, 21,
+            0,  0,
+            0,  0,
+                8,
+				2,
+		    plat7,
+        g_Level07,
+    },
+	{
+            2, 20,
+           15,  8,
+           15, 14,
+            0,  0,
+           28, 20,
+                1,
+				1,
+		    plat8,
+        g_Level08,
     },
 };
 
@@ -94,7 +221,6 @@ extern u8	g_PlayerAction;
 extern bool g_PlayerMovingRight;
 extern bool g_PlayerMovingLeft;
 extern bool g_PlayerJumping;
-extern bool g_PlayerDamped;
 extern bool g_PlayerDying;
 extern bool g_PlayerInputRight;
 extern bool g_PlayerInputLeft;
@@ -181,7 +307,7 @@ void UpdatePlayerMovement() {
 
 	g_PlayerMovingRight = g_PlayerMovingLeft = FALSE;
 
-	u8 x_incr = g_PlayerDamped ? 2 : 8;
+	u8 x_incr = 8;
 
 	if (g_PlayerInputRight)
 	{
@@ -286,15 +412,23 @@ void PrintGFXText(c8 *text, u8 x, u8 y) {
 		}
 		// "
 		else if (c == 34) {
-			tile = 39;
+			tile = 40;
 		}
 		// '
 		else if (c == 39) {
 			tile = 38;
 		}
+		// ,
+		else if (c == 44) {
+			tile = 39;
+		}
 		// .
 		else if (c == 46) {
 			tile = 37;
+		}
+		// :
+		else if (c == 58) {
+			tile = 41;
 		}
 
 		VDP_Poke_GM2(x, y, tile);

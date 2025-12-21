@@ -42,15 +42,15 @@ const Pawn_Sprite g_PlayerRewindLayers[] =
 
 // Idle animation frames
 const Pawn_Frame g_PlayerFramesIdle[] =
-{//   Pattern                                              Time  Function
+{//   Pattern           Time  Function
 	{ PLAYER_FRAME(0),	250,  NULL },
-	{ PLAYER_FRAME(11),  10,  NULL },
-	{ PLAYER_FRAME(12),  10,  NULL },
-	{ PLAYER_FRAME(11),  10,  NULL },
-	{ PLAYER_FRAME(12),  10,  NULL },
-	{ PLAYER_FRAME(11),  10,  NULL },
-	{ PLAYER_FRAME(12),  10,  NULL },
-	{ PLAYER_FRAME(11),  10,  NULL },
+	{ PLAYER_FRAME(9),   10,  NULL },
+	{ PLAYER_FRAME(10),  10,  NULL },
+	{ PLAYER_FRAME(9),   10,  NULL },
+	{ PLAYER_FRAME(10),  10,  NULL },
+	{ PLAYER_FRAME(9),   10,  NULL },
+	{ PLAYER_FRAME(10),  10,  NULL },
+	{ PLAYER_FRAME(9),   10,  NULL },
 };
 
 // Move animation frames
@@ -92,8 +92,8 @@ const Pawn_Frame g_PlayerFramesFallLeft[] =
 
 const Pawn_Frame g_PlayerFramesDeath[] =
 {
-	{ PLAYER_FRAME(9),	10,	NULL },
-	{ PLAYER_FRAME(10),	10,	NULL },
+	{ PLAYER_FRAME(7),	10,	NULL },
+	{ PLAYER_FRAME(8),	10,	NULL },
 };
 
 // List of all player actions
@@ -118,7 +118,7 @@ const Pawn_Sprite g_KeyLayers[] =
 
 // Idle animation frames
 const Pawn_Frame g_KeyFramesIdle[] =
-{//   Pattern                                       Time Function
+{//   Pattern        Time Function
 	{ KEY_FRAME(0),	 20,  NULL },
 	{ KEY_FRAME(1),	 20,  NULL },
 };
@@ -137,24 +137,24 @@ const Pawn_Sprite g_EnemyLayers[] =
 };
 
 const Pawn_Frame g_EnemyFramesIdle[] =
-{//   Pattern                                           Time Function
+{//   Pattern           Time Function
 	{ ENEMY_FRAME(2),	20,  NULL },
 };
 
 const Pawn_Frame g_EnemyFramesMoveLeft[] =
-{//   Pattern                                           Time Function
+{//   Pattern           Time Function
 	{ ENEMY_FRAME(0),	20,  NULL },
 	{ ENEMY_FRAME(1),	20,  NULL },
 };
 
 const Pawn_Frame g_EnemyFramesMoveRight[] =
-{//   Pattern                                           Time Function
+{//   Pattern           Time Function
 	{ ENEMY_FRAME(3),	20,  NULL },
 	{ ENEMY_FRAME(4),	20,  NULL },
 };
 
 const Pawn_Frame g_EnemyFramesShocked[] =
-{//   Pattern                                           Time Function
+{//   Pattern           Time Function
 	{ ENEMY_FRAME(5),	20,  NULL },
 	{ ENEMY_FRAME(6),	20,  NULL },
 };
@@ -175,7 +175,7 @@ const Pawn_Sprite g_CrystalLayers[] =
 };
 
 const Pawn_Frame g_CrystalFramesIdle[] =
-{//   Pattern                                           Time Function
+{//   Pattern           Time Function
 	{ CRYSTAL_FRAME(0),	16,  NULL },
 	{ CRYSTAL_FRAME(1),	16,  NULL },
 };
@@ -251,7 +251,6 @@ u8	 g_PlayerAction;
 bool g_PlayerMovingRight = FALSE;
 bool g_PlayerMovingLeft = FALSE;
 bool g_PlayerJumping = FALSE;
-bool g_PlayerDamped = FALSE;
 bool g_PlayerDying = FALSE;
 bool g_PlayerInputRight = FALSE;
 bool g_PlayerInputLeft = FALSE;
@@ -285,7 +284,7 @@ bool g_CrystalEnabled;
 //=============================================================================
 
 u8 g_CurrentLevel = 0;
-u8 g_NextLevel = 1;
+u8 g_NextLevel = 0;
 
 //=============================================================================
 // REWIND DATA
@@ -371,7 +370,9 @@ void PlayerPhysicsEvent(u8 event, u8 tile)
 // Collision callback
 bool PlayerPhysicsCollision(u8 tile)
 {
-	return (tile >= 208 && tile <= 210) || (tile >= 224);
+	// XXX: da rivedere coi livelli messi
+	return (tile >= 196 && tile <= 217)
+		|| (tile >= 224);
 }
 
 void EnemyPhysicsEvent(u8 event, u8 tile)
@@ -428,20 +429,6 @@ void TakeKey() {
 
 void TakeCrystal() {
 	g_PlayerMaxRewindEnergy += 32;
-}
-
-void CheckPlayerOnDampers() {
-	g_PlayerDamped = FALSE;
-	u8 tx = (g_PlayerPawn.PositionX + 8) >> 3;
-	u8 ty = (g_PlayerPawn.PositionY) >> 3;
-
-	// Controlla la tile sotto i piedi del personaggio
-	u8 tile = VDP_Peek_GM2(tx, ty + 2);
-
-	if (tile == 210) {
-		// Se sta passando dal terreno accidentato deve rallentare
-		g_PlayerDamped = TRUE;
-	}
 }
 
 bool isPlayerAtExit() {
@@ -520,9 +507,9 @@ bool State_ChangeLevel()
 
 	VDP_WriteLayout_GM2(g_Levels[g_CurrentLevel].layout, 0, 2, 32, 24);
 
-	// Disabilita gli sprite piattaforma. A riabilitarli se servono pensa
-	// la State_Game
-	VDP_DisableSpritesFrom(PLATFORM_SPRITE_BASE_ID);
+	// Nasconde tutti gli sprite, questa funzione e la State_Game
+	// riabiliteranno quelli che servono in ciascun livello
+	VDP_HideAllSprites();
 
 	SetActiveSegment(0);
 
@@ -637,9 +624,6 @@ bool State_Game()
 			return TRUE;
 		}
 	}
-
-	// Controlla se il giocatore è sul terreno accidentato
-	CheckPlayerOnDampers();
 
 	// Controlla se il giocatore ha raggiunto l'uscita
 	if (isPlayerAtExit()) {
