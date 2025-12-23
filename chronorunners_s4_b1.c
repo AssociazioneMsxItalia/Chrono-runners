@@ -244,7 +244,7 @@ extern i8   g_EnemyDX;
 //=============================================================================
 void UpdatePlayerInput();
 void UpdatePlayerGravity();
-void UpdatePlayerMovement();
+void UpdatePlayerMovement(struct Platform *platform);
 void UpdatePlayerAction();
 
 void UpdateEnemyInput();
@@ -255,7 +255,7 @@ void PrintGFXText(c8 *text, u8 x, u8 y);
 void PrintGFXNumber(u8 number, u8 x, u8 y);
 
 void DrawPlatforms();
-i8 isPlayerOnPlatform();
+struct Platform* isPlayerOnPlatform();
 
 //=============================================================================
 // EXTERN PROTOTYPES
@@ -303,7 +303,7 @@ void UpdatePlayerGravity() {
 		g_VelocityY = -FORCE;
 }
 
-void UpdatePlayerMovement() {
+void UpdatePlayerMovement(struct Platform *platform) {
 
 	g_PlayerMovingRight = g_PlayerMovingLeft = FALSE;
 
@@ -320,14 +320,32 @@ void UpdatePlayerMovement() {
 		g_PlayerMovingLeft = TRUE;
 	}
 
+	// Se preme su E non è su una piattaforma né sta già saltando, allora
+	// esegue il salto
+	if (g_PlayerInputUp && (platform != NULL || !g_PlayerJumping)) {
+		// Inizia il salto
+		g_PlayerJumping = TRUE;
+		g_VelocityY = FORCE;
+		// Ora NON è più su piattaforma
+		platform = NULL;
+	}
+
+	// Gestisce esplicitamente la piattaforma. Entra qua solo se non abbiamo
+	// appena saltato
+	if (platform != NULL) {
+		// Forza posizione Y sulla piattaforma
+		g_PlayerPawn.PositionY = platform->pos_y - 16;
+
+		// Siccome è sulla piattaforma, il personaggio NON sta saltando
+		g_PlayerJumping = FALSE;
+
+		// Aggiungi movimento piattaforma (moltiplicato per 8 per ottavi di pixel)
+		g_mDX += (platform->dir_x * 8);
+	}
+
 	if (g_PlayerJumping)
 	{
 		UpdatePlayerGravity();
-	}
-	else if (g_PlayerInputUp)
-	{
-		g_PlayerJumping = TRUE;
-		g_VelocityY = FORCE;
 	}
 
 	// Gli spostamenti sono espressi in ottavi di pixel
@@ -445,24 +463,31 @@ void PrintGFXNumber(u8 number, u8 x, u8 y) {
 	VDP_Poke_GM2(x+1, y, tile1);
 }
 
-i8 isPlayerOnPlatform() {
+struct Platform* isPlayerOnPlatform() {
 	u8 np = g_Levels[g_CurrentLevel].num_platforms;
 	struct Platform *platforms = g_Levels[g_CurrentLevel].platforms;
 
 	for (u8 p=0; p < np; p++) {
+		// -16 / +16 per permettere al giocatore di sfruttare lo spazio in
+		// orizzontale della piattaforma fino all'ultimo pixel
 		bool in_x = g_PlayerPawn.PositionX > platforms[p].pos_x - 16
 		         && g_PlayerPawn.PositionX < platforms[p].pos_x + 16;
 
-		bool in_y = g_PlayerPawn.PositionY > platforms[p].pos_y - 16
+		// Perché -4? Serve per considerare anche l'area immediatamente sopra
+		// la piattaforma come parte della piattaforma stessa. Senza questo
+		// buffer, su una piattaforma che va verso il basso si vedrebbe
+		// "saltare" il giocatore, perché ad ogni fotogramma gli manca la
+		// terra sotto i piedi
+		bool in_y = g_PlayerPawn.PositionY > platforms[p].pos_y - 16 - 4
 		         && g_PlayerPawn.PositionY < platforms[p].pos_y;
 
 		if (in_x && in_y)
 		{
-			return p;
+			return &platforms[p];
 		}
 	}
 
-	return -1;
+	return NULL;
 }
 
 void UpdatePlatforms() {

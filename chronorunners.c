@@ -203,7 +203,7 @@ extern void InitializeSprite();
 //=============================================================================
 extern void UpdatePlayerInput();
 extern void UpdatePlayerGravity();
-extern void UpdatePlayerMovement();
+extern void UpdatePlayerMovement(struct Platform *platform);
 extern void UpdatePlayerAction();
 extern void UpdateEnemyInput();
 extern void UpdateEnemyMovement();
@@ -213,7 +213,7 @@ i8 GetDPos(i8* m);
 extern void PrintGFXText(c8 *text, u8 x, u8 y);
 extern void PrintGFXNumber(u8 number, u8 x, u8 y);
 
-extern i8 isPlayerOnPlatform();
+extern struct Platform* isPlayerOnPlatform();
 
 extern void UpdatePlatforms();
 extern void DrawPlatforms();
@@ -563,7 +563,15 @@ bool State_Game()
 
 	// Gestione input
 	UpdatePlayerInput();
-	UpdatePlayerMovement();
+
+	// Aggiorna piattaforme
+	UpdatePlatforms();
+
+	// Controlla se il giocatore è atterrato su una piattaforma mobile
+	struct Platform *platform = isPlayerOnPlatform();
+
+	UpdatePlayerMovement(platform);
+
 	UpdatePlayerAction();
 	if (g_EnemyEnabled) {
 		UpdateEnemyInput();
@@ -576,7 +584,7 @@ bool State_Game()
 		PrintTime();
 	}
 
-	UpdatePlatforms();
+	DrawPlatforms();
 
 	SetActiveSegment(0);
 
@@ -630,23 +638,6 @@ bool State_Game()
 		Game_SetState(State_ChangeLevel);
 		return TRUE;
 	}
-
-	// Controlla se il giocatore è atterrato su una piattaforma mobile. Nel caso,
-	// tiene conto anche dello spostamento sull'asse X
-	SetActiveSegment(4);
-	i8 p = isPlayerOnPlatform();
-	if (p != -1) {
-		struct Platform *platform = &g_Levels[g_CurrentLevel].platforms[p];
-		// XXX: in teoria dovrebbe bastare aggiungere dir_x senza moltiplicare
-		// per due...
-		g_PlayerPawn.PositionX += platform->dir_x * 2;
-		g_PlayerPawn.PositionY = platform->pos_y - 16;
-		g_PlayerJumping = FALSE;
-	}
-
-	DrawPlatforms();
-
-	SetActiveSegment(0);
 
 	Pawn_Draw(&g_PlayerPawn);
 	Pawn_Draw(&g_KeyPawn);
