@@ -22,6 +22,8 @@ bool State_Death();
 bool State_Rewind();
 bool State_ChangeLevel();
 
+void tick();
+
 //=============================================================================
 // READ-ONLY DATA
 //=============================================================================
@@ -245,6 +247,9 @@ void SetActiveSegment(u8 segment) {
 u8 g_RemainingMinutes = 0;
 u8 g_RemainingSeconds = 0;
 u8 g_RemainingFS = 0;
+
+// Contatore per l'animazione dei minuti persi dopo la morte
+u8 g_CountDownTicks;
 
 Pawn g_PlayerPawn;
 u8	 g_PlayerAction;
@@ -493,6 +498,7 @@ void PlayerRestart() {
 				 start_x * 8, start_y * 8);
 
 	g_PlayerDying = FALSE;
+	g_CountDownTicks = 50 - 1;
 
 	rewind_head = rewind_tail = rewind_count = 0;
 }
@@ -698,6 +704,7 @@ bool State_Game()
 
 bool State_Death()
 {
+    // Appena entra imposta lo stato dying e inizia il salto
     if (!g_PlayerDying) {
         g_mDX = 0;
         g_mDY = 0;
@@ -705,22 +712,45 @@ bool State_Death()
         g_PlayerDying = TRUE;
     }
 
-	SetActiveSegment(4);
-	UpdatePlayerGravity();
-	g_DY = GetDPos(&g_mDY);
-	SetActiveSegment(0);
+	// Ancora il personaggio non è uscito dallo schermo
+	if (g_PlayerPawn.PositionY < 240) {
+		SetActiveSegment(4);
+		UpdatePlayerGravity();
+		g_DY = GetDPos(&g_mDY);
+		SetActiveSegment(0);
 
-	Pawn_SetAction(&g_PlayerPawn, ACTION_DEATH);
-	Pawn_SetPosition(&g_PlayerPawn,
-		g_PlayerPawn.PositionX,
-		g_PlayerPawn.PositionY + g_DY);
-	Pawn_Update(&g_PlayerPawn);
+		Pawn_SetAction(&g_PlayerPawn, ACTION_DEATH);
+		Pawn_SetPosition(&g_PlayerPawn,
+						  g_PlayerPawn.PositionX,
+						  g_PlayerPawn.PositionY + g_DY);
+		Pawn_Update(&g_PlayerPawn);
 
-	Pawn_Draw(&g_PlayerPawn);
+		Pawn_Draw(&g_PlayerPawn);
+	}
 
 	if (g_PlayerPawn.PositionY > 240) {
-		PlayerRestart();
-		Game_SetState(State_Game);
+		// Ogni morte costa al giocatore 5 minuti sul tempo totale
+
+		// Se non li ha più, game over XXX: da gestire
+		if (g_RemainingMinutes == 0 && g_RemainingSeconds == 0) {
+			DEBUG_PRINT("GAME OVER\n");
+		}
+
+		// Scala 6 secondi per fotogramma dal contatore, per fare un'animazione
+		// che spieghi visivamente cosa sta succedendo
+		for (u16 t=0; t < 300; t++) {
+			tick();
+		}
+		SetActiveSegment(4);
+		PrintTime();
+		SetActiveSegment(0);
+
+		if (g_CountDownTicks > 0) {
+			g_CountDownTicks--;
+		} else {
+			PlayerRestart();
+			Game_SetState(State_Game);
+		}
 	}
 	return TRUE;
 }
@@ -765,7 +795,7 @@ bool State_Rewind()
 // MAIN LOOP
 //=============================================================================
 
-void InterruptHook() {
+void tick() {
 	if (g_RemainingFS == 0) {
 		if (g_RemainingSeconds == 0) {
 			if (g_RemainingMinutes == 0) {
@@ -782,6 +812,13 @@ void InterruptHook() {
 	} else {
 		g_RemainingFS--;
 	}
+}
+
+void InterruptHook() {
+    if (Game_GetCurrentState() != State_Game)
+        return;
+
+    tick();
 }
 
 void main()
