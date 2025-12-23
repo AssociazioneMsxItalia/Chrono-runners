@@ -332,8 +332,8 @@ u8 rewind_tail;
 u8 rewind_count;
 
 void DrawRewindGauge() {
-	// La barra di rewind può essere grande fino a 8 slot, due cristalli
-	// per tipo.
+	// La barra di rewind può essere grande fino a 8 slot, un cristallo
+	// ne riempie due
 
 	u8 ntiles = g_PlayerRewindEnergy >> 5; // g_PlayerRewindEnergy / 32
 
@@ -428,7 +428,7 @@ void TakeKey() {
 }
 
 void TakeCrystal() {
-	g_PlayerMaxRewindEnergy += 32;
+	g_PlayerMaxRewindEnergy += 62;
 }
 
 bool isPlayerAtExit() {
