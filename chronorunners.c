@@ -443,6 +443,16 @@ bool isPlayerAtExit() {
 	return bboxCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY, door_x * 8, door_y * 8);
 }
 
+bool isPlayerOnSpikes() {
+    for (i8 t = -1; t < 2; t++) {
+        u8 tile = VDP_Peek_GM2((g_PlayerPawn.PositionX >> 3) + t,
+                               (g_PlayerPawn.PositionY >> 3) + 2);
+        if (tile >= 192 && tile <= 195)
+            return TRUE;
+    }
+    return FALSE;
+}
+
 void PrintTime() {
 	PrintGFXNumber(g_RemainingMinutes, 7, 0);
 	PrintGFXNumber(g_RemainingSeconds, 10, 0);
@@ -616,6 +626,13 @@ bool State_Game()
 		Pawn_Disable(&g_CrystalPawn);
 	}
 
+    // Controlla la collisione tra giocatore e spine
+    if (isPlayerOnSpikes()) {
+        // Effetto "morte" del giocatore.
+        Game_SetState(State_Death);
+        return TRUE;
+    }
+
 	// Controlla la collisione tra giocatore e nemico
 	if (g_EnemyEnabled && doPawnsCollide(&g_PlayerPawn, &g_EnemyPawn)) {
 
@@ -624,10 +641,6 @@ bool State_Game()
 			Pawn_Disable(&g_EnemyPawn);
 		} else {
 			// Effetto "morte" del giocatore.
-			g_mDX = 0;
-			g_mDY = 0;
-			g_VelocityY = FORCE;
-			g_PlayerDying = TRUE;
 			Game_SetState(State_Death);
 			return TRUE;
 		}
@@ -685,6 +698,13 @@ bool State_Game()
 
 bool State_Death()
 {
+    if (!g_PlayerDying) {
+        g_mDX = 0;
+        g_mDY = 0;
+        g_VelocityY = FORCE;
+        g_PlayerDying = TRUE;
+    }
+
 	SetActiveSegment(4);
 	UpdatePlayerGravity();
 	g_DY = GetDPos(&g_mDY);
