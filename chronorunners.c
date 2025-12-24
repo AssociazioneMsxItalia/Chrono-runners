@@ -220,6 +220,10 @@ extern struct Platform* isPlayerOnPlatform();
 extern void UpdatePlatforms();
 extern void DrawPlatforms();
 
+extern void DrawMines();
+
+extern void AllocateSpriteIDs();
+
 extern struct Level g_Levels[];
 
 u8 g_PreviousSegment = 0;
@@ -409,6 +413,28 @@ bool bboxCollide(u8 x1, u8 y1, u8 x2, u8 y2) {
 	return FALSE;
 }
 
+// Verifica collisione tra due rettangoli definiti da:
+// (x1, y1) -> Angolo in alto a sinistra
+// (x2, y2) -> Angolo in basso a destra
+bool rectCollide(u8 ax1, u8 ay1, u8 ax2, u8 ay2,
+				 u8 bx1, u8 by1, u8 bx2, u8 by2) {
+
+	// 1. Il rettangolo A è completamente a sinistra di B?
+	if (ax2 < bx1) return FALSE;
+
+	// 2. Il rettangolo A è completamente a destra di B?
+	if (ax1 > bx2) return FALSE;
+
+	// 3. Il rettangolo A è completamente sopra B?
+	if (ay2 < by1) return FALSE;
+
+	// 4. Il rettangolo A è completamente sotto B?
+	if (ay1 > by2) return FALSE;
+
+	// Se nessuna delle condizioni sopra è vera, i rettangoli si intersecano
+	return TRUE;
+}
+
 bool doPawnsCollide(Pawn *p1, Pawn *p2) {
 	return bboxCollide(p1->PositionX, p1->PositionY, p2->PositionX, p2->PositionY);
 }
@@ -456,6 +482,25 @@ bool isPlayerOnSpikes() {
             return TRUE;
     }
     return FALSE;
+}
+
+bool isPlayerOnMines() {
+	// Recupera livello corrente
+	struct Level *lvl;
+	lvl = &g_Levels[g_CurrentLevel];
+
+	u8 nm = lvl->num_mines;
+	struct Mine *mines = lvl->mines;
+	for (u8 m=0; m < nm; m++) {
+		// Confronta il bbox 16x16 del giocatore con un bbox 2x1 della mina
+		if (rectCollide(g_PlayerPawn.PositionX,      g_PlayerPawn.PositionY,
+					    g_PlayerPawn.PositionX + 16, g_PlayerPawn.PositionY + 16,
+				        mines[m].pos_x + 7,     mines[m].pos_y - 1,
+				        mines[m].pos_x + 7 + 2, mines[m].pos_y)) {
+			return TRUE;
+		}
+	}
+	return FALSE;
 }
 
 void PrintTime() {
@@ -526,6 +571,8 @@ bool State_ChangeLevel()
 	// Nasconde tutti gli sprite, questa funzione e la State_Game
 	// riabiliteranno quelli che servono in ciascun livello
 	VDP_HideAllSprites();
+
+	AllocateSpriteIDs();
 
 	SetActiveSegment(0);
 
@@ -601,6 +648,7 @@ bool State_Game()
 	}
 
 	DrawPlatforms();
+	DrawMines();
 
 	SetActiveSegment(0);
 
@@ -633,7 +681,7 @@ bool State_Game()
 	}
 
     // Controlla la collisione tra giocatore e spine
-    if (isPlayerOnSpikes()) {
+    if (isPlayerOnSpikes() || isPlayerOnMines()) {
         // Effetto "morte" del giocatore.
         Game_SetState(State_Death);
         return TRUE;

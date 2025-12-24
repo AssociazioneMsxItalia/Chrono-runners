@@ -36,6 +36,16 @@ struct Platform plat1[] = {
     23*8, 21*8}, // max_x max_y
 };
 
+struct Mine mines1[] = {
+	{10*8, 13*8}, // pos_x pos_y
+	{10*8, 22*8},
+};
+
+struct Mine mines2[] = {
+	{5*8,  22*8}, // pos_x pos_y
+	{24*8, 22*8},
+};
+
 struct Platform plat3[] = {
    {23*8, 13*8,  // pos_x pos_y
       -1,    0,  // dir_x dir_y
@@ -124,6 +134,8 @@ struct Level g_Levels[] =
                 2, // next_level
 				1, // num_platforms
 			plat1, // platforms
+				2, // num_mines
+		   mines1, // mines
         g_Level01, // layout
     },
     {
@@ -135,6 +147,8 @@ struct Level g_Levels[] =
                 3,
 				0,
 			 NULL,
+				2,
+		   mines2,
         g_Level02,
     },
     {
@@ -146,6 +160,8 @@ struct Level g_Levels[] =
                 4,
 				3,
 		    plat3,
+				0,
+			 NULL,
         g_Level03,
     },
 	{
@@ -157,6 +173,8 @@ struct Level g_Levels[] =
                 5,
 				2,
 		    plat4,
+				0,
+			 NULL,
         g_Level04,
     },
 	{
@@ -168,6 +186,8 @@ struct Level g_Levels[] =
                 6,
 				4,
 		    plat5,
+				0,
+			 NULL,
         g_Level05,
     },
 	{
@@ -179,6 +199,8 @@ struct Level g_Levels[] =
                 7,
 				1,
 		    plat6,
+				0,
+			 NULL,
         g_Level06,
     },
 	{
@@ -190,6 +212,8 @@ struct Level g_Levels[] =
                 8,
 				2,
 		    plat7,
+				0,
+			 NULL,
         g_Level07,
     },
 	{
@@ -201,6 +225,8 @@ struct Level g_Levels[] =
                 1,
 				1,
 		    plat8,
+				0,
+			 NULL,
         g_Level08,
     },
 };
@@ -210,11 +236,14 @@ struct Level g_Levels[] =
 // MEMORY DATA
 //=============================================================================
 
+u8 g_PlatformSpritesBaseID;
+u8 g_MineSpritesBaseID;
+
 //=============================================================================
 // EXTERN MEMORY DATA
 //=============================================================================
 
-extern u8 g_CurrentLevel;
+extern u8 g_RemainingFS;
 
 extern Pawn g_PlayerPawn;
 extern u8	g_PlayerAction;
@@ -239,6 +268,8 @@ extern bool g_EnemyMovingLeft;
 extern i8   g_EnemymDX;
 extern i8   g_EnemyDX;
 
+extern u8 g_CurrentLevel;
+
 //=============================================================================
 // PROTOTYPES
 //=============================================================================
@@ -255,7 +286,12 @@ void PrintGFXText(c8 *text, u8 x, u8 y);
 void PrintGFXNumber(u8 number, u8 x, u8 y);
 
 void DrawPlatforms();
+void UpdatePlatforms();
 struct Platform* isPlayerOnPlatform();
+
+void DrawMines();
+
+void AllocateSpriteIDs();
 
 //=============================================================================
 // EXTERN PROTOTYPES
@@ -514,7 +550,49 @@ void DrawPlatforms() {
 	struct Platform *platforms = g_Levels[g_CurrentLevel].platforms;
 
 	for (u8 p=0; p < np; p++) {
-		u8 index = PLATFORM_SPRITE_BASE_ID + p;
+		u8 index = g_PlatformSpritesBaseID + p;
+		VDP_SetSpritePosition(index, platforms[p].pos_x, platforms[p].pos_y);
+	}
+}
+
+void DrawMines() {
+	// Recupera livello corrente
+	struct Level *lvl;
+	lvl = &g_Levels[g_CurrentLevel];
+
+	struct Mine *mines = lvl->mines;
+	for (u8 m=0; m < lvl->num_mines; m++) {
+		u8 index = g_MineSpritesBaseID + m;
+		u8 color = g_RemainingFS < 25 ? COLOR_DARK_RED : COLOR_LIGHT_RED;
+		VDP_SetSpriteColorSM1(index, color);
+	}
+}
+
+void AllocateSpriteIDs() {
+
+	// Recupera livello corrente
+	struct Level *lvl;
+	lvl = &g_Levels[g_CurrentLevel];
+
+	// Gli sprite ID allocati fissi sono 0..4, le piattaforme partono dal 5
+	g_PlatformSpritesBaseID = 5;
+
+	// Imposta gli sprite piattaforma da usare nel livello corrente
+	u8 np = lvl->num_platforms;
+	struct Platform *platforms = lvl->platforms;
+	for (u8 p=0; p < np; p++) {
+		u8 index = g_PlatformSpritesBaseID + p;
 		u8 shape = platforms[p].dir_x != 0 ? PLATFORMH_PATTERN_OFFSET : PLATFORMV_PATTERN_OFFSET;
-		VDP_SetSpriteSM1(index, platforms[p].pos_x, platforms[p].pos_y, shape, COLOR_BLACK);	}
+		VDP_SetSpriteSM1(index, platforms[p].pos_x, platforms[p].pos_y, shape, COLOR_BLACK);
+	}
+
+	g_MineSpritesBaseID = g_PlatformSpritesBaseID + np;
+
+	// Imposta sprite per le mine
+	u8 nm = lvl->num_mines;
+	struct Mine *mines = lvl->mines;
+	for (u8 m=0; m < nm; m++) {
+		u8 index = g_MineSpritesBaseID + m;
+		VDP_SetSpriteSM1(index, mines[m].pos_x, mines[m].pos_y, MINE_PATTERN_OFFSET, COLOR_DARK_RED);
+	}
 }

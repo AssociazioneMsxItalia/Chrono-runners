@@ -11,6 +11,11 @@ struct Platform {
     u8 max_y;
 };
 
+struct Mine {
+    u8 pos_x;
+    u8 pos_y;
+};
+
 struct Level
 {
     u8 start_x;
@@ -26,5 +31,7 @@ struct Level
     u8 next_level;
     u8 num_platforms;
     struct Platform *platforms;
+    u8 num_mines;
+    struct Mine *mines;
     u8 *layout;
 };

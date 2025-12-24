@@ -15,6 +15,7 @@
 #include "content/sprite/crystal_sprt_layer.h"
 #include "content/sprite/platformv_sprt_layer.h"
 #include "content/sprite/platformh_sprt_layer.h"
+#include "content/sprite/mine_sprt_layer.h"
 #include "content/tile/data_tile_gm2.h"
 
 //=============================================================================
@@ -78,4 +79,5 @@ void InitializeSprite() {
 	VDP_LoadSpritePattern(g_CrystalSprtLayer, CRYSTAL_PATTERN_OFFSET, CRYSTAL_PATTERN_TOTAL);
 	VDP_LoadSpritePattern(g_PlatformVSprtLayer, PLATFORMV_PATTERN_OFFSET, PLATFORMV_PATTERN_TOTAL);
 	VDP_LoadSpritePattern(g_PlatformHSprtLayer, PLATFORMH_PATTERN_OFFSET, PLATFORMH_PATTERN_TOTAL);
+	VDP_LoadSpritePattern(g_MineSprtLayer, MINE_PATTERN_OFFSET, MINE_PATTERN_TOTAL);
 }
