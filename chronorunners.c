@@ -531,7 +531,8 @@ bool State_Initialize()
 	return TRUE;
 }
 
-void PlayerRestart() {
+void PlayerRestart()
+{
 	SetActiveSegment(4);
 	u8 start_x = g_Levels[g_CurrentLevel].start_x;
 	u8 start_y = g_Levels[g_CurrentLevel].start_y;
@@ -776,7 +777,7 @@ bool State_Death()
 		Pawn_Draw(&g_PlayerPawn);
 	}
 
-	if (g_PlayerPawn.PositionY > 240) {
+	if (g_PlayerPawn.PositionY >= 240) {
 		// Ogni morte costa al giocatore 5 minuti sul tempo totale
 
 		// Se non li ha più, game over XXX: da gestire
