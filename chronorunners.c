@@ -379,9 +379,8 @@ void PlayerPhysicsEvent(u8 event, u8 tile)
 // Collision callback
 bool PlayerPhysicsCollision(u8 tile)
 {
-	// XXX: da rivedere coi livelli messi
-	return (tile >= 196 && tile <= 217)
-		|| (tile >= 224);
+	return (tile >= 196 && tile <= 200)
+		|| (tile >= 208);
 }
 
 void EnemyPhysicsEvent(u8 event, u8 tile)
