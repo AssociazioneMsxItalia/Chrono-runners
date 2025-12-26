@@ -270,6 +270,16 @@ extern i8   g_EnemyDX;
 
 extern u8 g_CurrentLevel;
 
+extern bool g_KeyEnabled;
+extern u8 g_KeyPosX;
+extern u8 g_KeyPosY;
+extern u8 g_KeyAnimFrame;
+
+extern bool g_CrystalEnabled;
+extern u8 g_CrystalPosX;
+extern u8 g_CrystalPosY;
+extern u8 g_CrystalAnimFrame;
+
 //=============================================================================
 // PROTOTYPES
 //=============================================================================
@@ -290,6 +300,8 @@ void UpdatePlatforms();
 struct Platform* isPlayerOnPlatform();
 
 void DrawMines();
+void DrawKey();
+void DrawCrystal();
 
 void AllocateSpriteIDs();
 
@@ -436,7 +448,7 @@ void UpdateEnemyMovement() {
 
 	if (g_EnemyMovingLeft) {
 		g_EnemymDX -= 2;
-	} else if (g_EnemyMovingRight) {
+	} else if (g_EnemyMovingRight) {
 		g_EnemymDX += 2;
 	}
 
@@ -568,13 +580,54 @@ void DrawMines() {
 	}
 }
 
+void DrawKey() {
+	if (!g_KeyEnabled)
+		return;
+
+	// Alterna i due fotogrammi ogni 20 tick
+	g_KeyAnimFrame++;
+	if (g_KeyAnimFrame >= 40) {
+		g_KeyAnimFrame = 0;
+	}
+
+	u8 pattern = KEY_PATTERN_OFFSET + (g_KeyAnimFrame >= 20 ? KEY_PATTERN_SIZE : 0);
+	VDP_SetSpritePattern(KEY_SPRITE_ID, pattern);
+}
+
+void DrawCrystal() {
+	if (!g_CrystalEnabled)
+		return;
+
+	// Alterna i due fotogrammi ogni 16 tick
+	g_CrystalAnimFrame++;
+	if (g_CrystalAnimFrame >= 32) {
+		g_CrystalAnimFrame = 0;
+	}
+
+	u8 pattern = CRYSTAL_PATTERN_OFFSET + (g_CrystalAnimFrame >= 16 ? CRYSTAL_PATTERN_SIZE : 0);
+	VDP_SetSpritePattern(CRYSTAL_SPRITE_ID, pattern);
+}
+
 void AllocateSpriteIDs() {
 
 	// Recupera livello corrente
 	struct Level *lvl;
 	lvl = &g_Levels[g_CurrentLevel];
 
-	// Gli sprite ID allocati fissi sono 0..4, le piattaforme partono dal 5
+	// Gli sprite ID allocati fissi sono:
+	// 0-1: Player (2 layers)
+	// 2: Key
+	// 3: Enemy
+	// 4: Crystal
+	// 5+: Platform e Mine
+
+	VDP_SetSpriteSM1(KEY_SPRITE_ID, g_KeyPosX, g_KeyPosY, KEY_PATTERN_OFFSET, COLOR_BLACK);
+
+	VDP_SetSpriteSM1(CRYSTAL_SPRITE_ID, g_CrystalPosX, g_CrystalPosY, CRYSTAL_PATTERN_OFFSET, COLOR_MEDIUM_RED);
+	if (!g_CrystalEnabled) {
+		VDP_HideSprite(CRYSTAL_SPRITE_ID);
+	}
+
 	g_PlatformSpritesBaseID = 5;
 
 	// Imposta gli sprite piattaforma da usare nel livello corrente

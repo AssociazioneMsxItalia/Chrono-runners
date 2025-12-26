@@ -7,7 +7,6 @@
 // Dimensione sprite
 #define sprSize laySize * nLayers
 
-// Per ora il player è visualizzato usando gli sprite 0 e 1
 #define PLAYER_SPRITE_ID 0
 #define PLAYER_PATTERN_OFFSET (u8)0
 #define PLAYER_PATTERN_SIZE laySize * nLayers
@@ -16,7 +15,6 @@
 #define PLAYER_PATTERN_END PLAYER_PATTERN_OFFSET + PLAYER_PATTERN_TOTAL
 #define PLAYER_FRAME(x) x * PLAYER_PATTERN_SIZE + PLAYER_PATTERN_OFFSET
 
-// Per ora la chiave è visualizzata usando lo sprite 2
 #define KEY_SPRITE_ID 2
 #define KEY_PATTERN_OFFSET PLAYER_PATTERN_END
 #define KEY_PATTERN_SIZE laySize

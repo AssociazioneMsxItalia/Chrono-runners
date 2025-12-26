@@ -112,26 +112,6 @@ const Pawn_Action g_AnimActions[] =
 };
 
 
-// Key sprite layers
-const Pawn_Sprite g_KeyLayers[] =
-{//   X  Y  DataOffset    Color            Flag
-	{ 0, 0, 0,            COLOR_BLACK,     0 },
-};
-
-// Idle animation frames
-const Pawn_Frame g_KeyFramesIdle[] =
-{//   Pattern        Time Function
-	{ KEY_FRAME(0),	 20,  NULL },
-	{ KEY_FRAME(1),	 20,  NULL },
-};
-
-// List of all key actions
-const Pawn_Action g_KeyAnimActions[] =
-{//   Frames             Number                          Loop? Interrupt?
-	{ g_KeyFramesIdle,   numberof(g_KeyFramesIdle),      TRUE, TRUE },
-};
-
-
 // Enemy sprite layers
 const Pawn_Sprite g_EnemyLayers[] =
 {//   X  Y  DataOffset    Color            Flag
@@ -170,25 +150,6 @@ const Pawn_Action g_EnemyAnimActions[] =
 };
 
 
-// Crystal sprite layers
-const Pawn_Sprite g_CrystalLayers[] =
-{//   X  Y  DataOffset    Color              Flag
-	{ 0, 0, 0,            COLOR_MEDIUM_RED,     0 },
-};
-
-const Pawn_Frame g_CrystalFramesIdle[] =
-{//   Pattern           Time Function
-	{ CRYSTAL_FRAME(0),	16,  NULL },
-	{ CRYSTAL_FRAME(1),	16,  NULL },
-};
-
-// List of all crystal actions
-const Pawn_Action g_CrystalAnimActions[] =
-{//   Frames             Number                          Loop? Interrupt?
-	{ g_CrystalFramesIdle,   numberof(g_CrystalFramesIdle),      TRUE, TRUE },
-};
-
-
 //=============================================================================
 // SEGMENT 3, BANK 1
 //=============================================================================
@@ -221,6 +182,8 @@ extern void UpdatePlatforms();
 extern void DrawPlatforms();
 
 extern void DrawMines();
+extern void DrawKey();
+extern void DrawCrystal();
 
 extern void AllocateSpriteIDs();
 
@@ -273,8 +236,11 @@ bool g_PlayerHasKey = FALSE;
 u8 g_PlayerMaxRewindEnergy = 62;
 u8 g_PlayerRewindEnergy = 0;
 
-Pawn g_KeyPawn;
+// Key sprite
 bool g_KeyEnabled;
+u8 g_KeyPosX;
+u8 g_KeyPosY;
+u8 g_KeyAnimFrame;
 
 Pawn g_EnemyPawn;
 bool g_EnemyEnabled;
@@ -285,8 +251,11 @@ i8   g_EnemymDX = 0;
 i8   g_EnemyDX = 0;
 i8	 g_EnemyDY = 0;
 
-Pawn g_CrystalPawn;
+// Crystal sprite
 bool g_CrystalEnabled;
+u8 g_CrystalPosX;
+u8 g_CrystalPosY;
+u8 g_CrystalAnimFrame;
 
 //=============================================================================
 // LEVELS
@@ -434,10 +403,6 @@ bool rectCollide(u8 ax1, u8 ay1, u8 ax2, u8 ay2,
 	return TRUE;
 }
 
-bool doPawnsCollide(Pawn *p1, Pawn *p2) {
-	return bboxCollide(p1->PositionX, p1->PositionY, p2->PositionX, p2->PositionY);
-}
-
 void TakeKey() {
 	g_PlayerHasKey = TRUE;
 
@@ -556,12 +521,23 @@ bool State_ChangeLevel()
 	g_CurrentLevel = g_NextLevel;
 	g_NextLevel = g_Levels[g_CurrentLevel].next_level - 1;
 
-	u8 key_x = g_Levels[g_CurrentLevel].key_x;
-	u8 key_y = g_Levels[g_CurrentLevel].key_y;
+	g_KeyPosX = g_Levels[g_CurrentLevel].key_x * 8;
+	g_KeyPosY = g_Levels[g_CurrentLevel].key_y * 8;
+	g_KeyAnimFrame = 0;
+
+	g_KeyEnabled = TRUE;
+
 	u8 enemy_x = g_Levels[g_CurrentLevel].enemy_x;
 	u8 enemy_y = g_Levels[g_CurrentLevel].enemy_y;
-	u8 crystal_x = g_Levels[g_CurrentLevel].crystal_x;
-	u8 crystal_y = g_Levels[g_CurrentLevel].crystal_y;
+
+	g_CrystalPosX = g_Levels[g_CurrentLevel].crystal_x * 8;
+	g_CrystalPosY = g_Levels[g_CurrentLevel].crystal_y * 8;
+	g_CrystalAnimFrame = 0;
+
+	if (g_CrystalPosX == 0 && g_CrystalPosY == 0)
+		g_CrystalEnabled = FALSE;
+	else
+		g_CrystalEnabled = TRUE;
 
 	PrintGFXText("TIME   '  \"", 2, 0);
 	PrintTime();
@@ -579,15 +555,6 @@ bool State_ChangeLevel()
 	g_PlayerHasKey = FALSE;
 	PlayerRestart();
 
-	// Init key pawn
-	Pawn_Initialize(&g_KeyPawn,
-		            g_KeyLayers, numberof(g_KeyLayers),
-					KEY_SPRITE_ID, g_KeyAnimActions);
-	Pawn_SetPosition(&g_KeyPawn,
-		             key_x * 8, key_y * 8);
-	g_KeyEnabled = TRUE;
-	Pawn_SetEnable(&g_KeyPawn, g_KeyEnabled);
-
 	// Init enemy pawn
 	Pawn_Initialize(&g_EnemyPawn,
 		            g_EnemyLayers, numberof(g_EnemyLayers),
@@ -601,19 +568,6 @@ bool State_ChangeLevel()
 	else
 		g_EnemyEnabled = TRUE;
 	Pawn_SetEnable(&g_EnemyPawn, g_EnemyEnabled);
-
-	// Init crystal pawn
-	Pawn_Initialize(&g_CrystalPawn,
-		            g_CrystalLayers, numberof(g_CrystalLayers),
-					CRYSTAL_SPRITE_ID, g_CrystalAnimActions);
-	Pawn_SetPosition(&g_CrystalPawn,
-		             crystal_x * 8, crystal_y * 8);
-
-	if (crystal_x == 0 && crystal_y == 0)
-		g_CrystalEnabled = FALSE;
-	else
-		g_CrystalEnabled = TRUE;
-	Pawn_SetEnable(&g_CrystalPawn, g_CrystalEnabled);
 
 	Game_SetState(State_Game);
 
@@ -649,6 +603,8 @@ bool State_Game()
 
 	DrawPlatforms();
 	DrawMines();
+	DrawKey();
+	DrawCrystal();
 
 	SetActiveSegment(0);
 
@@ -656,28 +612,22 @@ bool State_Game()
 	Pawn_SetMovement(&g_PlayerPawn, g_DX, g_DY);
 	Pawn_Update(&g_PlayerPawn);
 
-	Pawn_SetAction(&g_KeyPawn, ACTION_IDLE);
-	Pawn_Update(&g_KeyPawn);
-
 	Pawn_SetAction(&g_EnemyPawn, g_EnemyAction);
 	Pawn_SetMovement(&g_EnemyPawn, g_EnemyDX, g_EnemyDY);
 	Pawn_Update(&g_EnemyPawn);
 
-	Pawn_SetAction(&g_CrystalPawn, ACTION_IDLE);
-	Pawn_Update(&g_CrystalPawn);
-
 	// Controlla la collisione tra giocatore e chiave
-	if (g_KeyEnabled && doPawnsCollide(&g_PlayerPawn, &g_KeyPawn)) {
+	if (g_KeyEnabled && bboxCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY, g_KeyPosX, g_KeyPosY)) {
 		TakeKey();
 		g_KeyEnabled = FALSE;
-		Pawn_Disable(&g_KeyPawn);
+		VDP_HideSprite(KEY_SPRITE_ID);
 	}
 
 	// Controlla la collisione tra giocatore e cristallo
-	if (g_CrystalEnabled && doPawnsCollide(&g_PlayerPawn, &g_CrystalPawn)) {
+	if (g_CrystalEnabled && bboxCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY, g_CrystalPosX, g_CrystalPosY)) {
 		TakeCrystal();
 		g_CrystalEnabled = FALSE;
-		Pawn_Disable(&g_CrystalPawn);
+		VDP_HideSprite(CRYSTAL_SPRITE_ID);
 	}
 
     // Controlla la collisione tra giocatore e spine
@@ -688,7 +638,7 @@ bool State_Game()
     }
 
 	// Controlla la collisione tra giocatore e nemico
-	if (g_EnemyEnabled && doPawnsCollide(&g_PlayerPawn, &g_EnemyPawn)) {
+	if (g_EnemyEnabled && bboxCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY, g_EnemyPawn.PositionX, g_EnemyPawn.PositionY)) {
 
 		if (g_PlayerPawn.PositionY < g_EnemyPawn.PositionY) {
 			g_EnemyEnabled = FALSE;
@@ -707,9 +657,7 @@ bool State_Game()
 	}
 
 	Pawn_Draw(&g_PlayerPawn);
-	Pawn_Draw(&g_KeyPawn);
 	Pawn_Draw(&g_EnemyPawn);
-	Pawn_Draw(&g_CrystalPawn);
 
 	// Inserisce la posizione attuale nel buffer circolare
 	x_rewind[rewind_head] = g_PlayerPawn.PositionX;
