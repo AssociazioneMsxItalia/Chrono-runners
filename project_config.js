@@ -43,7 +43,7 @@
 //*****************************************************************************
 
 //-- Project name (string). Will be use for output filename
-ProjName = "chronorunners";
+ProjName = "chronorunner";
 
 //-- List of project modules to build (array). If empty, ProjName will be added
 ProjModules = [ ProjName ];
@@ -268,7 +268,7 @@ LogStdout = true;
 LogFile = true;
 
 //-- Name of the log file (string)
-LogFileName = "chronorunners";
+LogFileName = "chronorunner";
 
 //*******************************************************************************
 // ANALYZER SETINGS

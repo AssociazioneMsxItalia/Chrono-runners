@@ -270,7 +270,7 @@ i8	 g_mDY = 0;
 i8   g_DX;
 i8   g_DY;
 bool g_PlayerHasKey = FALSE;
-u8 g_PlayerMaxRewindEnergy = 0;
+u8 g_PlayerMaxRewindEnergy = 62;
 u8 g_PlayerRewindEnergy = 0;
 
 Pawn g_KeyPawn;

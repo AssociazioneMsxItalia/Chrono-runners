@@ -1,4 +1,4 @@
-# Chrono-runners By Associazione MSX Italia
+# Chrono Runner By Associazione MSX Italia
 
 # Estrazione sprite da Magellan
 
