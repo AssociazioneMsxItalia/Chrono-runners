@@ -14,6 +14,7 @@ struct Platform {
 struct Mine {
     u8 pos_x;
     u8 pos_y;
+    bool enabled;
 };
 
 struct Enemy {

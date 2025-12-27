@@ -37,13 +37,13 @@ struct Platform plat1[] = {
 };
 
 struct Mine mines1[] = {
-	{10*8, 13*8}, // pos_x pos_y
-	{10*8, 22*8},
+	{10*8, 13*8, TRUE}, // pos_x pos_y
+	{10*8, 22*8, TRUE},
 };
 
 struct Mine mines2[] = {
-	{5*8,  22*8}, // pos_x pos_y
-	{24*8, 22*8},
+	{5*8,  22*8, TRUE}, // pos_x pos_y
+	{24*8, 22*8, TRUE},
 };
 
 struct Enemy enemies2[] = {
@@ -665,15 +665,19 @@ void DrawEnemies() {
 }
 
 void DrawMines() {
-	// Recupera livello corrente
 	struct Level *lvl = &g_Levels[g_CurrentLevel];
 
 	struct Mine *mines = lvl->mines;
 	for (u8 m=0; m < lvl->num_mines; m++) {
 		u8 index = g_MineSpritesBaseID + m;
 		u8 color = g_RemainingFS < 25 ? COLOR_DARK_RED : COLOR_LIGHT_RED;
-		VDP_SetSpriteColorSM1(index, color);
-	}
+
+        if (mines[m].enabled) {
+			VDP_SetSpriteColorSM1(index, color);
+        } else {
+			VDP_HideSprite(index);
+        }
+    }
 }
 
 void DrawKey() {

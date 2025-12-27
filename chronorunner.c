@@ -396,12 +396,20 @@ bool isPlayerOnMines() {
 
 	u8 nm = lvl->num_mines;
 	struct Mine *mines = lvl->mines;
+
 	for (u8 m=0; m < nm; m++) {
+		// Considera solo mine attive
+		if (!mines[m].enabled)
+			continue;
+
 		// Confronta il bbox 16x16 del giocatore con un bbox 2x1 della mina
 		if (rectCollide(g_PlayerPawn.PositionX,      g_PlayerPawn.PositionY,
 					    g_PlayerPawn.PositionX + 16, g_PlayerPawn.PositionY + 16,
 				        mines[m].pos_x + 7,     mines[m].pos_y - 1,
 				        mines[m].pos_x + 7 + 2, mines[m].pos_y)) {
+
+			// Disabilita la mina
+			mines[m].enabled = FALSE;
 			return TRUE;
 		}
 	}
