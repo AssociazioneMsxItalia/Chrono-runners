@@ -111,45 +111,6 @@ const Pawn_Action g_AnimActions[] =
 	{ g_PlayerFramesDeath,     numberof(g_PlayerFramesDeath),     TRUE, TRUE },
 };
 
-
-// Enemy sprite layers
-const Pawn_Sprite g_EnemyLayers[] =
-{//   X  Y  DataOffset    Color            Flag
-	{ 0, 0, 0,            COLOR_BLACK,     0 },
-};
-
-const Pawn_Frame g_EnemyFramesIdle[] =
-{//   Pattern           Time Function
-	{ ENEMY_FRAME(2),	20,  NULL },
-};
-
-const Pawn_Frame g_EnemyFramesMoveLeft[] =
-{//   Pattern           Time Function
-	{ ENEMY_FRAME(0),	20,  NULL },
-	{ ENEMY_FRAME(1),	20,  NULL },
-};
-
-const Pawn_Frame g_EnemyFramesMoveRight[] =
-{//   Pattern           Time Function
-	{ ENEMY_FRAME(3),	20,  NULL },
-	{ ENEMY_FRAME(4),	20,  NULL },
-};
-
-const Pawn_Frame g_EnemyFramesShocked[] =
-{//   Pattern           Time Function
-	{ ENEMY_FRAME(5),	20,  NULL },
-	{ ENEMY_FRAME(6),	20,  NULL },
-};
-
-const Pawn_Action g_EnemyAnimActions[] =
-{//   Frames                    Number                              Loop? Interrupt?
-	{ g_EnemyFramesIdle,		numberof(g_EnemyFramesIdle),		TRUE, TRUE },
-	{ g_EnemyFramesMoveRight,	numberof(g_EnemyFramesMoveRight),	TRUE, TRUE },
-	{ g_EnemyFramesMoveLeft,	numberof(g_EnemyFramesMoveLeft),	TRUE, TRUE },
-	{ g_EnemyFramesShocked,		numberof(g_EnemyFramesShocked),		TRUE, TRUE },
-};
-
-
 //=============================================================================
 // SEGMENT 3, BANK 1
 //=============================================================================
@@ -168,9 +129,6 @@ extern void UpdatePlayerInput();
 extern void UpdatePlayerGravity();
 extern void UpdatePlayerMovement(struct Platform *platform);
 extern void UpdatePlayerAction();
-extern void UpdateEnemyInput();
-extern void UpdateEnemyMovement();
-extern void UpdateEnemyAction();
 i8 GetDPos(i8* m);
 
 extern void PrintGFXText(c8 *text, u8 x, u8 y);
@@ -180,6 +138,9 @@ extern struct Platform* isPlayerOnPlatform();
 
 extern void UpdatePlatforms();
 extern void DrawPlatforms();
+
+extern void UpdateEnemies();
+extern void DrawEnemies();
 
 extern void DrawMines();
 extern void DrawKey();
@@ -241,15 +202,6 @@ bool g_KeyEnabled;
 u8 g_KeyPosX;
 u8 g_KeyPosY;
 u8 g_KeyAnimFrame;
-
-Pawn g_EnemyPawn;
-bool g_EnemyEnabled;
-u8   g_EnemyAction;
-bool g_EnemyMovingRight = FALSE;
-bool g_EnemyMovingLeft = FALSE;
-i8   g_EnemymDX = 0;
-i8   g_EnemyDX = 0;
-i8	 g_EnemyDY = 0;
 
 // Crystal sprite
 bool g_CrystalEnabled;
@@ -352,17 +304,6 @@ bool PlayerPhysicsCollision(u8 tile)
 		|| (tile >= 208);
 }
 
-void EnemyPhysicsEvent(u8 event, u8 tile)
-{
-	event; tile;
-}
-
-bool EnemyPhysicsCollision(u8 tile)
-{
-	tile;
-	return FALSE;
-}
-
 //=============================================================================
 // UTILITIES
 //=============================================================================
@@ -450,8 +391,7 @@ bool isPlayerOnSpikes() {
 
 bool isPlayerOnMines() {
 	// Recupera livello corrente
-	struct Level *lvl;
-	lvl = &g_Levels[g_CurrentLevel];
+	struct Level *lvl = &g_Levels[g_CurrentLevel];
 
 	u8 nm = lvl->num_mines;
 	struct Mine *mines = lvl->mines;
@@ -462,6 +402,31 @@ bool isPlayerOnMines() {
 				        mines[m].pos_x + 7,     mines[m].pos_y - 1,
 				        mines[m].pos_x + 7 + 2, mines[m].pos_y)) {
 			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+bool isPlayerHitByEnemies() {
+	struct Level *lvl = &g_Levels[g_CurrentLevel];
+	struct Enemy *enemies = lvl->enemies;
+
+	for (u8 e=0; e < lvl->num_enemies; e++) {
+		// Skip if enemy is already stunned
+		if (enemies[e].stunned_timer > 0)
+			continue;
+
+		if (bboxCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY,
+		                enemies[e].pos_x, enemies[e].pos_y)) {
+
+			// Check if player is above enemy (jumping on enemy)
+			if (g_PlayerPawn.PositionY < enemies[e].pos_y) {
+				// Player jumped on enemy - stun it for ~2 seconds (100 frames at 50fps)
+				enemies[e].stunned_timer = 100;
+			} else {
+				// Enemy hit player
+				return TRUE;
+			}
 		}
 	}
 	return FALSE;
@@ -527,9 +492,6 @@ bool State_ChangeLevel()
 
 	g_KeyEnabled = TRUE;
 
-	u8 enemy_x = g_Levels[g_CurrentLevel].enemy_x;
-	u8 enemy_y = g_Levels[g_CurrentLevel].enemy_y;
-
 	g_CrystalPosX = g_Levels[g_CurrentLevel].crystal_x * 8;
 	g_CrystalPosY = g_Levels[g_CurrentLevel].crystal_y * 8;
 	g_CrystalAnimFrame = 0;
@@ -555,20 +517,6 @@ bool State_ChangeLevel()
 	g_PlayerHasKey = FALSE;
 	PlayerRestart();
 
-	// Init enemy pawn
-	Pawn_Initialize(&g_EnemyPawn,
-		            g_EnemyLayers, numberof(g_EnemyLayers),
-					ENEMY_SPRITE_ID, g_EnemyAnimActions);
-	Pawn_InitializePhysics(&g_EnemyPawn, EnemyPhysicsEvent, EnemyPhysicsCollision, 16, 16);
-	Pawn_SetPosition(&g_EnemyPawn,
-		             enemy_x * 8, enemy_y * 8);
-
-	if (enemy_x == 0 && enemy_y == 0)
-		g_EnemyEnabled = FALSE;
-	else
-		g_EnemyEnabled = TRUE;
-	Pawn_SetEnable(&g_EnemyPawn, g_EnemyEnabled);
-
 	Game_SetState(State_Game);
 
 	return TRUE;
@@ -584,17 +532,15 @@ bool State_Game()
 	// Aggiorna piattaforme
 	UpdatePlatforms();
 
+	// Aggiorna nemici
+	UpdateEnemies();
+
 	// Controlla se il giocatore è atterrato su una piattaforma mobile
 	struct Platform *platform = isPlayerOnPlatform();
 
 	UpdatePlayerMovement(platform);
 
 	UpdatePlayerAction();
-	if (g_EnemyEnabled) {
-		UpdateEnemyInput();
-		UpdateEnemyMovement();
-		UpdateEnemyAction();
-	}
 
 	// Testi a video
 	if (g_RemainingFS == 0) {
@@ -603,6 +549,7 @@ bool State_Game()
 
 	DrawPlatforms();
 	DrawMines();
+	DrawEnemies();
 	DrawKey();
 	DrawCrystal();
 
@@ -611,10 +558,7 @@ bool State_Game()
 	Pawn_SetAction(&g_PlayerPawn, g_PlayerAction);
 	Pawn_SetMovement(&g_PlayerPawn, g_DX, g_DY);
 	Pawn_Update(&g_PlayerPawn);
-
-	Pawn_SetAction(&g_EnemyPawn, g_EnemyAction);
-	Pawn_SetMovement(&g_EnemyPawn, g_EnemyDX, g_EnemyDY);
-	Pawn_Update(&g_EnemyPawn);
+	Pawn_Draw(&g_PlayerPawn);
 
 	// Controlla la collisione tra giocatore e chiave
 	if (g_KeyEnabled && bboxCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY, g_KeyPosX, g_KeyPosY)) {
@@ -631,33 +575,17 @@ bool State_Game()
 	}
 
     // Controlla la collisione tra giocatore e spine
-    if (isPlayerOnSpikes() || isPlayerOnMines()) {
+    if (isPlayerOnSpikes() || isPlayerOnMines() || isPlayerHitByEnemies()) {
         // Effetto "morte" del giocatore.
         Game_SetState(State_Death);
         return TRUE;
     }
-
-	// Controlla la collisione tra giocatore e nemico
-	if (g_EnemyEnabled && bboxCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY, g_EnemyPawn.PositionX, g_EnemyPawn.PositionY)) {
-
-		if (g_PlayerPawn.PositionY < g_EnemyPawn.PositionY) {
-			g_EnemyEnabled = FALSE;
-			Pawn_Disable(&g_EnemyPawn);
-		} else {
-			// Effetto "morte" del giocatore.
-			Game_SetState(State_Death);
-			return TRUE;
-		}
-	}
 
 	// Controlla se il giocatore ha raggiunto l'uscita
 	if (isPlayerAtExit()) {
 		Game_SetState(State_ChangeLevel);
 		return TRUE;
 	}
-
-	Pawn_Draw(&g_PlayerPawn);
-	Pawn_Draw(&g_EnemyPawn);
 
 	// Inserisce la posizione attuale nel buffer circolare
 	x_rewind[rewind_head] = g_PlayerPawn.PositionX;

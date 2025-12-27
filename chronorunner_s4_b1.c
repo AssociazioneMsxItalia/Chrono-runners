@@ -46,6 +46,76 @@ struct Mine mines2[] = {
 	{24*8, 22*8},
 };
 
+struct Enemy enemies2[] = {
+	{9*8, 6*8,  // pos_x pos_y
+			1,  // dir_x
+	5*8, 22*8,  // min_x max_x
+			2,  // speed (eighths of pixel per frame)
+			0,  // type (0-3)
+			0,  // mDX (initialized to 0)
+			0}, // stunned_timer (initialized to 0)
+
+  {16*8, 13*8,  // pos_x pos_y
+		   -1,  // dir_x
+   12*8, 22*8,  // min_x max_x
+	   	    2,  // speed (eighths of pixel per frame)
+	     	0,  // type (0-3)
+	     	0,  // mDX (initialized to 0)
+	     	0}, // stunned_timer (initialized to 0)
+
+   {8*8, 20*8,  // pos_x pos_y
+	        1,  // dir_x
+	7*8, 22*8,  // min_x max_x
+	   	    2,  // speed (eighths of pixel per frame)
+	        0,  // type (0-3)
+	        0,  // mDX (initialized to 0)
+	        0}, // stunned_timer (initialized to 0)
+};
+
+struct Enemy enemies4[] = {
+  {22*8, 21*8,  // pos_x pos_y
+	       -1,  // dir_x
+    6*8, 24*8,  // min_x max_x
+	   	    4,  // speed (eighths of pixel per frame)
+	        1,  // type (0-3)
+	        0,  // mDX (initialized to 0)
+	        0}, // stunned_timer (initialized to 0)
+};
+
+struct Enemy enemies6[] = {
+	{9*8, 6*8,  // pos_x pos_y
+	        1,  // dir_x
+    5*8, 25*8,  // min_x max_x
+	   	    4,  // speed (eighths of pixel per frame)
+	        2,  // type (0-3)
+	        0,  // mDX (initialized to 0)
+	        0}, // stunned_timer (initialized to 0)
+  {26*8, 13*8,  // pos_x pos_y
+	       -1,  // dir_x
+   18*8, 29*8,  // min_x max_x
+	   	    4,  // speed (eighths of pixel per frame)
+	        2,  // type (0-3)
+	        0,  // mDX (initialized to 0)
+	        0}, // stunned_timer (initialized to 0)
+   {22*8, 20*8, // pos_x pos_y
+	       -1,  // dir_x
+    5*8, 25*8,  // min_x max_x
+	   	    4,  // speed (eighths of pixel per frame)
+	        2,  // type (0-3)
+	        0,  // mDX (initialized to 0)
+	        0}, // stunned_timer (initialized to 0)
+};
+
+struct Enemy enemies8[] = {
+  {22*8, 20*8,  // pos_x pos_y
+	       -1,  // dir_x
+	1*8, 29*8,  // min_x max_x
+	        4,  // speed (eighths of pixel per frame)
+	        3,  // type (0-3)
+	        0,  // mDX (initialized to 0)
+	        0}, // stunned_timer (initialized to 0)
+};
+
 struct Platform plat3[] = {
    {23*8, 13*8,  // pos_x pos_y
       -1,    0,  // dir_x dir_y
@@ -55,12 +125,12 @@ struct Platform plat3[] = {
    {6*8,  19*8,  // pos_x pos_y
        1,    0,  // dir_x dir_y
      1*8, 19*8,  // min_x min_y
-    11*8, 19*8}, // max_x max_y
+    12*8, 19*8}, // max_x max_y
 
    {24*8, 19*8,  // pos_x pos_y
       -1,    0,  // dir_x dir_y
-    19*8, 19*8,  // min_x min_y
-    30*8, 19*8}, // max_x max_y
+    18*8, 19*8,  // min_x min_y
+    29*8, 19*8}, // max_x max_y
 };
 
 struct Platform plat4[] = {
@@ -129,26 +199,28 @@ struct Level g_Levels[] =
             1,  4, // start_x start_y
             1, 20, // end_x end_y
            27, 19, // key_x key_y
-             0, 0, // enemy_x enemy_y
              0, 0, // crystal_x crystal_y
                 2, // next_level
 				1, // num_platforms
 			plat1, // platforms
 				2, // num_mines
 		   mines1, // mines
+				0, // num_enemies
+			 NULL, // enemies
         g_Level01, // layout
     },
     {
            29,  6,
             9, 13,
            29, 11,
-            0,  0,
             2, 11,
                 3,
 				0,
 			 NULL,
 				2,
 		   mines2,
+numberof(enemies2),
+		 enemies2,
         g_Level02,
     },
     {
@@ -156,10 +228,11 @@ struct Level g_Levels[] =
            21,  8,
            15, 17,
             0,  0,
-            0,  0,
                 4,
 				3,
 		    plat3,
+				0,
+			 NULL,
 				0,
 			 NULL,
         g_Level03,
@@ -168,13 +241,14 @@ struct Level g_Levels[] =
             2, 21,
            28, 21,
            15, 11,
-            0,  0,
            15, 21,
                 5,
 				2,
 		    plat4,
 				0,
 			 NULL,
+numberof(enemies4),
+		 enemies4,
         g_Level04,
     },
 	{
@@ -182,10 +256,11 @@ struct Level g_Levels[] =
            28,  4,
            15, 20,
             0,  0,
-            0,  0,
                 6,
 				4,
 		    plat5,
+				0,
+			 NULL,
 				0,
 			 NULL,
         g_Level05,
@@ -194,13 +269,14 @@ struct Level g_Levels[] =
             1, 20,
            29, 20,
             1,  3,
-            0,  0,
             13, 3,
                 7,
 				1,
 		    plat6,
 				0,
 			 NULL,
+numberof(enemies6),
+		 enemies6,
         g_Level06,
     },
 	{
@@ -208,10 +284,11 @@ struct Level g_Levels[] =
            29, 10,
            15, 21,
             0,  0,
-            0,  0,
                 8,
 				2,
 		    plat7,
+				0,
+			 NULL,
 				0,
 			 NULL,
         g_Level07,
@@ -220,13 +297,14 @@ struct Level g_Levels[] =
             2, 20,
            15,  8,
            15, 14,
-            0,  0,
            28, 20,
                 1,
 				1,
 		    plat8,
 				0,
 			 NULL,
+numberof(enemies8),
+		 enemies8,
         g_Level08,
     },
 };
@@ -238,6 +316,8 @@ struct Level g_Levels[] =
 
 u8 g_PlatformSpritesBaseID;
 u8 g_MineSpritesBaseID;
+u8 g_EnemySpritesBaseID;
+u8 g_EnemyAnimCounter;
 
 //=============================================================================
 // EXTERN MEMORY DATA
@@ -260,14 +340,6 @@ extern i8	g_mDY;
 extern i8   g_DX;
 extern i8   g_DY;
 
-extern Pawn g_EnemyPawn;
-extern bool g_EnemyEnabled;
-extern u8	g_EnemyAction;
-extern bool g_EnemyMovingRight;
-extern bool g_EnemyMovingLeft;
-extern i8   g_EnemymDX;
-extern i8   g_EnemyDX;
-
 extern u8 g_CurrentLevel;
 
 extern bool g_KeyEnabled;
@@ -288,10 +360,6 @@ void UpdatePlayerGravity();
 void UpdatePlayerMovement(struct Platform *platform);
 void UpdatePlayerAction();
 
-void UpdateEnemyInput();
-void UpdateEnemyMovement();
-void UpdateEnemyAction();
-
 void PrintGFXText(c8 *text, u8 x, u8 y);
 void PrintGFXNumber(u8 number, u8 x, u8 y);
 
@@ -302,6 +370,9 @@ struct Platform* isPlayerOnPlatform();
 void DrawMines();
 void DrawKey();
 void DrawCrystal();
+
+void UpdateEnemies();
+void DrawEnemies();
 
 void AllocateSpriteIDs();
 
@@ -425,45 +496,6 @@ void UpdatePlayerAction() {
 		g_PlayerAction = ACTION_MOVELEFT;
 }
 
-void UpdateEnemyInput() {
-	if (!g_EnemyMovingRight && !g_EnemyMovingLeft) {
-		// Situazione iniziale, se non si muove partiamo verso sinistra
-		g_EnemyMovingLeft = TRUE;
-	} else if (g_EnemyMovingLeft) {
-		// Se sta andando verso sinistra ed è arrivato a un certo punto, cambia direzione
-		if (g_EnemyPawn.PositionX < 30) {
-			g_EnemyMovingLeft = FALSE;
-			g_EnemyMovingRight = TRUE;
-		}
-	} else if (g_EnemyMovingRight) {
-		// Se sta andando verso destra ed è arrivato a un certo punto, cambia direzione
-		if (g_EnemyPawn.PositionX > 170) {
-			g_EnemyMovingLeft = TRUE;
-			g_EnemyMovingRight = FALSE;
-		}
-	}
-}
-
-void UpdateEnemyMovement() {
-
-	if (g_EnemyMovingLeft) {
-		g_EnemymDX -= 2;
-	} else if (g_EnemyMovingRight) {
-		g_EnemymDX += 2;
-	}
-
-	g_EnemyDX = GetDPos(&g_EnemymDX);
-}
-
-void UpdateEnemyAction() {
-	g_EnemyAction = ACTION_IDLE;
-	if (g_EnemyMovingRight) {
-		g_EnemyAction = ACTION_MOVERIGHT;
-	} else if (g_EnemyMovingLeft) {
-		g_EnemyAction = ACTION_MOVELEFT;
-	}
-}
-
 void PrintGFXText(c8 *text, u8 x, u8 y) {
 	while (*text != 0) {
 		c8 c = *text;
@@ -567,10 +599,73 @@ void DrawPlatforms() {
 	}
 }
 
+void UpdateEnemies() {
+	struct Level *lvl = &g_Levels[g_CurrentLevel];
+	struct Enemy *enemies = lvl->enemies;
+
+	for (u8 e=0; e < lvl->num_enemies; e++) {
+		// Handle stunned state
+		if (enemies[e].stunned_timer > 0) {
+			enemies[e].stunned_timer--;
+			continue; // Don't move while stunned
+		}
+
+		// Check boundaries and reverse direction
+		if (enemies[e].pos_x < enemies[e].min_x) {
+			enemies[e].pos_x = enemies[e].min_x;
+			enemies[e].dir_x = -enemies[e].dir_x;
+		}
+
+		if (enemies[e].pos_x > enemies[e].max_x) {
+			enemies[e].pos_x = enemies[e].max_x;
+			enemies[e].dir_x = -enemies[e].dir_x;
+		}
+
+		// Add speed to accumulated movement (in eighths of pixel)
+		enemies[e].mDX += enemies[e].speed * enemies[e].dir_x;
+
+		// Convert eighths-of-pixel to actual pixel movement
+		i8 dx = GetDPos(&enemies[e].mDX);
+		enemies[e].pos_x += dx;
+	}
+}
+
+void DrawEnemies() {
+	struct Level *lvl = &g_Levels[g_CurrentLevel];
+	struct Enemy *enemies = lvl->enemies;
+
+	// Simple animation: alternate between 2 frames every 10 ticks
+	g_EnemyAnimCounter++;
+	if (g_EnemyAnimCounter >= 20) {
+		g_EnemyAnimCounter = 0;
+	}
+
+	for (u8 e=0; e < lvl->num_enemies; e++) {
+		u8 index = g_EnemySpritesBaseID + e;
+
+		// Calculate base pattern offset for this enemy type
+		u8 type_offset = enemies[e].type * ENEMY_TYPE_PATTERN_TOTAL;
+
+		// Choose pattern based on state
+		u8 pattern;
+		if (enemies[e].stunned_timer > 0) {
+			// Stunned animation - frames 5 and 6
+			pattern = ENEMY_PATTERN_OFFSET + type_offset + (g_EnemyAnimCounter >= 10 ? 16 : 20);
+		} else if (enemies[e].dir_x < 0) {
+			// Moving left - frames 0 and 1
+			pattern = ENEMY_PATTERN_OFFSET + type_offset + (g_EnemyAnimCounter >= 10 ? 4 : 0);
+		} else {
+			// Moving right - frames 3 and 4
+			pattern = ENEMY_PATTERN_OFFSET + type_offset + (g_EnemyAnimCounter >= 10 ? 12 : 8);
+		}
+
+		VDP_SetSpriteSM1(index, enemies[e].pos_x, enemies[e].pos_y, pattern, COLOR_BLACK);
+	}
+}
+
 void DrawMines() {
 	// Recupera livello corrente
-	struct Level *lvl;
-	lvl = &g_Levels[g_CurrentLevel];
+	struct Level *lvl = &g_Levels[g_CurrentLevel];
 
 	struct Mine *mines = lvl->mines;
 	for (u8 m=0; m < lvl->num_mines; m++) {
@@ -617,9 +712,8 @@ void AllocateSpriteIDs() {
 	// Gli sprite ID allocati fissi sono:
 	// 0-1: Player (2 layers)
 	// 2: Key
-	// 3: Enemy
-	// 4: Crystal
-	// 5+: Platform e Mine
+	// 3: Crystal
+	// 4+: Platforms, Mines, and Enemies
 
 	VDP_SetSpriteSM1(KEY_SPRITE_ID, g_KeyPosX, g_KeyPosY, KEY_PATTERN_OFFSET, COLOR_BLACK);
 
@@ -628,7 +722,7 @@ void AllocateSpriteIDs() {
 		VDP_HideSprite(CRYSTAL_SPRITE_ID);
 	}
 
-	g_PlatformSpritesBaseID = 5;
+	g_PlatformSpritesBaseID = 4;
 
 	// Imposta gli sprite piattaforma da usare nel livello corrente
 	u8 np = lvl->num_platforms;
@@ -647,5 +741,16 @@ void AllocateSpriteIDs() {
 	for (u8 m=0; m < nm; m++) {
 		u8 index = g_MineSpritesBaseID + m;
 		VDP_SetSpriteSM1(index, mines[m].pos_x, mines[m].pos_y, MINE_PATTERN_OFFSET, COLOR_DARK_RED);
+	}
+
+	g_EnemySpritesBaseID = g_MineSpritesBaseID + nm;
+	g_EnemyAnimCounter = 0;
+
+	// Imposta sprite per i nemici
+	u8 ne = lvl->num_enemies;
+	struct Enemy *enemies = lvl->enemies;
+	for (u8 e=0; e < ne; e++) {
+		u8 index = g_EnemySpritesBaseID + e;
+		VDP_SetSpriteSM1(index, enemies[e].pos_x, enemies[e].pos_y, ENEMY_PATTERN_OFFSET, COLOR_BLACK);
 	}
 }

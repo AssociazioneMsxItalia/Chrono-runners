@@ -11,7 +11,12 @@
 #include "sprite_defs.h"
 #include "content/sprite/player_sprt_layer.h"
 #include "content/sprite/key_sprt_layer.h"
-#include "content/sprite/enemy_sprt_layer.h"
+
+#include "content/sprite/enemy0_sprt_layer.h"  // Enemy type 0
+#include "content/sprite/enemy1_sprt_layer.h"  // Enemy type 1
+#include "content/sprite/enemy2_sprt_layer.h"  // Enemy type 2
+#include "content/sprite/enemy3_sprt_layer.h"  // Enemy type 3
+
 #include "content/sprite/crystal_sprt_layer.h"
 #include "content/sprite/platformv_sprt_layer.h"
 #include "content/sprite/platformh_sprt_layer.h"
@@ -73,11 +78,24 @@ void InitializeSprite() {
 	// Initialize sprite
 	VDP_SetSpriteFlag(VDP_SPRITE_SIZE_16 | VDP_SPRITE_SCALE_1);
 
+	// Load player sprites
 	VDP_LoadSpritePattern(g_PlayerSprtLayer, PLAYER_PATTERN_OFFSET, PLAYER_PATTERN_TOTAL);
+
+	// Load key sprite
 	VDP_LoadSpritePattern(g_KeySprtLayer, KEY_PATTERN_OFFSET, KEY_PATTERN_TOTAL);
-	VDP_LoadSpritePattern(g_EnemySprtLayer, ENEMY_PATTERN_OFFSET, ENEMY_PATTERN_TOTAL);
+
+	// Load crystal sprites
 	VDP_LoadSpritePattern(g_CrystalSprtLayer, CRYSTAL_PATTERN_OFFSET, CRYSTAL_PATTERN_TOTAL);
+
+	// Load Platform / Mine sprites
 	VDP_LoadSpritePattern(g_PlatformVSprtLayer, PLATFORMV_PATTERN_OFFSET, PLATFORMV_PATTERN_TOTAL);
 	VDP_LoadSpritePattern(g_PlatformHSprtLayer, PLATFORMH_PATTERN_OFFSET, PLATFORMH_PATTERN_TOTAL);
 	VDP_LoadSpritePattern(g_MineSprtLayer, MINE_PATTERN_OFFSET, MINE_PATTERN_TOTAL);
+
+	// Load all 4 enemy types (each type has 6 frames)
+	VDP_LoadSpritePattern(g_Enemy0SprtLayer, ENEMY_FRAME(0, 0), ENEMY_TYPE_PATTERN_TOTAL);
+	VDP_LoadSpritePattern(g_Enemy1SprtLayer, ENEMY_FRAME(1, 0), ENEMY_TYPE_PATTERN_TOTAL);
+	VDP_LoadSpritePattern(g_Enemy2SprtLayer, ENEMY_FRAME(2, 0), ENEMY_TYPE_PATTERN_TOTAL);
+	VDP_LoadSpritePattern(g_Enemy3SprtLayer, ENEMY_FRAME(3, 0), ENEMY_TYPE_PATTERN_TOTAL);
+
 }
