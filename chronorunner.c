@@ -564,6 +564,11 @@ bool State_Game()
 		PrintTime();
 	}
 
+	Pawn_SetAction(&g_PlayerPawn, g_PlayerAction);
+	Pawn_SetMovement(&g_PlayerPawn, g_DX, g_DY);
+	Pawn_Update(&g_PlayerPawn);
+	Pawn_Draw(&g_PlayerPawn);
+
 	DrawPlatforms();
 	DrawMines();
 	DrawEnemies();
@@ -571,11 +576,6 @@ bool State_Game()
 	DrawCrystal();
 
 	SetActiveSegment(0);
-
-	Pawn_SetAction(&g_PlayerPawn, g_PlayerAction);
-	Pawn_SetMovement(&g_PlayerPawn, g_DX, g_DY);
-	Pawn_Update(&g_PlayerPawn);
-	Pawn_Draw(&g_PlayerPawn);
 
 	// Controlla la collisione tra giocatore e chiave
 	if (g_KeyEnabled && bboxCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY, g_KeyPosX, g_KeyPosY)) {
