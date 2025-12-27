@@ -402,6 +402,7 @@ void UpdatePlayerInput() {
 	g_PlayerInputUp = FALSE;
 
 	u8 row8 = Keyboard_Read(8);
+	u8 joy = Joystick_Read(JOY_PORT_1);
 
 	if (IS_KEY_PRESSED(row8, KEY_RIGHT)) {
 		g_PlayerInputRight = TRUE;
@@ -409,7 +410,7 @@ void UpdatePlayerInput() {
 		g_PlayerInputLeft = TRUE;
 	}
 
-	if (IS_KEY_PRESSED(row8, KEY_UP)) {
+	if (IS_KEY_PRESSED(row8, KEY_UP) || IS_JOY_PRESSED(joy, JOY_INPUT_TRIGGER_A)) {
 		g_PlayerInputUp = TRUE;
 	}
 }
