@@ -413,19 +413,23 @@ bool isPlayerHitByEnemies() {
 	struct Enemy *enemies = lvl->enemies;
 
 	for (u8 e=0; e < lvl->num_enemies; e++) {
-		// Skip if enemy is already stunned
 		if (enemies[e].stunned_timer > 0)
 			continue;
 
 		if (bboxCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY,
 		                enemies[e].pos_x, enemies[e].pos_y)) {
 
-			// Check if player is above enemy (jumping on enemy)
-			if (g_PlayerPawn.PositionY < enemies[e].pos_y) {
-				// Player jumped on enemy - stun it for ~2 seconds (100 frames at 50fps)
+			// Se siamo sopra il nemico e stiamo scendendo
+			if (g_PlayerPawn.PositionY < enemies[e].pos_y && g_VelocityY < 0) {
+				// Stordiamo il nemico
 				enemies[e].stunned_timer = 100;
+
+				// Piccolo salto verso l'alto
+				g_VelocityY = FORCE;
+				g_PlayerJumping = TRUE;
+
+				return FALSE;
 			} else {
-				// Enemy hit player
 				return TRUE;
 			}
 		}
