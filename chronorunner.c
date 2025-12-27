@@ -433,6 +433,10 @@ bool isPlayerHitByEnemies() {
 	return FALSE;
 }
 
+bool isPlayerInPit() {
+	return g_PlayerPawn.PositionY > 192;
+}
+
 void PrintTime() {
 	PrintGFXNumber(g_RemainingMinutes, 7, 0);
 	PrintGFXNumber(g_RemainingSeconds, 10, 0);
@@ -575,8 +579,8 @@ bool State_Game()
 		VDP_HideSprite(CRYSTAL_SPRITE_ID);
 	}
 
-    // Controlla la collisione tra giocatore e spine
-    if (isPlayerOnSpikes() || isPlayerOnMines() || isPlayerHitByEnemies()) {
+    // Controlla la collisione tra giocatore e spine / mine / nemici / baratro
+    if (isPlayerOnSpikes() || isPlayerOnMines() || isPlayerHitByEnemies() || isPlayerInPit()) {
         // Effetto "morte" del giocatore.
         Game_SetState(State_Death);
         return TRUE;
