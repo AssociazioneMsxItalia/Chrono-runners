@@ -301,6 +301,7 @@ void PlayerPhysicsEvent(u8 event, u8 tile)
 bool PlayerPhysicsCollision(u8 tile)
 {
 	return (tile >= 196 && tile <= 200)
+	    || (tile == 202)
 		|| (tile >= 208);
 }
 
