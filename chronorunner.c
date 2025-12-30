@@ -654,7 +654,7 @@ bool State_Death()
     }
 
 	// Ancora il personaggio non è uscito dallo schermo
-	if (g_PlayerPawn.PositionY < 208) {
+	if (g_PlayerPawn.PositionY < 192) {
 		SetActiveSegment(4);
 		UpdatePlayerGravity();
 		g_DY = GetDPos(&g_mDY);
@@ -669,7 +669,7 @@ bool State_Death()
 		Pawn_Draw(&g_PlayerPawn);
 	}
 
-	if (g_PlayerPawn.PositionY >= 208) {
+	if (g_PlayerPawn.PositionY >= 192) {
 		// Ogni morte costa al giocatore 5 minuti sul tempo totale
 
 		// Se non li ha più, game over XXX: da gestire
