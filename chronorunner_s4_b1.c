@@ -410,7 +410,7 @@ void UpdatePlayerInput() {
 		g_PlayerInputLeft = TRUE;
 	}
 
-	if (IS_KEY_PRESSED(row8, KEY_UP) || IS_JOY_PRESSED(joy, JOY_INPUT_TRIGGER_A)) {
+	if (IS_KEY_PRESSED(row8, KEY_UP) || IS_JOY_PRESSED(joy, JOY_INPUT_TRIGGER_B)) {
 		g_PlayerInputUp = TRUE;
 	}
 }
