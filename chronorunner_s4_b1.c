@@ -53,7 +53,13 @@ struct Enemy enemies2[] = {
 			2,  // speed (eighths of pixel per frame)
 			0,  // type (0-3)
 			0,  // mDX (initialized to 0)
-			0}, // stunned_timer (initialized to 0)
+			0,  // stunned_timer (initialized to 0)
+			0,  // field_state
+			0,  // field_timer
+			0,  // field_cooldown
+			0,  // field_x
+			0,  // field_y
+			0}, // field_mDX
 
   {16*8, 13*8,  // pos_x pos_y
 		   -1,  // dir_x
@@ -61,7 +67,13 @@ struct Enemy enemies2[] = {
 	   	    2,  // speed (eighths of pixel per frame)
 	     	0,  // type (0-3)
 	     	0,  // mDX (initialized to 0)
-	     	0}, // stunned_timer (initialized to 0)
+	     	0,  // stunned_timer (initialized to 0)
+			0,  // field_state
+			0,  // field_timer
+			0,  // field_cooldown
+			0,  // field_x
+			0,  // field_y
+			0}, // field_mDX
 
    {8*8, 20*8,  // pos_x pos_y
 	        1,  // dir_x
@@ -69,7 +81,13 @@ struct Enemy enemies2[] = {
 	   	    2,  // speed (eighths of pixel per frame)
 	        0,  // type (0-3)
 	        0,  // mDX (initialized to 0)
-	        0}, // stunned_timer (initialized to 0)
+	        0,  // stunned_timer (initialized to 0)
+			0,  // field_state
+			0,  // field_timer
+			0,  // field_cooldown
+			0,  // field_x
+			0,  // field_y
+			0}, // field_mDX
 };
 
 struct Enemy enemies4[] = {
@@ -79,7 +97,13 @@ struct Enemy enemies4[] = {
 	   	    4,  // speed (eighths of pixel per frame)
 	        1,  // type (0-3)
 	        0,  // mDX (initialized to 0)
-	        0}, // stunned_timer (initialized to 0)
+	        0,  // stunned_timer (initialized to 0)
+			0,  // field_state
+			0,  // field_timer
+			0,  // field_cooldown
+			0,  // field_x
+			0,  // field_y
+			0}, // field_mDX
 };
 
 struct Enemy enemies6[] = {
@@ -89,31 +113,55 @@ struct Enemy enemies6[] = {
 	   	    4,  // speed (eighths of pixel per frame)
 	        2,  // type (0-3)
 	        0,  // mDX (initialized to 0)
-	        0}, // stunned_timer (initialized to 0)
+	        0,  // stunned_timer (initialized to 0)
+			0,  // field_state
+			0,  // field_timer
+			0,  // field_cooldown
+			0,  // field_x
+			0,  // field_y
+			0}, // field_mDX
   {26*8, 13*8,  // pos_x pos_y
 	       -1,  // dir_x
    18*8, 29*8,  // min_x max_x
 	   	    4,  // speed (eighths of pixel per frame)
 	        2,  // type (0-3)
 	        0,  // mDX (initialized to 0)
-	        0}, // stunned_timer (initialized to 0)
+	        0,  // stunned_timer (initialized to 0)
+			0,  // field_state
+			0,  // field_timer
+			0,  // field_cooldown
+			0,  // field_x
+			0,  // field_y
+			0}, // field_mDX
    {22*8, 20*8, // pos_x pos_y
 	       -1,  // dir_x
     5*8, 25*8,  // min_x max_x
 	   	    4,  // speed (eighths of pixel per frame)
 	        2,  // type (0-3)
 	        0,  // mDX (initialized to 0)
-	        0}, // stunned_timer (initialized to 0)
+	        0,  // stunned_timer (initialized to 0)
+			0,  // field_state
+			0,  // field_timer
+			0,  // field_cooldown
+			0,  // field_x
+			0,  // field_y
+			0}, // field_mDX
 };
 
 struct Enemy enemies8[] = {
   {22*8, 20*8,  // pos_x pos_y
 	       -1,  // dir_x
-	1*8, 29*8,  // min_x max_x
+	4*8, 29*8,  // min_x max_x
 	        4,  // speed (eighths of pixel per frame)
 	        3,  // type (0-3)
 	        0,  // mDX (initialized to 0)
-	        0}, // stunned_timer (initialized to 0)
+	        0,  // stunned_timer (initialized to 0)
+			0,  // field_state
+			0,  // field_timer
+			0,  // field_cooldown
+			0,  // field_x
+			0,  // field_y
+			0}, // field_mDX
 };
 
 struct Platform plat3[] = {
@@ -189,7 +237,7 @@ struct Platform plat7[] = {
 struct Platform plat8[] = {
    {15*8, 19*8,  // pos_x pos_y
        0,   -1,  // dir_x dir_y
-    15*8,  8*8,  // min_x min_y
+    15*8, 12*8,  // min_x min_y
     15*8, 20*8}, // max_x max_y
 };
 
@@ -297,7 +345,7 @@ numberof(enemies6),
             2, 20,
            15,  8,
            15, 14,
-           28, 20,
+           28, 18,
                 1,
 				1,
 		    plat8,
@@ -318,6 +366,8 @@ u8 g_PlatformSpritesBaseID;
 u8 g_MineSpritesBaseID;
 u8 g_EnemySpritesBaseID;
 u8 g_EnemyAnimCounter;
+u8 g_EnergyFieldSpritesBaseID;
+u8 g_EnergyFieldAnimCounter;
 
 //=============================================================================
 // EXTERN MEMORY DATA
@@ -373,6 +423,7 @@ void DrawCrystal();
 
 void UpdateEnemies();
 void DrawEnemies();
+void DrawEnergyFields();
 
 void AllocateSpriteIDs();
 
@@ -605,10 +656,70 @@ void UpdateEnemies() {
 	struct Enemy *enemies = lvl->enemies;
 
 	for (u8 e=0; e < lvl->num_enemies; e++) {
-		// Handle stunned state
+		// Muovi i proiettili indipendentemente dallo stato del nemico
+		if (enemies[e].field_state == 2) {
+
+			enemies[e].field_mDX += 12 * enemies[e].dir_x;
+			i8 dx = GetDPos(&enemies[e].field_mDX);
+			enemies[e].field_x += dx;
+
+			// Se esce dallo schermo, resettalo
+			if (enemies[e].field_x < 8 || enemies[e].field_x > 240) {
+				enemies[e].field_state = 0;
+			}
+		}
+
+		// Stato stunned. Per un nemico in questo stato ci fermiamo qua:
+		// no movimento, no nuovi field.
 		if (enemies[e].stunned_timer > 0) {
 			enemies[e].stunned_timer--;
-			continue; // Don't move while stunned
+			continue;
+		}
+
+		if (enemies[e].field_cooldown > 0) {
+			enemies[e].field_cooldown--;
+		}
+
+		// Nemici tipo 2, campo di forza locale
+		if (enemies[e].type == 2) {
+			if (enemies[e].field_state == 1) {
+				enemies[e].field_timer--;
+
+				if (enemies[e].field_timer == 0) {
+					// Al termine del timer disattiva il campo di forza
+					enemies[e].field_state = 0;
+					enemies[e].field_cooldown = 150;
+				}
+
+				// Se il campo di forza è attivo, il nemico non si muove
+				continue;
+
+			} else if (enemies[e].field_state == 0 && enemies[e].field_cooldown == 0) {
+
+				if (Math_GetRandom8() < 10) {
+					enemies[e].field_state = 1;
+					enemies[e].field_timer = 100;
+
+					// Il campo di forza appare davanti al nemico
+					enemies[e].field_x = enemies[e].pos_x + (enemies[e].dir_x * 16);
+					enemies[e].field_y = enemies[e].pos_y;
+				}
+			}
+		}
+
+		// Nemici tipo 3, campo di forza proiettile
+		if (enemies[e].type == 3) {
+			if (enemies[e].field_state == 0 && enemies[e].field_cooldown == 0) {
+
+				if (Math_GetRandom8() < 5) {
+					enemies[e].field_state = 2;
+					enemies[e].field_cooldown = 120;
+
+					enemies[e].field_x = enemies[e].pos_x + (enemies[e].dir_x * 16);
+					enemies[e].field_y = enemies[e].pos_y;
+					enemies[e].field_mDX = 0;
+				}
+			}
 		}
 
 		// Check boundaries and reverse direction
@@ -661,6 +772,33 @@ void DrawEnemies() {
 		}
 
 		VDP_SetSpriteSM1(index, enemies[e].pos_x, enemies[e].pos_y, pattern, COLOR_BLACK);
+	}
+}
+
+void DrawEnergyFields() {
+	struct Level *lvl = &g_Levels[g_CurrentLevel];
+	struct Enemy *enemies = lvl->enemies;
+
+	// Animate energy fields
+	g_EnergyFieldAnimCounter++;
+	if (g_EnergyFieldAnimCounter >= 16) {
+		g_EnergyFieldAnimCounter = 0;
+	}
+
+	u8 pattern = ENERGYFIELD_PATTERN_OFFSET + (g_EnergyFieldAnimCounter >= 8 ? ENERGYFIELD_PATTERN_SIZE : 0);
+
+	// Draw energy field for each enemy that has one active
+	for (u8 e=0; e < lvl->num_enemies; e++) {
+		u8 sprite_id = g_EnergyFieldSpritesBaseID + e;
+
+		if (enemies[e].field_state != 0) {
+			u8 color = (g_EnergyFieldAnimCounter & 1) ? COLOR_LIGHT_BLUE : COLOR_WHITE;
+			// Field is active (either Type 2 stationary or Type 3 projectile)
+			VDP_SetSpriteSM1(sprite_id, enemies[e].field_x, enemies[e].field_y, pattern, color);
+		} else {
+			// No active field - hide the sprite
+			VDP_HideSprite(sprite_id);
+		}
 	}
 }
 
@@ -718,7 +856,7 @@ void AllocateSpriteIDs() {
 	// 0-1: Player (2 layers)
 	// 2: Key
 	// 3: Crystal
-	// 4+: Platforms, Mines, and Enemies
+	// 4+: Platforms, Mines, Enemies, Energy Fields
 
 	VDP_SetSpriteSM1(KEY_SPRITE_ID, g_KeyPosX, g_KeyPosY, KEY_PATTERN_OFFSET, COLOR_BLACK);
 
@@ -757,5 +895,16 @@ void AllocateSpriteIDs() {
 	for (u8 e=0; e < ne; e++) {
 		u8 index = g_EnemySpritesBaseID + e;
 		VDP_SetSpriteSM1(index, enemies[e].pos_x, enemies[e].pos_y, ENEMY_PATTERN_OFFSET, COLOR_BLACK);
+	}
+
+	// Allocate energy field sprites - one per enemy
+	g_EnergyFieldSpritesBaseID = g_EnemySpritesBaseID + ne;
+	g_EnergyFieldAnimCounter = 0;
+
+	// Initialize energy field sprites (hidden initially)
+	for (u8 e = 0; e < ne; e++) {
+		u8 sprite_id = g_EnergyFieldSpritesBaseID + e;
+		VDP_SetSpriteSM1(sprite_id, 0, 0, ENERGYFIELD_PATTERN_OFFSET, COLOR_LIGHT_BLUE);
+		VDP_HideSprite(sprite_id);
 	}
 }

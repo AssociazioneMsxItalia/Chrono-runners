@@ -11,7 +11,7 @@
 #define PLAYER_SPRITE_ID 0
 #define KEY_SPRITE_ID 2
 #define CRYSTAL_SPRITE_ID 3
-// Platforms, mines and enemies use dynamic IDs allocated at runtime
+// Platforms, mines, enemies and energy fields use dynamic IDs allocated at runtime
 
 // Player patterns
 #define PLAYER_PATTERN_OFFSET (u8)0
@@ -72,3 +72,12 @@
 #define ENEMY_PATTERN_TOTAL ENEMY_TYPE_PATTERN_TOTAL * ENEMY_NUM_TYPES
 #define ENEMY_PATTERN_END ENEMY_PATTERN_OFFSET + ENEMY_PATTERN_TOTAL
 #define ENEMY_FRAME(type, frame) (type * ENEMY_TYPE_PATTERN_TOTAL) + (frame * ENEMY_PATTERN_SIZE) + ENEMY_PATTERN_OFFSET
+
+// Energy field patterns (for Type 2 and Type 3 enemies)
+// 2 frames for animation
+#define ENERGYFIELD_PATTERN_OFFSET ENEMY_PATTERN_END
+#define ENERGYFIELD_PATTERN_SIZE laySize
+#define ENERGYFIELD_PATTERN_NUM 2
+#define ENERGYFIELD_PATTERN_TOTAL ENERGYFIELD_PATTERN_SIZE * ENERGYFIELD_PATTERN_NUM
+#define ENERGYFIELD_PATTERN_END ENERGYFIELD_PATTERN_OFFSET + ENERGYFIELD_PATTERN_TOTAL
+#define ENERGYFIELD_FRAME(x) x * ENERGYFIELD_PATTERN_SIZE + ENERGYFIELD_PATTERN_OFFSET

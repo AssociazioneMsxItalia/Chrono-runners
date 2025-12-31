@@ -21,6 +21,7 @@
 #include "content/sprite/platformv_sprt_layer.h"
 #include "content/sprite/platformh_sprt_layer.h"
 #include "content/sprite/mine_sprt_layer.h"
+#include "content/sprite/energyfield_sprt_layer.h"  // Energy field sprite
 #include "content/tile/data_tile_gm2.h"
 
 //=============================================================================
@@ -98,4 +99,6 @@ void InitializeSprite() {
 	VDP_LoadSpritePattern(g_Enemy2SprtLayer, ENEMY_FRAME(2, 0), ENEMY_TYPE_PATTERN_TOTAL);
 	VDP_LoadSpritePattern(g_Enemy3SprtLayer, ENEMY_FRAME(3, 0), ENEMY_TYPE_PATTERN_TOTAL);
 
+	// Load energy field sprite (2 frames for animation)
+	VDP_LoadSpritePattern(g_EnergyFieldSprtLayer, ENERGYFIELD_PATTERN_OFFSET, ENERGYFIELD_PATTERN_TOTAL);
 }

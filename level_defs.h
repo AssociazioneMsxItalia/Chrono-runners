@@ -27,6 +27,13 @@ struct Enemy {
     u8 type;       // Enemy type (0-3 for different sprite sets)
     i8 mDX;        // Accumulated movement in eighths of pixel
     u8 stunned_timer; // Frames remaining while stunned (0 = not stunned)
+    u8 field_state;   // 0 = no field, 1 = field active (Type 2), 2 = field active (Type 3)
+    u8 field_timer;   // Timer for field duration or cooldown
+    u8 field_cooldown; // Cooldown before next field
+    // Energy field position (for Type 2 stationary and Type 3 projectile)
+    u8 field_x;
+    u8 field_y;
+    i8 field_mDX;  // Accumulated movement for Type 3 projectiles (in eighths of pixel)
 };
 
 struct Level

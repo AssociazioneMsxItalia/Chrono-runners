@@ -141,6 +141,7 @@ extern void DrawPlatforms();
 
 extern void UpdateEnemies();
 extern void DrawEnemies();
+extern void DrawEnergyFields();
 
 extern void DrawMines();
 extern void DrawKey();
@@ -214,7 +215,7 @@ u8 g_CrystalAnimFrame;
 //=============================================================================
 
 u8 g_CurrentLevel = 0;
-u8 g_NextLevel = 0;
+u8 g_NextLevel = 7;
 
 //=============================================================================
 // REWIND DATA
@@ -432,6 +433,12 @@ bool isPlayerHitByEnemies() {
 				// Stordiamo il nemico
 				enemies[e].stunned_timer = 100;
 
+				// Disattiva solo l'eventuale campo di forza locale, non i
+				// proiettili
+				if (enemies[e].field_state == 1) {
+					enemies[e].field_state = 0;
+				}
+
 				// Piccolo salto verso l'alto
 				g_VelocityY = FORCE;
 				g_PlayerJumping = TRUE;
@@ -442,6 +449,30 @@ bool isPlayerHitByEnemies() {
 			}
 		}
 	}
+	return FALSE;
+}
+
+bool isPlayerHitByEnergyFields() {
+	struct Level *lvl = &g_Levels[g_CurrentLevel];
+	struct Enemy *enemies = lvl->enemies;
+
+	// Controlla i campi di forza di ciascun nemico
+	for (u8 e=0; e < lvl->num_enemies; e++) {
+
+		if (enemies[e].field_state != 0) {
+			if (bboxCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY,
+			                enemies[e].field_x, enemies[e].field_y)) {
+
+				// Se il proiettile colpisce il personaggio, lo consuma
+				if (enemies[e].field_state == 2) {
+					enemies[e].field_state = 0;
+				}
+
+				return TRUE;
+			}
+		}
+	}
+
 	return FALSE;
 }
 
@@ -572,6 +603,7 @@ bool State_Game()
 	DrawPlatforms();
 	DrawMines();
 	DrawEnemies();
+	DrawEnergyFields();
 	DrawKey();
 	DrawCrystal();
 
@@ -591,8 +623,9 @@ bool State_Game()
 		VDP_HideSprite(CRYSTAL_SPRITE_ID);
 	}
 
-    // Controlla la collisione tra giocatore e spine / mine / nemici / baratro
-    if (isPlayerOnSpikes() || isPlayerOnMines() || isPlayerHitByEnemies() || isPlayerInPit()) {
+    // Controlla la collisione tra giocatore e spine / mine / nemici / energy fields / baratro
+    if (isPlayerOnSpikes() || isPlayerOnMines() || isPlayerHitByEnemies()
+     || isPlayerHitByEnergyFields() || isPlayerInPit()) {
         // Effetto "morte" del giocatore.
         Game_SetState(State_Death);
         return TRUE;
