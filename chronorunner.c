@@ -139,20 +139,19 @@ i8 GetDPos(i8* m);
 extern void PrintGFXText(const c8 *text, u8 x, u8 y);
 extern void PrintGFXNumber(u8 number, u8 x, u8 y);
 
-extern struct Platform* isPlayerOnPlatform();
+extern struct Platform* isPlayerOnPlatform(struct Level *lvl);
 
-extern void UpdatePlatforms();
-extern void DrawPlatforms();
+extern void UpdatePlatforms(struct Level *lvl);
+extern void DrawPlatforms(struct Level *lvl);
 
-extern void UpdateEnemies();
-extern void DrawEnemies();
-extern void DrawEnergyFields();
-
-extern void DrawMines();
+extern void UpdateEnemies(struct Level *lvl);
+extern void DrawEnemies(struct Level *lvl);
+extern void DrawEnergyFields(struct Level *lvl);
+extern void DrawMines(struct Level *lvl);
 extern void DrawKey();
 extern void DrawCrystal();
 
-extern void AllocateSpriteIDs();
+extern void AllocateSpriteIDs(struct Level *lvl);
 
 extern struct Level g_Levels[];
 
@@ -399,9 +398,7 @@ bool isPlayerOnSpikes() {
     return FALSE;
 }
 
-bool isPlayerOnMines() {
-	// Recupera livello corrente
-	struct Level *lvl = &g_Levels[g_CurrentLevel];
+bool isPlayerOnMines(struct Level *lvl) {
 
 	u8 nm = lvl->num_mines;
 	struct Mine *mines = lvl->mines;
@@ -425,8 +422,7 @@ bool isPlayerOnMines() {
 	return FALSE;
 }
 
-bool isPlayerHitByEnemies() {
-	struct Level *lvl = &g_Levels[g_CurrentLevel];
+bool isPlayerHitByEnemies(struct Level *lvl) {
 	struct Enemy *enemies = lvl->enemies;
 
 	for (u8 e=0; e < lvl->num_enemies; e++) {
@@ -460,8 +456,7 @@ bool isPlayerHitByEnemies() {
 	return FALSE;
 }
 
-bool isPlayerHitByEnergyFields() {
-	struct Level *lvl = &g_Levels[g_CurrentLevel];
+bool isPlayerHitByEnergyFields(struct Level *lvl) {
 	struct Enemy *enemies = lvl->enemies;
 
 	// Controlla i campi di forza di ciascun nemico
@@ -603,14 +598,18 @@ bool State_ChangeLevel()
 	g_CurrentLevel = g_NextLevel;
 	g_NextLevel = g_Levels[g_CurrentLevel].next_level - 1;
 
-	g_KeyPosX = g_Levels[g_CurrentLevel].key_x * 8;
-	g_KeyPosY = g_Levels[g_CurrentLevel].key_y * 8;
+	// Recupera livello corrente per passarlo esplicitamente alle funzioni che
+	// ne hanno bisogno
+	struct Level *lvl = &g_Levels[g_CurrentLevel];
+
+	g_KeyPosX = lvl->key_x * 8;
+	g_KeyPosY = lvl->key_y * 8;
 	g_KeyAnimFrame = 0;
 
 	g_KeyEnabled = TRUE;
 
-	g_CrystalPosX = g_Levels[g_CurrentLevel].crystal_x * 8;
-	g_CrystalPosY = g_Levels[g_CurrentLevel].crystal_y * 8;
+	g_CrystalPosX = lvl->crystal_x * 8;
+	g_CrystalPosY = lvl->crystal_y * 8;
 	g_CrystalAnimFrame = 0;
 
 	if (g_CrystalPosX == 0 && g_CrystalPosY == 0)
@@ -624,9 +623,9 @@ bool State_ChangeLevel()
 	PrintGFXText("TIME   '  \"", 2, 0);
 	PrintTime();
 
-	VDP_WriteLayout_GM2(g_Levels[g_CurrentLevel].layout, 0, 2, 32, 24);
+	VDP_WriteLayout_GM2(lvl->layout, 0, 2, 32, 24);
 
-	AllocateSpriteIDs();
+	AllocateSpriteIDs(lvl);
 
 	SetActiveSegment(0);
 
@@ -642,17 +641,21 @@ bool State_Game()
 {
 	SetActiveSegment(4);
 
+	// Recupera livello corrente per passarlo esplicitamente alle funzioni che
+	// ne hanno bisogno
+	struct Level *lvl = &g_Levels[g_CurrentLevel];
+
 	// Gestione input
 	UpdatePlayerInput();
 
 	// Aggiorna piattaforme
-	UpdatePlatforms();
+	UpdatePlatforms(lvl);
 
 	// Aggiorna nemici
-	UpdateEnemies();
+	UpdateEnemies(lvl);
 
 	// Controlla se il giocatore è atterrato su una piattaforma mobile
-	struct Platform *platform = isPlayerOnPlatform();
+	struct Platform *platform = isPlayerOnPlatform(lvl);
 
 	UpdatePlayerMovement(platform);
 
@@ -668,10 +671,10 @@ bool State_Game()
 	Pawn_Update(&g_PlayerPawn);
 	Pawn_Draw(&g_PlayerPawn);
 
-	DrawPlatforms();
-	DrawMines();
-	DrawEnemies();
-	DrawEnergyFields();
+	DrawPlatforms(lvl);
+	DrawMines(lvl);
+	DrawEnemies(lvl);
+	DrawEnergyFields(lvl);
 	DrawKey();
 	DrawCrystal();
 
@@ -692,8 +695,8 @@ bool State_Game()
 	}
 
     // Controlla la collisione tra giocatore e spine / mine / nemici / energy fields / baratro
-    if (isPlayerOnSpikes() || isPlayerOnMines() || isPlayerHitByEnemies()
-     || isPlayerHitByEnergyFields() || isPlayerInPit()) {
+    if (isPlayerOnSpikes() || isPlayerOnMines(lvl) || isPlayerHitByEnemies(lvl)
+     || isPlayerHitByEnergyFields(lvl) || isPlayerInPit()) {
         // Effetto "morte" del giocatore.
         Game_SetState(State_Death);
         return TRUE;

@@ -423,19 +423,18 @@ void UpdatePlayerAction();
 void PrintGFXText(const c8 *text, u8 x, u8 y);
 void PrintGFXNumber(u8 number, u8 x, u8 y);
 
-void DrawPlatforms();
-void UpdatePlatforms();
-struct Platform* isPlayerOnPlatform();
+void DrawPlatforms(struct Level *lvl);
+void UpdatePlatforms(struct Level *lvl);
+struct Platform* isPlayerOnPlatform(struct Level *lvl);
 
-void DrawMines();
+void UpdateEnemies(struct Level *lvl);
+void DrawEnemies(struct Level *lvl);
+void DrawEnergyFields(struct Level *lvl);
+void DrawMines(struct Level *lvl);
 void DrawKey();
 void DrawCrystal();
 
-void UpdateEnemies();
-void DrawEnemies();
-void DrawEnergyFields();
-
-void AllocateSpriteIDs();
+void AllocateSpriteIDs(struct Level *lvl);
 
 //=============================================================================
 // EXTERN PROTOTYPES
@@ -605,11 +604,10 @@ void PrintGFXNumber(u8 number, u8 x, u8 y) {
 	VDP_Poke_GM2(x+1, y, tile1);
 }
 
-struct Platform* isPlayerOnPlatform() {
-	u8 np = g_Levels[g_CurrentLevel].num_platforms;
-	struct Platform *platforms = g_Levels[g_CurrentLevel].platforms;
+struct Platform* isPlayerOnPlatform(struct Level *lvl) {
+	struct Platform *platforms = lvl->platforms;
 
-	for (u8 p=0; p < np; p++) {
+	for (u8 p=0; p < lvl->num_platforms; p++) {
 		// -16 / +16 per permettere al giocatore di sfruttare lo spazio in
 		// orizzontale della piattaforma fino all'ultimo pixel
 		bool in_x = g_PlayerPawn.PositionX > platforms[p].pos_x - 16
@@ -632,11 +630,10 @@ struct Platform* isPlayerOnPlatform() {
 	return NULL;
 }
 
-void UpdatePlatforms() {
-	u8 np = g_Levels[g_CurrentLevel].num_platforms;
-	struct Platform *platforms = g_Levels[g_CurrentLevel].platforms;
+void UpdatePlatforms(struct Level *lvl) {
+	struct Platform *platforms = lvl->platforms;
 
-	for (u8 p=0; p < np; p++) {
+	for (u8 p=0; p < lvl->num_platforms; p++) {
 		struct Platform *plat = &platforms[p];
 
 		plat->pos_x += plat->dir_x;
@@ -651,18 +648,16 @@ void UpdatePlatforms() {
 	}
 }
 
-void DrawPlatforms() {
-	u8 np = g_Levels[g_CurrentLevel].num_platforms;
-	struct Platform *platforms = g_Levels[g_CurrentLevel].platforms;
+void DrawPlatforms(struct Level *lvl) {
+	struct Platform *platforms = lvl->platforms;
 
-	for (u8 p=0; p < np; p++) {
+	for (u8 p=0; p < lvl->num_platforms; p++) {
 		u8 index = g_PlatformSpritesBaseID + p;
 		VDP_SetSpritePosition(index, platforms[p].pos_x, platforms[p].pos_y);
 	}
 }
 
-void UpdateEnemies() {
-	struct Level *lvl = &g_Levels[g_CurrentLevel];
+void UpdateEnemies(struct Level *lvl) {
 	struct Enemy *enemies = lvl->enemies;
 
 	for (u8 e=0; e < lvl->num_enemies; e++) {
@@ -752,8 +747,7 @@ void UpdateEnemies() {
 	}
 }
 
-void DrawEnemies() {
-	struct Level *lvl = &g_Levels[g_CurrentLevel];
+void DrawEnemies(struct Level *lvl) {
 	struct Enemy *enemies = lvl->enemies;
 
 	// Simple animation: alternate between 2 frames every 10 ticks
@@ -785,8 +779,7 @@ void DrawEnemies() {
 	}
 }
 
-void DrawEnergyFields() {
-	struct Level *lvl = &g_Levels[g_CurrentLevel];
+void DrawEnergyFields(struct Level *lvl) {
 	struct Enemy *enemies = lvl->enemies;
 
 	// Animate energy fields
@@ -812,10 +805,9 @@ void DrawEnergyFields() {
 	}
 }
 
-void DrawMines() {
-	struct Level *lvl = &g_Levels[g_CurrentLevel];
-
+void DrawMines(struct Level *lvl) {
 	struct Mine *mines = lvl->mines;
+
 	for (u8 m=0; m < lvl->num_mines; m++) {
 		u8 index = g_MineSpritesBaseID + m;
 		u8 color = g_RemainingFS < 25 ? COLOR_DARK_RED : COLOR_LIGHT_RED;
@@ -856,11 +848,7 @@ void DrawCrystal() {
 	VDP_SetSpritePattern(CRYSTAL_SPRITE_ID, pattern);
 }
 
-void AllocateSpriteIDs() {
-
-	// Recupera livello corrente
-	struct Level *lvl;
-	lvl = &g_Levels[g_CurrentLevel];
+void AllocateSpriteIDs(struct Level *lvl) {
 
 	// Gli sprite ID allocati fissi sono:
 	// 0-1: Player (2 layers)
