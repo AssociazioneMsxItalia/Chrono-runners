@@ -20,21 +20,19 @@
 // LEVELS
 //=============================================================================
 
-#include "content/levels/level01.h"
-#include "content/levels/level02.h"
-#include "content/levels/level03.h"
-#include "content/levels/level04.h"
-#include "content/levels/level05.h"
-#include "content/levels/level06.h"
-#include "content/levels/level07.h"
-#include "content/levels/level08.h"
+#include "content/levels/1_ronin.h"
+#include "content/levels/1_suicidepit.h"
+#include "content/levels/2_crystalchem.h"
+#include "content/levels/2_pipesandrobots.h"
+#include "content/levels/2_sf.h"
+#include "content/levels/2_whatliesbeneath.h"
+#include "content/levels/3_challenge.h"
+#include "content/levels/3_punisher.h"
+#include "content/levels/4_darkdescent.h"
+#include "content/levels/4_easypeasy.h"
+#include "content/levels/4_twister.h"
 
 #include "content/levels/intermission.h"
-
-// Declare array - will be initialized at runtime
-struct Level g_Levels[8];
-
-u8 g_NumLevels = numberof(g_Levels);
 
 //=============================================================================
 // MEMORY DATA
@@ -113,16 +111,24 @@ void AllocateSpriteIDs(struct Level *lvl);
 // FUNCTION
 //=============================================================================
 
+// Declare array - will be initialized at runtime
+struct Level g_Levels[11];
+
+u8 g_NumLevels = numberof(g_Levels);
+
 void InitializeLevels() {
 	// Copy level structs from header files into the global array
-	g_Levels[0] = level1;
-	g_Levels[1] = level2;
-	g_Levels[2] = level3;
-	g_Levels[3] = level4;
-	g_Levels[4] = level5;
-	g_Levels[5] = level6;
-	g_Levels[6] = level7;
-	g_Levels[7] = level8;
+	g_Levels[0] = level_ronin;
+	g_Levels[1] = level_suicidepit;
+	g_Levels[2] = level_crystalchem;
+	g_Levels[3] = level_pipesandrobots;
+	g_Levels[4] = level_sf;
+	g_Levels[5] = level_whatliesbeneath;
+	g_Levels[6] = level_challenge;
+	g_Levels[7] = level_punisher;
+	g_Levels[8] = level_darkdescent;
+	g_Levels[9] = level_easypeasy;
+	g_Levels[10] = level_twister;
 }
 
 i8 GetDPos(i8* m) {
@@ -261,6 +267,10 @@ void PrintGFXText(const c8 *text, u8 x, u8 y) {
 		// ,
 		else if (c == 44) {
 			tile = 39;
+		}
+		// -
+		else if (c == 45) {
+			tile = 47;
 		}
 		// .
 		else if (c == 46) {

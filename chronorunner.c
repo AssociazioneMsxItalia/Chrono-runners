@@ -393,7 +393,7 @@ bool isPlayerOnSpikes() {
     for (i8 t = -1; t < 2; t++) {
         u8 tile = VDP_Peek_GM2((g_PlayerPawn.PositionX >> 3) + t,
                                (g_PlayerPawn.PositionY >> 3) + 2);
-        if (tile >= 192 && tile <= 195)
+        if ((tile >= 192 && tile <= 195) || tile == 201)
             return TRUE;
     }
     return FALSE;
@@ -565,8 +565,8 @@ bool State_Intermission()
 		// Posizione
 		VDP_Poke_GM2(2 + prog, 16, 48);
 
-		PrintGFXText("LEVEL", 5, 18);
-		PrintGFXNumber(next_level_num, 11, 18);
+		PrintGFXText("ROOM", 5, 18);
+		PrintGFXNumber(next_level_num, 10, 18);
 
 		// Tempo rimanente
 		PrintGFXText("TIME", 18, 18);
