@@ -32,7 +32,7 @@ struct Platform plat_crystalchem[] = {
    {28*8,  8*8,  // pos_x pos_y
        0,    1,  // dir_x dir_y
     28*8,  5*8,  // min_x min_y
-    28*8, 13*8}, // max_x max_y
+    28*8, 14*8}, // max_x max_y
 };
 
 struct Enemy enemies_crystalchem[] = {
@@ -80,8 +80,8 @@ struct Enemy enemies_crystalchem[] = {
   };
 
   struct Level level_crystalchem = {
-	12, 4,       // start_x start_y
-	28, 21,       // end_x end_y
+	28, 21,      // start_x start_y
+	12, 4,       // end_x end_y
 	5, 10,      // key_x key_y
 	0, 0,        // crystal_x crystal_y
 	2,           // num_platforms
