@@ -46,7 +46,6 @@ struct Level
     u8 key_y;
     u8 crystal_x;
     u8 crystal_y;
-    u8 next_level;
     u8 num_platforms;
     struct Platform *platforms;
     u8 num_mines;

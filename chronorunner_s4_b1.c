@@ -28,343 +28,11 @@
 #include "content/levels/level06.h"
 #include "content/levels/level07.h"
 #include "content/levels/level08.h"
+
 #include "content/levels/intermission.h"
 
-struct Platform plat1[] = {
-   {23*8,  6*8,  // pos_x pos_y
-       0,    1,  // dir_x dir_y
-    23*8,  6*8,  // min_x min_y
-    23*8, 21*8}, // max_x max_y
-};
-
-struct Mine mines1[] = {
-	{10*8, 13*8, TRUE}, // pos_x pos_y
-	{10*8, 22*8, TRUE},
-};
-
-struct Mine mines2[] = {
-	{5*8,  22*8, TRUE}, // pos_x pos_y
-	{24*8, 22*8, TRUE},
-};
-
-struct Enemy enemies2[] = {
-	{9*8, 6*8,  // pos_x pos_y
-			1,  // dir_x
-	5*8, 22*8,  // min_x max_x
-			2,  // speed (eighths of pixel per frame)
-			0,  // type (0-3)
-			0,  // mDX (initialized to 0)
-			0,  // stunned_timer (initialized to 0)
-			0,  // field_state
-			0,  // field_timer
-			0,  // field_cooldown
-			0,  // field_x
-			0,  // field_y
-			0}, // field_mDX
-
-  {16*8, 13*8,  // pos_x pos_y
-		   -1,  // dir_x
-   12*8, 22*8,  // min_x max_x
-	   	    2,  // speed (eighths of pixel per frame)
-	     	0,  // type (0-3)
-	     	0,  // mDX (initialized to 0)
-	     	0,  // stunned_timer (initialized to 0)
-			0,  // field_state
-			0,  // field_timer
-			0,  // field_cooldown
-			0,  // field_x
-			0,  // field_y
-			0}, // field_mDX
-
-   {8*8, 20*8,  // pos_x pos_y
-	        1,  // dir_x
-	7*8, 22*8,  // min_x max_x
-	   	    2,  // speed (eighths of pixel per frame)
-	        0,  // type (0-3)
-	        0,  // mDX (initialized to 0)
-	        0,  // stunned_timer (initialized to 0)
-			0,  // field_state
-			0,  // field_timer
-			0,  // field_cooldown
-			0,  // field_x
-			0,  // field_y
-			0}, // field_mDX
-};
-
-struct Enemy enemies4[] = {
-  {22*8, 21*8,  // pos_x pos_y
-	       -1,  // dir_x
-    6*8, 24*8,  // min_x max_x
-	   	    4,  // speed (eighths of pixel per frame)
-	        1,  // type (0-3)
-	        0,  // mDX (initialized to 0)
-	        0,  // stunned_timer (initialized to 0)
-			0,  // field_state
-			0,  // field_timer
-			0,  // field_cooldown
-			0,  // field_x
-			0,  // field_y
-			0}, // field_mDX
-};
-
-struct Enemy enemies6[] = {
-	{9*8, 6*8,  // pos_x pos_y
-	        1,  // dir_x
-    5*8, 25*8,  // min_x max_x
-	   	    4,  // speed (eighths of pixel per frame)
-	        2,  // type (0-3)
-	        0,  // mDX (initialized to 0)
-	        0,  // stunned_timer (initialized to 0)
-			0,  // field_state
-			0,  // field_timer
-			0,  // field_cooldown
-			0,  // field_x
-			0,  // field_y
-			0}, // field_mDX
-  {26*8, 13*8,  // pos_x pos_y
-	       -1,  // dir_x
-   18*8, 29*8,  // min_x max_x
-	   	    4,  // speed (eighths of pixel per frame)
-	        2,  // type (0-3)
-	        0,  // mDX (initialized to 0)
-	        0,  // stunned_timer (initialized to 0)
-			0,  // field_state
-			0,  // field_timer
-			0,  // field_cooldown
-			0,  // field_x
-			0,  // field_y
-			0}, // field_mDX
-   {22*8, 20*8, // pos_x pos_y
-	       -1,  // dir_x
-    5*8, 25*8,  // min_x max_x
-	   	    4,  // speed (eighths of pixel per frame)
-	        2,  // type (0-3)
-	        0,  // mDX (initialized to 0)
-	        0,  // stunned_timer (initialized to 0)
-			0,  // field_state
-			0,  // field_timer
-			0,  // field_cooldown
-			0,  // field_x
-			0,  // field_y
-			0}, // field_mDX
-};
-
-struct Enemy enemies8[] = {
-  {22*8, 20*8,  // pos_x pos_y
-	       -1,  // dir_x
-	4*8, 29*8,  // min_x max_x
-	        4,  // speed (eighths of pixel per frame)
-	        3,  // type (0-3)
-	        0,  // mDX (initialized to 0)
-	        0,  // stunned_timer (initialized to 0)
-			0,  // field_state
-			0,  // field_timer
-			0,  // field_cooldown
-			0,  // field_x
-			0,  // field_y
-			0}, // field_mDX
-};
-
-struct Platform plat3[] = {
-   {23*8, 13*8,  // pos_x pos_y
-      -1,    0,  // dir_x dir_y
-     7*8, 11*8,  // min_x min_y
-    24*8, 11*8}, // max_x max_y
-
-   {6*8,  19*8,  // pos_x pos_y
-       1,    0,  // dir_x dir_y
-     1*8, 19*8,  // min_x min_y
-    12*8, 19*8}, // max_x max_y
-
-   {24*8, 19*8,  // pos_x pos_y
-      -1,    0,  // dir_x dir_y
-    18*8, 19*8,  // min_x min_y
-    29*8, 19*8}, // max_x max_y
-};
-
-struct Platform plat4[] = {
-   {1*8,  7*8,  // pos_x pos_y
-      0,    1,  // dir_x dir_y
-    1*8,  5*8,  // min_x min_y
-    1*8, 18*8}, // max_x max_y
-
-   {29*8, 16*8,  // pos_x pos_y
-       0,   -1,  // dir_x dir_y
-    29*8,  5*8,  // min_x min_y
-    29*8, 18*8}, // max_x max_y
-};
-
-struct Platform plat5[] = {
-   {8*8,  20*8,  // pos_x pos_y
-      0,    -1,  // dir_x dir_y
-    8*8,  11*8,  // min_x min_y
-    8*8,  21*8}, // max_x max_y
-
-   {12*8, 15*8,  // pos_x pos_y
-      0,    -1,  // dir_x dir_y
-    12*8, 6*8,  // min_x min_y
-    12*8, 16*8}, // max_x max_y
-
-   {18*8, 6*8,  // pos_x pos_y
-      0,    1,  // dir_x dir_y
-     18*8, 6*8,  // min_x min_y
-     18*8, 16*8}, // max_x max_y
-
-	{22*8, 11*8,  // pos_x pos_y
-      0,    1,  // dir_x dir_y
-     22*8, 9*8,  // min_x min_y
-     22*8, 21*8}, // max_x max_y
-};
-
-struct Platform plat6[] = {
-   {29*8,  8*8,  // pos_x pos_y
-       0,    1,  // dir_x dir_y
-    29*8,  7*8,  // min_x min_y
-    29*8, 14*8}, // max_x max_y
-};
-
-struct Platform plat7[] = {
-   {11*8, 8*8,  // pos_x pos_y
-      0,    1,  // dir_x dir_y
-    11*8, 8*8,  // min_x min_y
-    11*8, 17*8}, // max_x max_y
-
-   {19*8,  20*8,  // pos_x pos_y
-       0,    -1,  // dir_x dir_y
-    19*8,  9*8,  // min_x min_y
-    19*8,  21*8}, // max_x max_y
-};
-
-struct Platform plat8[] = {
-   {15*8, 19*8,  // pos_x pos_y
-       0,   -1,  // dir_x dir_y
-    15*8, 12*8,  // min_x min_y
-    15*8, 20*8}, // max_x max_y
-};
-
-struct Level g_Levels[] =
-{
-    {
-            1,  4, // start_x start_y
-            1, 20, // end_x end_y
-           27, 19, // key_x key_y
-             0, 0, // crystal_x crystal_y
-                2, // next_level
-				1, // num_platforms
-			plat1, // platforms
-				2, // num_mines
-		   mines1, // mines
-				0, // num_enemies
-			 NULL, // enemies
-        g_Level01, // layout
-     "\"THE PRISON\" BY L.VETTORI", // name
-    },
-    {
-           29,  6,
-            9, 13,
-           29, 11,
-            2, 11,
-                3,
-				0,
-			 NULL,
-				2,
-		   mines2,
-numberof(enemies2),
-		 enemies2,
-        g_Level02,
-   "\"THE FACTORY\" BY L.VETTORI",
-    },
-    {
-             9, 8,
-           21,  8,
-           15, 17,
-            0,  0,
-                4,
-				3,
-		    plat3,
-				0,
-			 NULL,
-				0,
-			 NULL,
-        g_Level03,
-      "\"THE CHASM\" BY L.VETTORI",
-    },
-	{
-            2, 21,
-           28, 21,
-           15, 11,
-           15, 21,
-                5,
-				2,
-		    plat4,
-				0,
-			 NULL,
-numberof(enemies4),
-		 enemies4,
-        g_Level04,
-      "\"THE TOWER\" BY L.VETTORI",
-    },
-	{
-            2,  4,
-           28,  4,
-           15, 20,
-            0,  0,
-                6,
-				4,
-		    plat5,
-				0,
-			 NULL,
-				0,
-			 NULL,
-        g_Level05,
-      "\"THE ABYSS\" BY L.VETTORI",
-    },
-	{
-            1, 20,
-           29, 20,
-            1,  3,
-            13, 3,
-                7,
-				1,
-		    plat6,
-				0,
-			 NULL,
-numberof(enemies6),
-		 enemies6,
-        g_Level06,
-   "\"THE FORTRESS\" BY L.VETTORI",
-    },
-	{
-            1, 10,
-           29, 10,
-           15, 21,
-            0,  0,
-                8,
-				2,
-		    plat7,
-				0,
-			 NULL,
-				0,
-			 NULL,
-        g_Level07,
-     "\"THE SUMMIT\" BY L.VETTORI",
-    },
-	{
-            2, 20,
-           15,  8,
-           15, 14,
-           28, 18,
-                1,
-				1,
-		    plat8,
-				0,
-			 NULL,
-numberof(enemies8),
-		 enemies8,
-        g_Level08,
-     "\"THE ESCAPE\" BY L.VETTORI",
-    },
-};
+// Declare array - will be initialized at runtime
+struct Level g_Levels[8];
 
 u8 g_NumLevels = numberof(g_Levels);
 
@@ -415,6 +83,7 @@ extern u8 g_CrystalAnimFrame;
 //=============================================================================
 // PROTOTYPES
 //=============================================================================
+void InitializeLevels();
 void UpdatePlayerInput();
 void UpdatePlayerGravity();
 void UpdatePlayerMovement(struct Platform *platform);
@@ -443,6 +112,18 @@ void AllocateSpriteIDs(struct Level *lvl);
 //=============================================================================
 // FUNCTION
 //=============================================================================
+
+void InitializeLevels() {
+	// Copy level structs from header files into the global array
+	g_Levels[0] = level1;
+	g_Levels[1] = level2;
+	g_Levels[2] = level3;
+	g_Levels[3] = level4;
+	g_Levels[4] = level5;
+	g_Levels[5] = level6;
+	g_Levels[6] = level7;
+	g_Levels[7] = level8;
+}
 
 i8 GetDPos(i8* m) {
 	i8 rv = sdiv((*m), 3);

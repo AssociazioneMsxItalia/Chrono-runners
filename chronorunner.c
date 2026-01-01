@@ -127,6 +127,7 @@ extern void InitializeSprite();
 // SEGMENT 4, BANK 1
 //=============================================================================
 extern u8 g_NumLevels;
+extern void InitializeLevels();
 
 extern const u8 g_Intermission[];
 
@@ -496,11 +497,14 @@ bool State_Initialize()
 {
 	// Switch Segment 3
 	SetActiveSegment(3);
-
 	SetVRAMTable();			// RAM Tables Address and Setup video
 	LoadPatternAndColor();  // Load Pattern and color
 	InitializeSprite();	    // Initialize sprite
+	SetActiveSegment(0);
 
+	// Level setup
+	SetActiveSegment(4);
+	InitializeLevels();
 	SetActiveSegment(0);
 
 	// Imposta tempo iniziale
@@ -596,7 +600,13 @@ bool State_ChangeLevel()
 
 	// Passa al livello successivo
 	g_CurrentLevel = g_NextLevel;
-	g_NextLevel = g_Levels[g_CurrentLevel].next_level - 1;
+
+	// Se i livelli sono finiti ricomincia da capo XXX: sistemare
+	if (g_NextLevel == g_NumLevels - 1) {
+		g_NextLevel = 0;
+	} else {
+		g_NextLevel += 1;
+	}
 
 	// Recupera livello corrente per passarlo esplicitamente alle funzioni che
 	// ne hanno bisogno
