@@ -52,7 +52,7 @@ struct Enemy enemies_crystalchem[] = {
 
   {23*8, 17*8,  // pos_x pos_y
 		   -1,  // dir_x
-   13*8, 24*8,  // min_x max_x
+   13*8, 29*8,  // min_x max_x
 	   	    4,  // speed (eighths of pixel per frame)
 	     	1,  // type (0-3)
 	     	0,  // mDX (initialized to 0)

@@ -86,5 +86,5 @@ struct Level level_suicidepit = {
 	3,           // num_enemies
 	enemies_suicidepit,  // enemies
 	g_Level1SuicidePitEmanueleDelCucina,   // layout
-	"SUICIDE PIT - EMANUELE DEL CUCINA", // name
+	"SUICIDE PIT - E. DEL CUCINA", // name
 };
