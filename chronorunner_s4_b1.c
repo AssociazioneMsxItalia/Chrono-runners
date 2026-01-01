@@ -907,14 +907,12 @@ void AllocateSpriteIDs() {
 		VDP_SetSpriteSM1(index, enemies[e].pos_x, enemies[e].pos_y, ENEMY_PATTERN_OFFSET, COLOR_BLACK);
 	}
 
-	// Allocate energy field sprites - one per enemy
+	// Campi di forza, uno per ciascun nemico
 	g_EnergyFieldSpritesBaseID = g_EnemySpritesBaseID + ne;
 	g_EnergyFieldAnimCounter = 0;
 
-	// Initialize energy field sprites (hidden initially)
 	for (u8 e = 0; e < ne; e++) {
 		u8 sprite_id = g_EnergyFieldSpritesBaseID + e;
 		VDP_SetSpriteSM1(sprite_id, 0, 0, ENERGYFIELD_PATTERN_OFFSET, COLOR_LIGHT_BLUE);
-		VDP_HideSprite(sprite_id);
 	}
 }
