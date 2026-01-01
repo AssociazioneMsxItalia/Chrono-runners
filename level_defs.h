@@ -54,4 +54,5 @@ struct Level
     u8 num_enemies;
     struct Enemy *enemies;
     u8 *layout;
+    const c8 *name;
 };

@@ -21,6 +21,7 @@ bool State_Game();
 bool State_Death();
 bool State_Rewind();
 bool State_ChangeLevel();
+bool State_Intermission();
 
 void tick();
 
@@ -125,13 +126,17 @@ extern void InitializeSprite();
 //=============================================================================
 // SEGMENT 4, BANK 1
 //=============================================================================
+extern u8 g_NumLevels;
+
+extern const u8 g_Intermission[];
+
 extern void UpdatePlayerInput();
 extern void UpdatePlayerGravity();
 extern void UpdatePlayerMovement(struct Platform *platform);
 extern void UpdatePlayerAction();
 i8 GetDPos(i8* m);
 
-extern void PrintGFXText(c8 *text, u8 x, u8 y);
+extern void PrintGFXText(const c8 *text, u8 x, u8 y);
 extern void PrintGFXNumber(u8 number, u8 x, u8 y);
 
 extern struct Platform* isPlayerOnPlatform();
@@ -180,6 +185,9 @@ u8 g_RemainingFS = 0;
 // Contatore per l'animazione dei minuti persi dopo la morte
 u8 g_CountDownTicks;
 
+// Controlla lo stato dell'intermission
+u8 g_IntermissionState = 0;
+
 Pawn g_PlayerPawn;
 u8	 g_PlayerAction;
 bool g_PlayerMovingRight = FALSE;
@@ -215,7 +223,7 @@ u8 g_CrystalAnimFrame;
 //=============================================================================
 
 u8 g_CurrentLevel = 0;
-u8 g_NextLevel = 7;
+u8 g_NextLevel = 0;
 
 //=============================================================================
 // REWIND DATA
@@ -503,7 +511,7 @@ bool State_Initialize()
 	// Imposta tempo iniziale
 	g_RemainingMinutes = 60;
 
-	Game_SetState(State_ChangeLevel);
+	Game_SetState(State_Intermission);
 
 	return TRUE;
 }
@@ -523,7 +531,68 @@ void PlayerRestart()
 	g_PlayerDying = FALSE;
 	g_CountDownTicks = 50 - 1;
 
+	// Resetta il contatore dei rewind, altrimenti il giocatore può riusare
+	// dopo la morte o dopo un livello delle coordinate spurie
+	g_PlayerRewindEnergy = 0;
+
 	rewind_head = rewind_tail = rewind_count = 0;
+}
+
+bool State_Intermission()
+{
+	if (g_IntermissionState == 0) {
+		SetActiveSegment(4);
+
+		// Nasconde tutti gli sprite, verranno riabilitati quelli che servono
+		// in ciascun livello
+		VDP_HideAllSprites();
+
+		// Prossimo livello
+		u8 next_level_num = g_NextLevel + 1;
+		const c8 *level_name = g_Levels[g_NextLevel].name;
+
+		VDP_WriteLayout_GM2(g_Intermission, 0, 0, 32, 24);
+
+		// Progresso
+		u16 prog = (g_NextLevel * 30) / g_NumLevels;
+
+		// Barra verde
+		if (prog != 0)
+			VDP_FillLayout_GM2(49, 2, 16, prog, 1);
+
+		// Barra rossa
+		VDP_FillLayout_GM2(51, 2 + prog, 16, (30 - prog), 1);
+
+		// Posizione
+		VDP_Poke_GM2(2 + prog, 16, 48);
+
+		PrintGFXText("LEVEL", 5, 18);
+		PrintGFXNumber(next_level_num, 11, 18);
+
+		// Tempo rimanente
+		PrintGFXText("TIME", 18, 18);
+		PrintGFXNumber(g_RemainingMinutes, 23, 18);
+		PrintGFXText("'", 25, 18);
+		PrintGFXNumber(g_RemainingSeconds, 26, 18);
+		PrintGFXText("\"", 28, 18);
+
+		// Nome del livello (centrato)
+		PrintGFXText(level_name, 16 - (String_Length(level_name) / 2), 20);
+
+		PrintGFXText("PRESS SPACE KEY", 8, 23);
+		SetActiveSegment(0);
+
+		g_IntermissionState = 1;
+	}
+
+	u8 row8 = Keyboard_Read(8);
+	if (IS_KEY_PRESSED(row8, KEY_SPACE)) {
+		g_IntermissionState = 0;
+		Game_SetState(State_ChangeLevel);
+		return FALSE;
+	}
+
+	return TRUE;
 }
 
 bool State_ChangeLevel()
@@ -549,14 +618,13 @@ bool State_ChangeLevel()
 	else
 		g_CrystalEnabled = TRUE;
 
+	// Cancella lo schermo
+	VDP_FillScreen_GM2(44);
+
 	PrintGFXText("TIME   '  \"", 2, 0);
 	PrintTime();
 
 	VDP_WriteLayout_GM2(g_Levels[g_CurrentLevel].layout, 0, 2, 32, 24);
-
-	// Nasconde tutti gli sprite, questa funzione e la State_Game
-	// riabiliteranno quelli che servono in ciascun livello
-	VDP_HideAllSprites();
 
 	AllocateSpriteIDs();
 
@@ -633,7 +701,7 @@ bool State_Game()
 
 	// Controlla se il giocatore ha raggiunto l'uscita
 	if (isPlayerAtExit()) {
-		Game_SetState(State_ChangeLevel);
+		Game_SetState(State_Intermission);
 		return TRUE;
 	}
 

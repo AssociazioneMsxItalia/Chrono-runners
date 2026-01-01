@@ -28,6 +28,7 @@
 #include "content/levels/level06.h"
 #include "content/levels/level07.h"
 #include "content/levels/level08.h"
+#include "content/levels/intermission.h"
 
 struct Platform plat1[] = {
    {23*8,  6*8,  // pos_x pos_y
@@ -256,6 +257,7 @@ struct Level g_Levels[] =
 				0, // num_enemies
 			 NULL, // enemies
         g_Level01, // layout
+     "\"THE PRISON\" BY L.VETTORI", // name
     },
     {
            29,  6,
@@ -270,6 +272,7 @@ struct Level g_Levels[] =
 numberof(enemies2),
 		 enemies2,
         g_Level02,
+   "\"THE FACTORY\" BY L.VETTORI",
     },
     {
              9, 8,
@@ -284,6 +287,7 @@ numberof(enemies2),
 				0,
 			 NULL,
         g_Level03,
+      "\"THE CHASM\" BY L.VETTORI",
     },
 	{
             2, 21,
@@ -298,6 +302,7 @@ numberof(enemies2),
 numberof(enemies4),
 		 enemies4,
         g_Level04,
+      "\"THE TOWER\" BY L.VETTORI",
     },
 	{
             2,  4,
@@ -312,6 +317,7 @@ numberof(enemies4),
 				0,
 			 NULL,
         g_Level05,
+      "\"THE ABYSS\" BY L.VETTORI",
     },
 	{
             1, 20,
@@ -326,6 +332,7 @@ numberof(enemies4),
 numberof(enemies6),
 		 enemies6,
         g_Level06,
+   "\"THE FORTRESS\" BY L.VETTORI",
     },
 	{
             1, 10,
@@ -340,6 +347,7 @@ numberof(enemies6),
 				0,
 			 NULL,
         g_Level07,
+     "\"THE SUMMIT\" BY L.VETTORI",
     },
 	{
             2, 20,
@@ -354,9 +362,11 @@ numberof(enemies6),
 numberof(enemies8),
 		 enemies8,
         g_Level08,
+     "\"THE ESCAPE\" BY L.VETTORI",
     },
 };
 
+u8 g_NumLevels = numberof(g_Levels);
 
 //=============================================================================
 // MEMORY DATA
@@ -410,7 +420,7 @@ void UpdatePlayerGravity();
 void UpdatePlayerMovement(struct Platform *platform);
 void UpdatePlayerAction();
 
-void PrintGFXText(c8 *text, u8 x, u8 y);
+void PrintGFXText(const c8 *text, u8 x, u8 y);
 void PrintGFXNumber(u8 number, u8 x, u8 y);
 
 void DrawPlatforms();
@@ -548,7 +558,7 @@ void UpdatePlayerAction() {
 		g_PlayerAction = ACTION_MOVELEFT;
 }
 
-void PrintGFXText(c8 *text, u8 x, u8 y) {
+void PrintGFXText(const c8 *text, u8 x, u8 y) {
 	while (*text != 0) {
 		c8 c = *text;
 		u8 tile = 0;
