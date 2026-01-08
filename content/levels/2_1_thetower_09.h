@@ -51,7 +51,7 @@ struct Enemy enemies4[] = {
 			0}, // field_mDX
 };
 
-struct Level level4 = {
+struct Level level_thetower = {
 	2, 21,       // start_x start_y
 	28, 21,      // end_x end_y
 	15, 11,      // key_x key_y

@@ -20,17 +20,21 @@
 // LEVELS
 //=============================================================================
 
-#include "content/levels/1_ronin.h"
-#include "content/levels/1_suicidepit.h"
-#include "content/levels/2_crystalchem.h"
-#include "content/levels/2_pipesandrobots.h"
-#include "content/levels/2_sf.h"
-#include "content/levels/2_whatliesbeneath.h"
-#include "content/levels/3_challenge.h"
-#include "content/levels/3_punisher.h"
-#include "content/levels/4_darkdescent.h"
-#include "content/levels/4_easypeasy.h"
-#include "content/levels/4_twister.h"
+#include "content/levels/1_1_ronin_16.h"
+#include "content/levels/1_2_thefactory_07.h"
+#include "content/levels/1_3_theprison_06.h"
+#include "content/levels/1_4_suicidepit_19.h"
+#include "content/levels/2_1_thetower_09.h"
+#include "content/levels/2_2_thechasm_08.h"
+#include "content/levels/2_3_sf_17.h"
+#include "content/levels/2_4_whatliesbeneath_22.h"
+#include "content/levels/2_5_pipesandrobots_23.h"
+#include "content/levels/2_6_crystalchem_31.h"
+#include "content/levels/3_1_punisher_18.h"
+#include "content/levels/3_4_challenge_20.h"
+#include "content/levels/4_1_easypeasy_30.h"
+#include "content/levels/4_3_darkdescent_24.h"
+#include "content/levels/4_4_twister_29.h"
 
 #include "content/levels/intermission.h"
 
@@ -112,23 +116,27 @@ void AllocateSpriteIDs(struct Level *lvl);
 //=============================================================================
 
 // Declare array - will be initialized at runtime
-struct Level g_Levels[11];
+struct Level g_Levels[15];
 
 u8 g_NumLevels = numberof(g_Levels);
 
 void InitializeLevels() {
 	// Copy level structs from header files into the global array
 	g_Levels[0] = level_ronin;
-	g_Levels[1] = level_suicidepit;
-	g_Levels[2] = level_crystalchem;
-	g_Levels[3] = level_pipesandrobots;
-	g_Levels[4] = level_sf;
-	g_Levels[5] = level_whatliesbeneath;
-	g_Levels[6] = level_challenge;
-	g_Levels[7] = level_punisher;
-	g_Levels[8] = level_darkdescent;
-	g_Levels[9] = level_easypeasy;
-	g_Levels[10] = level_twister;
+	g_Levels[1] = level_thefactory;
+	g_Levels[2] = level_theprison;
+	g_Levels[3] = level_suicidepit;
+	g_Levels[4] = level_thetower;
+	g_Levels[5] = level_thechasm;
+	g_Levels[6] = level_sf;
+	g_Levels[7] = level_whatliesbeneath;
+	g_Levels[8] = level_pipesandrobots;
+	g_Levels[9] = level_crystalchem;
+	g_Levels[10] = level_punisher;
+	g_Levels[11] = level_challenge;
+	g_Levels[12] = level_easypeasy;
+	g_Levels[13] = level_darkdescent;
+	g_Levels[14] = level_twister;
 }
 
 i8 GetDPos(i8* m) {

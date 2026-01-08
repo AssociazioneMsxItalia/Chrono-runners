@@ -35,7 +35,7 @@ struct Mine mines1[] = {
 	{10*8, 22*8, TRUE},
 };
 
-struct Level level1 = {
+struct Level level_theprison = {
 	1, 4,        // start_x start_y
 	1, 20,       // end_x end_y
 	27, 19,      // key_x key_y
