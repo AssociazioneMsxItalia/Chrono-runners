@@ -22,6 +22,7 @@ bool State_Death();
 bool State_Rewind();
 bool State_ChangeLevel();
 bool State_Intermission();
+bool State_GameOver();
 
 void tick();
 
@@ -178,15 +179,18 @@ void SetActiveSegment(u8 segment) {
 
 // Tempo rimanente. Separa le componenti in modo da non dover
 // effettuare divisioni per trovarle.
-u8 g_RemainingMinutes = 0;
-u8 g_RemainingSeconds = 0;
-u8 g_RemainingFS = 0;
+u8 g_RemainingMinutes;
+u8 g_RemainingSeconds;
+u8 g_RemainingFS;
 
 // Contatore per l'animazione dei minuti persi dopo la morte
 u8 g_CountDownTicks;
 
 // Controlla lo stato dell'intermission
 u8 g_IntermissionState = 0;
+
+// Contatore per lo stato di game over (50 fps * 5 secondi = 250)
+u8 g_GameOverCounter = 0;
 
 Pawn g_PlayerPawn;
 u8	 g_PlayerAction;
@@ -222,8 +226,8 @@ u8 g_CrystalAnimFrame;
 // LEVELS
 //=============================================================================
 
-u8 g_CurrentLevel = 0;
-u8 g_NextLevel = 0;
+u8 g_CurrentLevel;
+u8 g_NextLevel;
 
 //=============================================================================
 // REWIND DATA
@@ -509,6 +513,12 @@ bool State_Initialize()
 
 	// Imposta tempo iniziale
 	g_RemainingMinutes = 60;
+	g_RemainingSeconds = 0;
+	g_RemainingFS = 0;
+
+	// Reset livelli
+	g_CurrentLevel = 0;
+	g_NextLevel = 0;
 
 	Game_SetState(State_Intermission);
 
@@ -676,6 +686,12 @@ bool State_Game()
 		PrintTime();
 	}
 
+	// Controlla se il tempo è esaurito
+	if (g_RemainingMinutes == 0 && g_RemainingSeconds == 0) {
+		Game_SetState(State_Death);
+		return TRUE;
+	}
+
 	Pawn_SetAction(&g_PlayerPawn, g_PlayerAction);
 	Pawn_SetMovement(&g_PlayerPawn, g_DX, g_DY);
 	Pawn_Update(&g_PlayerPawn);
@@ -786,11 +802,6 @@ bool State_Death()
 	if (g_PlayerPawn.PositionY >= 192) {
 		// Ogni morte costa al giocatore 5 minuti sul tempo totale
 
-		// Se non li ha più, game over XXX: da gestire
-		if (g_RemainingMinutes == 0 && g_RemainingSeconds == 0) {
-			DEBUG_PRINT("GAME OVER\n");
-		}
-
 		// Scala 6 secondi per fotogramma dal contatore, per fare un'animazione
 		// che spieghi visivamente cosa sta succedendo
 		for (u16 t=0; t < 300; t++) {
@@ -803,10 +814,42 @@ bool State_Death()
 		if (g_CountDownTicks > 0) {
 			g_CountDownTicks--;
 		} else {
-			PlayerRestart();
-			Game_SetState(State_Game);
+			// Se il tempo è esaurito, vai a Game Over
+			if (g_RemainingMinutes == 0 && g_RemainingSeconds == 0) {
+				Game_SetState(State_GameOver);
+			} else {
+				PlayerRestart();
+				Game_SetState(State_Game);
+			}
 		}
 	}
+	return TRUE;
+}
+
+bool State_GameOver()
+{
+	// Prima volta in questo stato: prepara lo schermo
+	if (g_GameOverCounter == 0) {
+		// Nasconde tutti gli sprite
+		VDP_HideAllSprites();
+
+		// Cancella lo schermo con tile vuoto
+		VDP_FillScreen_GM2(44);
+
+		SetActiveSegment(4);
+		// Stampa "GAME OVER" centrato (10 caratteri = 5 a sinistra del centro)
+		PrintGFXText("GAME OVER", 11, 12);
+		SetActiveSegment(0);
+	}
+
+	g_GameOverCounter++;
+
+	// Dopo 5 secondi (250 frame a 50 fps)
+	if (g_GameOverCounter >= 250) {
+		g_GameOverCounter = 0;
+		Game_SetState(State_Initialize);
+	}
+
 	return TRUE;
 }
 
