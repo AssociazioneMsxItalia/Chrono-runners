@@ -46,7 +46,7 @@
 ProjName = "chronorunner";
 
 //-- List of project modules to build (array). If empty, ProjName will be added
-ProjModules = [ ProjName ];
+ProjModules = [ ProjName, "snapshot" ];
 
 //-- Project segments base name (string). ProjName will be used if not defined
 // ProjSegments = ProjName;

@@ -10,6 +10,7 @@
 #include "level_defs.h"
 #include "sprite_defs.h"
 #include "math_utils.h"
+#include "snapshot.h"
 
 //=============================================================================
 // DEFINES
@@ -270,8 +271,8 @@ Le invarianti di questo buffer sono:
 
 */
 
-// 5 secondi * 50 fps per coordinata
-#define rewindSize 250
+// 2 seconds * 50 fps per coordinata (reduced to fit in available RAM)
+#define rewindSize 100
 u8 x_rewind[rewindSize];
 u8 y_rewind[rewindSize];
 u8 f_rewind[rewindSize];
@@ -708,12 +709,13 @@ void UpdatePlatforms(struct Level *lvl) {
 	}
 }
 
-void DrawPlatforms(struct Level *lvl) {
+void DrawPlatforms(struct Level *lvl, bool rewind) {
 	struct Platform *platforms = lvl->platforms;
 
 	for (u8 p=0; p < lvl->num_platforms; p++) {
 		u8 index = g_PlatformSpritesBaseID + p;
 		VDP_SetSpritePosition(index, platforms[p].pos_x, platforms[p].pos_y);
+		VDP_SetSpriteColorSM1(index, rewind ? COLOR_WHITE : COLOR_BLACK);
 	}
 }
 
@@ -816,7 +818,7 @@ void UpdateEnemies(struct Level *lvl) {
 	}
 }
 
-void DrawEnemies(struct Level *lvl) {
+void DrawEnemies(struct Level *lvl, bool rewind) {
 	struct Enemy *enemies = lvl->enemies;
 
 	// Simple animation: alternate between 2 frames every 10 ticks
@@ -844,11 +846,12 @@ void DrawEnemies(struct Level *lvl) {
 			pattern = ENEMY_PATTERN_OFFSET + type_offset + (g_EnemyAnimCounter >= 10 ? 12 : 8);
 		}
 
-		VDP_SetSpriteSM1(index, enemies[e].pos_x, enemies[e].pos_y, pattern, COLOR_BLACK);
+		u8 color = rewind ? COLOR_WHITE : COLOR_BLACK;
+		VDP_SetSpriteSM1(index, enemies[e].pos_x, enemies[e].pos_y, pattern, color);
 	}
 }
 
-void DrawEnergyFields(struct Level *lvl) {
+void DrawEnergyFields(struct Level *lvl, bool rewind) {
 	struct Enemy *enemies = lvl->enemies;
 
 	// Animate energy fields
@@ -864,7 +867,12 @@ void DrawEnergyFields(struct Level *lvl) {
 		u8 sprite_id = g_EnergyFieldSpritesBaseID + e;
 
 		if (enemies[e].field_state != 0) {
-			u8 color = (g_EnergyFieldAnimCounter & 1) ? COLOR_LIGHT_BLUE : COLOR_WHITE;
+			u8 color;
+			if (rewind) {
+				color = COLOR_WHITE;
+			} else {
+				color = (g_EnergyFieldAnimCounter & 1) ? COLOR_DARK_GREEN : COLOR_DARK_YELLOW;
+			}
 			// Field is active (either Type 2 stationary or Type 3 projectile)
 			VDP_SetSpriteSM1(sprite_id, enemies[e].field_x, enemies[e].field_y, pattern, color);
 		} else {
@@ -874,12 +882,18 @@ void DrawEnergyFields(struct Level *lvl) {
 	}
 }
 
-void DrawMines(struct Level *lvl) {
+void DrawMines(struct Level *lvl, bool rewind) {
 	struct Mine *mines = lvl->mines;
 
 	for (u8 m=0; m < lvl->num_mines; m++) {
 		u8 index = g_MineSpritesBaseID + m;
-		u8 color = g_RemainingFS < 25 ? COLOR_LIGHT_RED : COLOR_BLACK;
+		u8 color;
+		
+		if (rewind) {
+			color = COLOR_WHITE;
+		} else {
+			color = g_RemainingFS < 25 ? COLOR_DARK_RED : COLOR_LIGHT_RED;
+		}
 
         if (mines[m].enabled) {
 			VDP_SetSpriteColorSM1(index, color);
@@ -1032,6 +1046,9 @@ void PlayerRestart()
 	g_PlayerRewindEnergy = 0;
 
 	rewind_head = rewind_tail = rewind_count = 0;
+
+	// Initialize snapshot system for object rewind
+	Snapshot_Initialize();
 }
 
 bool State_Intermission()
@@ -1187,10 +1204,10 @@ bool State_Game()
 	Pawn_Update(&g_PlayerPawn);
 	Pawn_Draw(&g_PlayerPawn);
 
-	DrawPlatforms(lvl);
-	DrawMines(lvl);
-	DrawEnemies(lvl);
-	DrawEnergyFields(lvl);
+	DrawPlatforms(lvl, FALSE);
+	DrawMines(lvl, FALSE);
+	DrawEnemies(lvl, FALSE);
+	DrawEnergyFields(lvl, FALSE);
 	DrawKey();
 	DrawCrystal();
 
@@ -1238,6 +1255,9 @@ bool State_Game()
 		// Altrimenti si limita a incrementare il contatore di elementi
 		rewind_count++;
 	}
+
+	// Capture snapshot of all game objects (platforms, enemies, mines)
+	Snapshot_Capture(lvl);
 
 	u8 row8 = Keyboard_Read(8);
 	if (IS_KEY_PRESSED(row8, KEY_SPACE)) {
@@ -1369,6 +1389,25 @@ bool State_Rewind()
 	g_PlayerPawn.Update |= PAWN_UPDATE_PATTERN;
 	g_PlayerPawn.AnimFrame = f_rewind[rewind_head];
 	Pawn_Draw(&g_PlayerPawn);
+
+	// Restore all game objects to their state at this frame
+	SetActiveSegment(4);
+	struct Level *lvl = &g_Levels[g_CurrentLevel];
+
+	// Synchronize snapshot head with player rewind head
+	u8 snapshot_head = (g_SnapshotHead - 1 + SNAPSHOT_BUFFER_SIZE) % SNAPSHOT_BUFFER_SIZE;
+	g_SnapshotHead = snapshot_head;
+	g_SnapshotCount--;
+
+	Snapshot_Restore(lvl, snapshot_head);
+
+	// Redraw all objects at their rewound positions in white
+	DrawPlatforms(lvl, TRUE);
+	DrawMines(lvl, TRUE);
+	DrawEnemies(lvl, TRUE);
+	DrawEnergyFields(lvl, TRUE);
+
+	SetActiveSegment(0);
 
 	return TRUE;
 }
