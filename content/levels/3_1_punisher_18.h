@@ -27,7 +27,6 @@ struct Enemy enemies_punisher[] = {
   {7*8, 14*8,  // pos_x pos_y
 		   1,  // dir_x
    4*8, 17*8,   // min_x max_x
-			4,  // speed (eighths of pixel per frame)
 			2,  // type (0-3)
 			0,  // mDX (initialized to 0)
 			0,  // stunned_timer (initialized to 0)

@@ -34,7 +34,6 @@ struct Enemy enemies_sf[] = {
   {19*8, 10*8,  // pos_x pos_y
 			1,  // dir_x
    1*8, 25*8,  // min_x max_x
-			4,  // speed (eighths of pixel per frame)
 			1,  // type (0-3)
 			0,  // mDX (initialized to 0)
 			0,  // stunned_timer (initialized to 0)
@@ -47,7 +46,6 @@ struct Enemy enemies_sf[] = {
   {19*8, 21*8,  // pos_x pos_y
 		   -1,  // dir_x
    11*8, 24*8,  // min_x max_x
-	   	    4,  // speed (eighths of pixel per frame)
 	     	1,  // type (0-3)
 	     	0,  // mDX (initialized to 0)
 	     	0,  // stunned_timer (initialized to 0)

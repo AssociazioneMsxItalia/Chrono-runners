@@ -39,7 +39,6 @@ struct Enemy enemies_crystalchem[] = {
   {13*8, 14*8,  // pos_x pos_y
 			1,  // dir_x
    12*8, 19*8,  // min_x max_x
-			4,  // speed (eighths of pixel per frame)
 			1,  // type (0-3)
 			0,  // mDX (initialized to 0)
 			0,  // stunned_timer (initialized to 0)
@@ -52,7 +51,6 @@ struct Enemy enemies_crystalchem[] = {
   {23*8, 17*8,  // pos_x pos_y
 		   -1,  // dir_x
    13*8, 29*8,  // min_x max_x
-	   	    4,  // speed (eighths of pixel per frame)
 	     	1,  // type (0-3)
 	     	0,  // mDX (initialized to 0)
 	     	0,  // stunned_timer (initialized to 0)
@@ -65,7 +63,6 @@ struct Enemy enemies_crystalchem[] = {
   {14*8, 21*8,  // pos_x pos_y
 		   -1,  // dir_x
     4*8, 24*8,  // min_x max_x
-	   	    4,  // speed (eighths of pixel per frame)
 	     	1,  // type (0-3)
 	     	0,  // mDX (initialized to 0)
 	     	0,  // stunned_timer (initialized to 0)

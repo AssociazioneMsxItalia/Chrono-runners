@@ -39,7 +39,6 @@ struct Enemy enemies4[] = {
   {22*8, 21*8,  // pos_x pos_y
 	       -1,  // dir_x
     6*8, 24*8,  // min_x max_x
-	   	    4,  // speed (eighths of pixel per frame)
 	        1,  // type (0-3)
 	        0,  // mDX (initialized to 0)
 	        0,  // stunned_timer (initialized to 0)

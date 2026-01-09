@@ -27,7 +27,6 @@ struct Enemy enemies_twister[] = {
   {17*8, 10*8,  // pos_x pos_y
 	       -1,  // dir_x
 	6*8, 20*8,  // min_x max_x
-	        4,  // speed (eighths of pixel per frame)
 	        3,  // type (0-3)
 	        0,  // mDX (initialized to 0)
 	        0,  // stunned_timer (initialized to 0)
@@ -39,7 +38,6 @@ struct Enemy enemies_twister[] = {
   {12*8, 21*8,  // pos_x pos_y
 	       -1,  // dir_x
     6*8, 24*8,  // min_x max_x
-	        4,  // speed (eighths of pixel per frame)
 	        3,  // type (0-3)
 	        0,  // mDX (initialized to 0)
 	        0,  // stunned_timer (initialized to 0)

@@ -32,7 +32,6 @@ struct Enemy enemies2[] = {
 	{9*8, 6*8,  // pos_x pos_y
 			1,  // dir_x
 	5*8, 22*8,  // min_x max_x
-			2,  // speed (eighths of pixel per frame)
 			0,  // type (0-3)
 			0,  // mDX (initialized to 0)
 			0,  // stunned_timer (initialized to 0)
@@ -45,7 +44,6 @@ struct Enemy enemies2[] = {
   {16*8, 13*8,  // pos_x pos_y
 		   -1,  // dir_x
    12*8, 22*8,  // min_x max_x
-	   	    2,  // speed (eighths of pixel per frame)
 	     	0,  // type (0-3)
 	     	0,  // mDX (initialized to 0)
 	     	0,  // stunned_timer (initialized to 0)
@@ -58,7 +56,6 @@ struct Enemy enemies2[] = {
    {8*8, 20*8,  // pos_x pos_y
 	        1,  // dir_x
 	7*8, 22*8,  // min_x max_x
-	   	    2,  // speed (eighths of pixel per frame)
 	        0,  // type (0-3)
 	        0,  // mDX (initialized to 0)
 	        0,  // stunned_timer (initialized to 0)

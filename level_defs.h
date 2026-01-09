@@ -23,8 +23,7 @@ struct Enemy {
     i8 dir_x;      // Movement direction (-1 left, 1 right)
     u8 min_x;      // Left boundary
     u8 max_x;      // Right boundary
-    u8 speed;      // Movement speed (added to mDX each frame)
-    u8 type;       // Enemy type (0-3 for different sprite sets)
+    u8 type;       // Enemy type (0-3 for different sprite sets, also determines speed)
     i8 mDX;        // Accumulated movement in eighths of pixel
     u8 stunned_timer; // Frames remaining while stunned (0 = not stunned)
     u8 field_state;   // 0 = no field, 1 = field active (Type 2), 2 = field active (Type 3)

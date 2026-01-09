@@ -443,7 +443,9 @@ void UpdateEnemies(struct Level *lvl) {
 		}
 
 		// Add speed to accumulated movement (in eighths of pixel)
-		enemies[e].mDX += enemies[e].speed * enemies[e].dir_x;
+		// Type 0: 2 eighths/frame, all others: 4 eighths/frame
+		u8 speed = (enemies[e].type == 0) ? 2 : 4;
+		enemies[e].mDX += speed * enemies[e].dir_x;
 
 		// Convert eighths-of-pixel to actual pixel movement
 		i8 dx = GetDPos(&enemies[e].mDX);

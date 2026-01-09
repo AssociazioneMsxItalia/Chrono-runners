@@ -36,7 +36,6 @@ struct Enemy enemies_suicidepit[] = {
   {11*8, 16*8,  // pos_x pos_y
 	        1,  // dir_x
 	9*8, 13*8,  // min_x max_x
-	        2,  // speed (eighths of pixel per frame)
 	        0,  // type (0-3)
 	        0,  // mDX (initialized to 0)
 	        0,  // stunned_timer (initialized to 0)
@@ -48,7 +47,6 @@ struct Enemy enemies_suicidepit[] = {
   {18*8, 14*8,  // pos_x pos_y
 	       -1,  // dir_x
    17*8, 21*8,  // min_x max_x
-	        2,  // speed (eighths of pixel per frame)
 	        0,  // type (0-3)
 	        0,  // mDX (initialized to 0)
 	        0,  // stunned_timer (initialized to 0)
@@ -60,7 +58,6 @@ struct Enemy enemies_suicidepit[] = {
   {26*8, 12*8,  // pos_x pos_y
 	        1,  // dir_x
    25*8, 29*8,  // min_x max_x
-	        2,  // speed (eighths of pixel per frame)
 	        0,  // type (0-3)
 	        0,  // mDX (initialized to 0)
 	        0,  // stunned_timer (initialized to 0)
