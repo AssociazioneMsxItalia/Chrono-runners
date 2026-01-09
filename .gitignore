@@ -13,3 +13,9 @@ Toolkit/ExtractTilesMagellan/bin/
 
 # Impostazioni VSCode
 .vscode/
+
+# Configurazione locale
+chronorunner.js
+
+# Asset
+Chrono runner assets/
