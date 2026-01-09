@@ -115,28 +115,34 @@ void AllocateSpriteIDs(struct Level *lvl);
 // FUNCTION
 //=============================================================================
 
-// Declare array - will be initialized at runtime
+// Numero livelli
 struct Level g_Levels[15];
+
+// Sequenza livelli (vedi InitalizeLevels)
+#define LEVEL_LIST \
+	LEVEL_ENTRY(level_ronin) \
+	LEVEL_ENTRY(level_thefactory) \
+	LEVEL_ENTRY(level_theprison) \
+	LEVEL_ENTRY(level_suicidepit) \
+	LEVEL_ENTRY(level_thetower) \
+	LEVEL_ENTRY(level_thechasm) \
+	LEVEL_ENTRY(level_sf) \
+	LEVEL_ENTRY(level_whatliesbeneath) \
+	LEVEL_ENTRY(level_pipesandrobots) \
+	LEVEL_ENTRY(level_crystalchem) \
+	LEVEL_ENTRY(level_punisher) \
+	LEVEL_ENTRY(level_challenge) \
+	LEVEL_ENTRY(level_easypeasy) \
+	LEVEL_ENTRY(level_darkdescent) \
+	LEVEL_ENTRY(level_twister)
 
 u8 g_NumLevels = numberof(g_Levels);
 
 void InitializeLevels() {
-	// Copy level structs from header files into the global array
-	g_Levels[0] = level_ronin;
-	g_Levels[1] = level_thefactory;
-	g_Levels[2] = level_theprison;
-	g_Levels[3] = level_suicidepit;
-	g_Levels[4] = level_thetower;
-	g_Levels[5] = level_thechasm;
-	g_Levels[6] = level_sf;
-	g_Levels[7] = level_whatliesbeneath;
-	g_Levels[8] = level_pipesandrobots;
-	g_Levels[9] = level_crystalchem;
-	g_Levels[10] = level_punisher;
-	g_Levels[11] = level_challenge;
-	g_Levels[12] = level_easypeasy;
-	g_Levels[13] = level_darkdescent;
-	g_Levels[14] = level_twister;
+	u8 idx = 0;
+	#define LEVEL_ENTRY(lvl) g_Levels[idx++] = lvl;
+	LEVEL_LIST
+	#undef LEVEL_ENTRY
 }
 
 i8 GetDPos(i8* m) {
