@@ -366,40 +366,43 @@ void UpdateEnemies(struct Level *lvl) {
 	struct Enemy *enemies = lvl->enemies;
 
 	for (u8 e=0; e < lvl->num_enemies; e++) {
-		// Muovi i proiettili indipendentemente dallo stato del nemico
-		if (enemies[e].field_state == 2) {
+		struct Enemy enemy;
+		enemy = enemies[e];
 
-			enemies[e].field_mDX += 12 * enemies[e].dir_x;
-			i8 dx = GetDPos(&enemies[e].field_mDX);
-			enemies[e].field_x += dx;
+		// Muovi i proiettili indipendentemente dallo stato del nemico
+		if (enemy.field_state == 2) {
+
+			enemy.field_mDX += 12 * enemy.dir_x;
+			i8 dx = GetDPos(&enemy.field_mDX);
+			enemy.field_x += dx;
 
 			// Se esce dallo schermo, resettalo
-			if (enemies[e].field_x < 8 || enemies[e].field_x > 240) {
-				enemies[e].field_state = 0;
+			if (enemy.field_x < 8 || enemy.field_x > 240) {
+				enemy.field_state = 0;
 			}
 		}
 
 		// Stato stunned. Per un nemico in questo stato ci fermiamo qua:
 		// no movimento, no nuovi field.
-		if (enemies[e].stunned_timer > 0) {
-			enemies[e].stunned_timer--;
+		if (enemy.stunned_timer > 0) {
+			enemy.stunned_timer--;
 			continue;
 		}
 
 		// Nemici tipo 2, campo di forza locale
-		if (enemies[e].type == 2) {
-			if (enemies[e].field_state == 1) {
-				enemies[e].field_timer--;
+		if (enemy.type == 2) {
+			if (enemy.field_state == 1) {
+				enemy.field_timer--;
 
-				if (enemies[e].field_timer == 0) {
+				if (enemy.field_timer == 0) {
 					// Al termine del timer disattiva il campo di forza
-					enemies[e].field_state = 0;
+					enemy.field_state = 0;
 				}
 
 				// Se il campo di forza è attivo, il nemico non si muove
 				continue;
 
-			} else if (enemies[e].field_state == 0) {
+			} else if (enemy.field_state == 0) {
 				// Spawn window based on g_RemainingFS cycle
 				// Different enemies check at different counter values (offset by enemy index)
 				// This creates a natural phase offset without multiplication
@@ -408,19 +411,19 @@ void UpdateEnemies(struct Level *lvl) {
 
 				// 10-frame window out of 50
 				if (check_value < 10 && Math_GetRandom8() < 10) {
-					enemies[e].field_state = 1;
-					enemies[e].field_timer = 100;
+					enemy.field_state = 1;
+					enemy.field_timer = 100;
 
 					// Il campo di forza appare davanti al nemico
-					enemies[e].field_x = enemies[e].pos_x + (enemies[e].dir_x * 16);
-					enemies[e].field_y = enemies[e].pos_y;
+					enemy.field_x = enemy.pos_x + (enemy.dir_x * 16);
+					enemy.field_y = enemy.pos_y;
 				}
 			}
 		}
 
 		// Nemici tipo 3, campo di forza proiettile
-		if (enemies[e].type == 3) {
-			if (enemies[e].field_state == 0) {
+		if (enemy.type == 3) {
+			if (enemy.field_state == 0) {
 				// Spawn window based on g_RemainingFS cycle
 				// Different enemies check at different counter values (offset by enemy index)
 				u8 check_value = g_RemainingFS + e;
@@ -428,34 +431,34 @@ void UpdateEnemies(struct Level *lvl) {
 
 				// 8-frame window out of 50
 				if (check_value < 8 && Math_GetRandom8() < 5) {
-					enemies[e].field_state = 2;
+					enemy.field_state = 2;
 
-					enemies[e].field_x = enemies[e].pos_x + (enemies[e].dir_x * 16);
-					enemies[e].field_y = enemies[e].pos_y;
-					enemies[e].field_mDX = 0;
+					enemy.field_x = enemy.pos_x + (enemy.dir_x * 16);
+					enemy.field_y = enemy.pos_y;
+					enemy.field_mDX = 0;
 				}
 			}
 		}
 
 		// Check boundaries and reverse direction
-		if (enemies[e].pos_x < enemies[e].min_x) {
-			enemies[e].pos_x = enemies[e].min_x;
-			enemies[e].dir_x = -enemies[e].dir_x;
+		if (enemy.pos_x < enemy.min_x) {
+			enemy.pos_x = enemy.min_x;
+			enemy.dir_x = -enemy.dir_x;
 		}
 
-		if (enemies[e].pos_x > enemies[e].max_x) {
-			enemies[e].pos_x = enemies[e].max_x;
-			enemies[e].dir_x = -enemies[e].dir_x;
+		if (enemy.pos_x > enemy.max_x) {
+			enemy.pos_x = enemy.max_x;
+			enemy.dir_x = -enemy.dir_x;
 		}
 
 		// Add speed to accumulated movement (in eighths of pixel)
 		// Type 0: 2 eighths/frame, all others: 4 eighths/frame
-		u8 speed = (enemies[e].type == 0) ? 2 : 4;
-		enemies[e].mDX += speed * enemies[e].dir_x;
+		u8 speed = (enemy.type == 0) ? 2 : 4;
+		enemy.mDX += speed * enemy.dir_x;
 
 		// Convert eighths-of-pixel to actual pixel movement
-		i8 dx = GetDPos(&enemies[e].mDX);
-		enemies[e].pos_x += dx;
+		i8 dx = GetDPos(&enemy.mDX);
+		enemy.pos_x += dx;
 	}
 }
 
