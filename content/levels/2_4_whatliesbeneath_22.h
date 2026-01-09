@@ -47,5 +47,5 @@ struct Level level_whatliesbeneath = {
 	0,           // num_enemies
 	NULL,        // enemies
 	g_Level2WhatLiesBeneathOrazioCacciola,   // layout
-	"WHAT LIES BENEATH - S.FORTE", // name
+	"WHAT LIES BENEATH - O.CACCIOLA", // name
 };
