@@ -380,10 +380,6 @@ void UpdateEnemies(struct Level *lvl) {
 			continue;
 		}
 
-		if (enemies[e].field_cooldown > 0) {
-			enemies[e].field_cooldown--;
-		}
-
 		// Nemici tipo 2, campo di forza locale
 		if (enemies[e].type == 2) {
 			if (enemies[e].field_state == 1) {
@@ -392,15 +388,20 @@ void UpdateEnemies(struct Level *lvl) {
 				if (enemies[e].field_timer == 0) {
 					// Al termine del timer disattiva il campo di forza
 					enemies[e].field_state = 0;
-					enemies[e].field_cooldown = 150;
 				}
 
 				// Se il campo di forza è attivo, il nemico non si muove
 				continue;
 
-			} else if (enemies[e].field_state == 0 && enemies[e].field_cooldown == 0) {
+			} else if (enemies[e].field_state == 0) {
+				// Spawn window based on g_RemainingFS cycle
+				// Different enemies check at different counter values (offset by enemy index)
+				// This creates a natural phase offset without multiplication
+				u8 check_value = g_RemainingFS + e;
+				if (check_value >= 50) check_value -= 50;
 
-				if (Math_GetRandom8() < 10) {
+				// 10-frame window out of 50
+				if (check_value < 10 && Math_GetRandom8() < 10) {
 					enemies[e].field_state = 1;
 					enemies[e].field_timer = 100;
 
@@ -413,11 +414,15 @@ void UpdateEnemies(struct Level *lvl) {
 
 		// Nemici tipo 3, campo di forza proiettile
 		if (enemies[e].type == 3) {
-			if (enemies[e].field_state == 0 && enemies[e].field_cooldown == 0) {
+			if (enemies[e].field_state == 0) {
+				// Spawn window based on g_RemainingFS cycle
+				// Different enemies check at different counter values (offset by enemy index)
+				u8 check_value = g_RemainingFS + e;
+				if (check_value >= 50) check_value -= 50;
 
-				if (Math_GetRandom8() < 5) {
+				// 8-frame window out of 50
+				if (check_value < 8 && Math_GetRandom8() < 5) {
 					enemies[e].field_state = 2;
-					enemies[e].field_cooldown = 120;
 
 					enemies[e].field_x = enemies[e].pos_x + (enemies[e].dir_x * 16);
 					enemies[e].field_y = enemies[e].pos_y;

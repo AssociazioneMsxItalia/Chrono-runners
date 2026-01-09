@@ -42,7 +42,6 @@ struct Enemy enemies_suicidepit[] = {
 	        0,  // stunned_timer (initialized to 0)
 			0,  // field_state
 			0,  // field_timer
-			0,  // field_cooldown
 			0,  // field_x
 			0,  // field_y
 			0}, // field_mDX
@@ -55,7 +54,6 @@ struct Enemy enemies_suicidepit[] = {
 	        0,  // stunned_timer (initialized to 0)
 			0,  // field_state
 			0,  // field_timer
-			0,  // field_cooldown
 			0,  // field_x
 			0,  // field_y
 			0}, // field_mDX
@@ -68,7 +66,6 @@ struct Enemy enemies_suicidepit[] = {
 	        0,  // stunned_timer (initialized to 0)
 			0,  // field_state
 			0,  // field_timer
-			0,  // field_cooldown
 			0,  // field_x
 			0,  // field_y
 			0}, // field_mDX
