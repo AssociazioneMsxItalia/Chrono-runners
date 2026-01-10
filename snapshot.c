@@ -110,13 +110,14 @@ void Snapshot_Restore(struct Level *lvl, u8 snapshot_index, u8 *out_player_x, u8
 
     // Restore enemy states
     for (u8 e = 0; e < lvl->num_enemies && e < MAX_ENEMIES; e++) {
-        lvl->enemies[e].pos_x = snap->enemy_x[e];
-        lvl->enemies[e].pos_y = snap->enemy_y[e];
-        lvl->enemies[e].dir_x = snap->enemy_dir[e];
-        lvl->enemies[e].stunned_timer = snap->enemy_stunned[e];
-        lvl->enemies[e].field_state = snap->enemy_field_state[e];
-        lvl->enemies[e].field_x = snap->enemy_field_x[e];
-        lvl->enemies[e].field_y = snap->enemy_field_y[e];
+        struct Enemy *enemy = &lvl->enemies[e];
+        enemy->pos_x = snap->enemy_x[e];
+        enemy->pos_y = snap->enemy_y[e];
+        enemy->dir_x = snap->enemy_dir[e];
+        enemy->stunned_timer = snap->enemy_stunned[e];
+        enemy->field_state = snap->enemy_field_state[e];
+        enemy->field_x = snap->enemy_field_x[e];
+        enemy->field_y = snap->enemy_field_y[e];
     }
 }
 
