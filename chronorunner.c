@@ -333,14 +333,6 @@ void ReinitPlayer(Pawn *pawn, Pawn_Sprite *spr_layers, u8 n_spr_layers, u8 x, u8
 	Pawn_SetPosition(pawn, x, y);
 }
 
-// Semplice rilevazione di collisioni a bounding box. Assume oggetti 16x16
-bool bboxCollide(u8 x1, u8 y1, u8 x2, u8 y2) {
-	if (abs((i16)x1 - x2) < 16 && abs((i16)y1 - y2) < 16)
-		return TRUE;
-
-	return FALSE;
-}
-
 // Verifica collisione tra due rettangoli definiti da:
 // (x1, y1) -> Angolo in alto a sinistra
 // (x2, y2) -> Angolo in basso a destra
@@ -361,6 +353,12 @@ bool rectCollide(u8 ax1, u8 ay1, u8 ax2, u8 ay2,
 
 	// Se nessuna delle condizioni sopra è vera, i rettangoli si intersecano
 	return TRUE;
+}
+
+// Semplice rilevazione di collisioni a bounding box. Assume oggetti 16x16
+bool bboxCollide(u8 x1, u8 y1, u8 x2, u8 y2) {
+	return rectCollide(x1, y1, x1 + 15, y1 + 15,
+	                   x2, y2, x2 + 15, y2 + 15);
 }
 
 void TakeKey() {
