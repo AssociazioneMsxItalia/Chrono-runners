@@ -18,9 +18,9 @@ struct Level;
 #define SNAPSHOT_BUFFER_SIZE 100
 
 // Maximum objects per level (adjust if your levels have more)
-#define MAX_PLATFORMS 8
-#define MAX_ENEMIES 8
-#define MAX_MINES 8
+#define MAX_PLATFORMS 4
+#define MAX_ENEMIES 4
+#define MAX_MINES 6
 
 /**
  * @brief Complete snapshot of all dynamic game object states

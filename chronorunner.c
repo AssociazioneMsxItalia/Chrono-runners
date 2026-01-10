@@ -205,7 +205,7 @@ i8	 g_mDY = 0;
 i8   g_DX;
 i8   g_DY;
 bool g_PlayerHasKey = FALSE;
-u8 g_PlayerMaxRewindEnergy = 62;
+u8 g_PlayerMaxRewindEnergy = 25;
 u8 g_PlayerRewindEnergy = 0;
 
 // Key sprite
@@ -284,7 +284,7 @@ void DrawRewindGauge() {
 	// La barra di rewind può essere grande fino a 8 slot, un cristallo
 	// ne riempie due
 
-	u8 ntiles = g_PlayerRewindEnergy >> 5; // g_PlayerRewindEnergy / 32
+	u8 ntiles = g_PlayerRewindEnergy >> 4; // / 16
 
 	if (ntiles != 0)
 		VDP_FillLayout_GM2(45, 21, 0, ntiles, 1);
@@ -382,7 +382,7 @@ void TakeKey() {
 }
 
 void TakeCrystal() {
-	g_PlayerMaxRewindEnergy += 62;
+	g_PlayerMaxRewindEnergy += 25;
 }
 
 bool isPlayerAtExit() {
