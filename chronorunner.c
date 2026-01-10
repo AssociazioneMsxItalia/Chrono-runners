@@ -235,51 +235,6 @@ u8 g_EnergyFieldAnimCounter;
 u8 g_CurrentLevel;
 u8 g_NextLevel;
 
-//=============================================================================
-// REWIND DATA
-//=============================================================================
-
-/*
-
-Il personaggio principale può riavvolgere il tempo per sé stesso, ripercorrendo
-lo spazio che ha attraversato nella direzione inversa. Noi ogni fotogramma del
-gioco ci salviamo posizione e fotogramma.
-
-Usiamo un buffer circolare, implementato con strategia a contatore, che ha due
-vantaggi in questo caso:
- * permette di usare tutto lo spazio a disposizione (anche l'ultimo slot);
- * permette di risparmiare un po' di codice che sarebbe altrimenti servito per
-   calcolare il numero degli elementi contenuti.
-
-Le invarianti di questo buffer sono:
-
- * head cresce verso "destra";
- * tail logicamente si trova sempre a "sinistra" di head;
- * head punta alla posizione vuota che ospiterà il prossimo valore;
- * il buffer è vuoto quando count = 0
- * il buffer è pieno quando count = rewindSize;
-
- tail           head
-   |              |
-   v              v
-|--0123456789ABCDE-----------|
-
-  head           tail
-   |              |
-   v              v
-|BC---------------0123456789A|
-
-*/
-
-// 2 seconds * 50 fps per coordinata (reduced to fit in available RAM)
-#define rewindSize 100
-u8 x_rewind[rewindSize];
-u8 y_rewind[rewindSize];
-u8 f_rewind[rewindSize];
-u8 rewind_head;
-u8 rewind_tail;
-u8 rewind_count;
-
 void DrawRewindGauge() {
 	// La barra di rewind può essere grande fino a 8 slot, un cristallo
 	// ne riempie due
@@ -1045,9 +1000,7 @@ void PlayerRestart()
 	// dopo la morte o dopo un livello delle coordinate spurie
 	g_PlayerRewindEnergy = 0;
 
-	rewind_head = rewind_tail = rewind_count = 0;
-
-	// Initialize snapshot system for object rewind
+	// Initialize snapshot system for player and object rewind
 	Snapshot_Initialize();
 }
 
@@ -1241,23 +1194,8 @@ bool State_Game()
 		return TRUE;
 	}
 
-	// Inserisce la posizione attuale nel buffer circolare
-	x_rewind[rewind_head] = g_PlayerPawn.PositionX;
-	y_rewind[rewind_head] = g_PlayerPawn.PositionY;
-	f_rewind[rewind_head] = g_PlayerPawn.AnimFrame;
-	rewind_head = (rewind_head + 1) % rewindSize;
-
-	// L'array era già pieno?
-	if (rewind_count == rewindSize) {
-		// Se sì, deve consumare la posizione acquisita più vecchia
-		rewind_tail = (rewind_tail + 1) % rewindSize;
-	} else {
-		// Altrimenti si limita a incrementare il contatore di elementi
-		rewind_count++;
-	}
-
-	// Capture snapshot of all game objects (platforms, enemies, mines)
-	Snapshot_Capture(lvl);
+	// Capture snapshot of all game objects and player state
+	Snapshot_Capture(lvl, g_PlayerPawn.PositionX, g_PlayerPawn.PositionY, g_PlayerPawn.AnimFrame);
 
 	u8 row8 = Keyboard_Read(8);
 	if (IS_KEY_PRESSED(row8, KEY_SPACE)) {
@@ -1266,7 +1204,7 @@ bool State_Game()
 			// Sostituisce i colori dello sprite principale
 			ReinitPlayer(&g_PlayerPawn,
 							g_PlayerRewindLayers, numberof(g_PlayerRewindLayers),
-							x_rewind[rewind_head], y_rewind[rewind_head]);
+							g_PlayerPawn.PositionX, g_PlayerPawn.PositionY);
 
 			// Entra in modalità rewind
 			Game_SetState(State_Rewind);
@@ -1374,40 +1312,33 @@ bool State_Rewind()
 		return TRUE;
 	}
 
-	// Ogni passo di rewind consuma un elemento dell'array circolare
-	rewind_head = (rewind_head - 1 + rewindSize) % rewindSize;
-	rewind_count--;
+	// Ogni passo di rewind consuma un elemento del buffer snapshot
+	u8 snapshot_idx = Snapshot_RewindStep();
 
 	// e anche l'energia di rewind del giocatore
 	g_PlayerRewindEnergy--;
 
 	DrawRewindGauge();
 
-	// Aggiorna la posizione e il fotogramma. Per forzare quest'ultimo,
-	// imposta a mano il flag di aggiornamento pattern.
-	Pawn_SetPosition(&g_PlayerPawn, x_rewind[rewind_head], y_rewind[rewind_head]);
-	g_PlayerPawn.Update |= PAWN_UPDATE_PATTERN;
-	g_PlayerPawn.AnimFrame = f_rewind[rewind_head];
-	Pawn_Draw(&g_PlayerPawn);
-
 	// Restore all game objects to their state at this frame
-	SetActiveSegment(4);
+	SetSegmentForLevel(g_CurrentLevel);
 	struct Level *lvl = &g_Levels[g_CurrentLevel];
 
-	// Synchronize snapshot head with player rewind head
-	u8 snapshot_head = (g_SnapshotHead - 1 + SNAPSHOT_BUFFER_SIZE) % SNAPSHOT_BUFFER_SIZE;
-	g_SnapshotHead = snapshot_head;
-	g_SnapshotCount--;
+	u8 px, py, pf;
+	Snapshot_Restore(lvl, snapshot_idx, &px, &py, &pf);
 
-	Snapshot_Restore(lvl, snapshot_head);
+	// Aggiorna la posizione e il fotogramma. Per forzare quest'ultimo,
+	// imposta a mano il flag di aggiornamento pattern.
+	Pawn_SetPosition(&g_PlayerPawn, px, py);
+	g_PlayerPawn.Update |= PAWN_UPDATE_PATTERN;
+	g_PlayerPawn.AnimFrame = pf;
+	Pawn_Draw(&g_PlayerPawn);
 
 	// Redraw all objects at their rewound positions in white
 	DrawPlatforms(lvl, TRUE);
 	DrawMines(lvl, TRUE);
 	DrawEnemies(lvl, TRUE);
 	DrawEnergyFields(lvl, TRUE);
-
-	SetActiveSegment(0);
 
 	return TRUE;
 }
