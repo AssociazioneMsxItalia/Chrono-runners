@@ -752,7 +752,13 @@ void DrawEnemies(struct Level *lvl, bool rewind) {
 			pattern = ENEMY_PATTERN_OFFSET + type_offset + (g_EnemyAnimCounter >= 10 ? 12 : 8);
 		}
 
-		u8 color = rewind ? COLOR_WHITE : COLOR_BLACK;
+		u8 color;
+		if (rewind) {
+			color = COLOR_WHITE;
+		} else {
+			color = COLOR_BLACK;
+		}
+
 		VDP_SetSpriteSM1(index, enemies[e].pos_x, enemies[e].pos_y, pattern, color);
 	}
 }
