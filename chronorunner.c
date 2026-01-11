@@ -879,7 +879,7 @@ void DrawMines(struct Level *lvl) {
 
 	for (u8 m=0; m < lvl->num_mines; m++) {
 		u8 index = g_MineSpritesBaseID + m;
-		u8 color = g_RemainingFS < 25 ? COLOR_DARK_RED : COLOR_LIGHT_RED;
+		u8 color = g_RemainingFS < 25 ? COLOR_LIGHT_RED : COLOR_BLACK;
 
         if (mines[m].enabled) {
 			VDP_SetSpriteColorSM1(index, color);
