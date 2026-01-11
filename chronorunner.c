@@ -172,6 +172,13 @@ extern void InitializeSprite();
 extern const u8 g_Intermission[];
 
 //=============================================================================
+// SEGMENT 7, BANK 1
+//=============================================================================
+extern void PrintGFXText(const c8 *text, u8 x, u8 y);
+extern void PrintGFXNumber(u8 number, u8 x, u8 y);
+extern void PrintTime();
+
+//=============================================================================
 // MEMORY DATA
 //=============================================================================
 
@@ -445,62 +452,6 @@ bool isPlayerHitByEnergyFields(struct Level *lvl) {
 
 bool isPlayerInPit() {
 	return g_PlayerPawn.PositionY > 192;
-}
-
-void PrintGFXText(const c8 *text, u8 x, u8 y) {
-	while (*text != 0) {
-		c8 c = *text;
-		u8 tile = 0;
-		// Numero
-		if (c >= 48 && c <= 57) {
-			tile = 1 + (c - 48);
-		}
-		// Lettera
-		else if (c >= 65 && c <= 90) {
-			tile = 11 + (c - 65);
-		}
-		// "
-		else if (c == 34) {
-			tile = 40;
-		}
-		// '
-		else if (c == 39) {
-			tile = 38;
-		}
-		// ,
-		else if (c == 44) {
-			tile = 39;
-		}
-		// -
-		else if (c == 45) {
-			tile = 47;
-		}
-		// .
-		else if (c == 46) {
-			tile = 37;
-		}
-		// :
-		else if (c == 58) {
-			tile = 41;
-		}
-
-		VDP_Poke_GM2(x, y, tile);
-
-		x++;
-		text++;
-	}
-}
-
-void PrintGFXNumber(u8 number, u8 x, u8 y) {
-	u8 tile10 = (number / 10) + 1;
-	u8 tile1 = (number % 10) + 1;
-	VDP_Poke_GM2(x, y, tile10);
-	VDP_Poke_GM2(x+1, y, tile1);
-}
-
-void PrintTime() {
-	PrintGFXNumber(g_RemainingMinutes, 7, 0);
-	PrintGFXNumber(g_RemainingSeconds, 10, 0);
 }
 
 //=============================================================================
@@ -1012,8 +963,11 @@ bool State_Intermission()
 
 		SetSegmentForLevel(g_NextLevel);
 
-		// Prossimo livello
-		const c8 *level_name = g_Levels[g_NextLevel].name;
+		// Prende il nome del prossimo livello
+		c8 level_name[32];
+		String_Copy(level_name, g_Levels[g_NextLevel].name);
+
+		SetActiveSegment(0);
 
 		// Progresso
 		u16 prog = (g_NextLevel * 30) / g_NumLevels;
@@ -1028,6 +982,8 @@ bool State_Intermission()
 		// Posizione
 		VDP_Poke_GM2(2 + prog, 16, 48);
 
+		SetActiveSegment(7);
+
 		PrintGFXText("ROOM", 5, 18);
 		PrintGFXNumber(g_NextLevel + 1, 10, 18);
 
@@ -1041,9 +997,9 @@ bool State_Intermission()
 		// Nome del livello (centrato)
 		PrintGFXText(level_name, 16 - (String_Length(level_name) / 2), 20);
 
-		SetActiveSegment(0);
-
 		PrintGFXText("PRESS SPACE KEY", 8, 23);
+
+		SetActiveSegment(0);
 
 		g_IntermissionState = 1;
 	}
@@ -1100,8 +1056,10 @@ bool State_ChangeLevel()
 
 	SetActiveSegment(0);
 
+	SetActiveSegment(7);
 	PrintGFXText("TIME   '  \"", 2, 0);
 	PrintTime();
+	SetActiveSegment(0);
 
 	g_PlayerHasKey = FALSE;
 	PlayerRestart();
@@ -1137,7 +1095,9 @@ bool State_Game()
 
 	// Testi a video
 	if (g_RemainingFS == 0) {
+		SetActiveSegment(7);
 		PrintTime();
+		SetActiveSegment(0);
 	}
 
 	// Controlla se il tempo è esaurito
