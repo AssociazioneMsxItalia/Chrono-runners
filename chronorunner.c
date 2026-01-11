@@ -837,19 +837,13 @@ void DrawEnergyFields(struct Level *lvl, bool rewind) {
 	}
 }
 
-void DrawMines(struct Level *lvl, bool rewind) {
+void DrawMines(struct Level *lvl) {
 	struct Mine *mines = lvl->mines;
 
 	for (u8 m=0; m < lvl->num_mines; m++) {
 		u8 index = g_MineSpritesBaseID + m;
-		u8 color;
+		u8 color = g_RemainingFS < 25 ? COLOR_BLACK : COLOR_LIGHT_RED;
 		
-		if (rewind) {
-			color = COLOR_WHITE;
-		} else {
-			color = g_RemainingFS < 25 ? COLOR_DARK_RED : COLOR_LIGHT_RED;
-		}
-
         if (mines[m].enabled) {
 			VDP_SetSpriteColorSM1(index, color);
         } else {
@@ -1158,9 +1152,9 @@ bool State_Game()
 	Pawn_Draw(&g_PlayerPawn);
 
 	DrawPlatforms(lvl, FALSE);
-	DrawMines(lvl, FALSE);
 	DrawEnemies(lvl, FALSE);
 	DrawEnergyFields(lvl, FALSE);
+	DrawMines(lvl);
 	DrawKey();
 	DrawCrystal();
 
@@ -1336,7 +1330,6 @@ bool State_Rewind()
 
 	// Redraw all objects at their rewound positions in white
 	DrawPlatforms(lvl, TRUE);
-	DrawMines(lvl, TRUE);
 	DrawEnemies(lvl, TRUE);
 	DrawEnergyFields(lvl, TRUE);
 
