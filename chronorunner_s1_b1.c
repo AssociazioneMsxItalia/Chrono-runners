@@ -6,6 +6,7 @@
 // LEVELS
 //=============================================================================
 
+#include "content/levels/1_0_intro_04.h"
 #include "content/levels/1_1_ronin_16.h"
 #include "content/levels/1_2_thefactory_07.h"
 #include "content/levels/1_3_theprison_06.h"

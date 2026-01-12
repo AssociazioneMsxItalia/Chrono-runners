@@ -135,11 +135,11 @@ void SetActiveSegment(u8 segment) {
 	}
 }
 
-u8 g_NumLevels = 15;
-struct Level g_Levels[15];
+u8 g_NumLevels = 16;
+struct Level g_Levels[16];
 
 void SetSegmentForLevel(u8 lvlidx) {
-	if (lvlidx < 10) {
+	if (lvlidx < 11) {
 		SetActiveSegment(1);
 	} else {
 		SetActiveSegment(2);
@@ -750,6 +750,7 @@ void AllocateSpriteIDs(struct Level *lvl) {
 // STATES
 //=============================================================================
 
+#include "content/levels/1_0_intro_04_lvl.h"
 #include "content/levels/1_1_ronin_16_lvl.h"
 #include "content/levels/1_2_thefactory_07_lvl.h"
 #include "content/levels/1_3_theprison_06_lvl.h"
@@ -776,6 +777,7 @@ bool State_Initialize()
 	SetActiveSegment(0);
 
 	u8 i = 0;
+	g_Levels[i++] = level_intro;
 	g_Levels[i++] = level_ronin;
 	g_Levels[i++] = level_thefactory;
 	g_Levels[i++] = level_theprison;
