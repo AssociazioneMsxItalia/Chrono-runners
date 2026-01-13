@@ -227,7 +227,7 @@ u8 g_CrystalPosX;
 u8 g_CrystalPosY;
 u8 g_CrystalAnimFrame;
 
-// Alloaczione sprite
+// Allocazione sprite
 u8 g_PlatformSpritesBaseID;
 u8 g_MineSpritesBaseID;
 u8 g_EnemySpritesBaseID;
@@ -615,13 +615,166 @@ void UpdatePlatforms(struct Level *lvl) {
 	}
 }
 
+void DrawKey(struct Level *lvl) {
+	if (!g_KeyEnabled)
+		return;
+
+	// Alterna i due fotogrammi ogni 20 tick
+	g_KeyAnimFrame++;
+	if (g_KeyAnimFrame >= 40) {
+		g_KeyAnimFrame = 0;
+	}
+
+	u8 pattern = KEY_PATTERN_OFFSET;
+	if(g_KeyAnimFrame >= 20) {
+		pattern += KEY_PATTERN_SIZE;
+	}
+
+	VDP_SetSpriteSM1(KEY_SPRITE_ID, lvl->key_x * 8, lvl->key_y * 8, pattern, COLOR_BLACK);
+}
+
+void DrawCrystal(struct Level *lvl) {
+	if (!g_CrystalEnabled)
+		return;
+
+	// Alterna i due fotogrammi ogni 16 tick
+	g_CrystalAnimFrame++;
+	if (g_CrystalAnimFrame >= 32) {
+		g_CrystalAnimFrame = 0;
+	}
+
+	u8 pattern = CRYSTAL_PATTERN_OFFSET;
+	if (g_CrystalAnimFrame >= 16) {
+		pattern += CRYSTAL_PATTERN_SIZE;
+	}
+
+	VDP_SetSpriteSM1(CRYSTAL_SPRITE_ID, lvl->crystal_x * 8, lvl->crystal_y * 8, pattern, COLOR_MEDIUM_RED);
+}
+
 void DrawPlatforms(struct Level *lvl, bool rewind) {
 	struct Platform *platforms = lvl->platforms;
 
 	for (u8 p=0; p < lvl->num_platforms; p++) {
 		u8 index = g_PlatformSpritesBaseID + p;
-		VDP_SetSpritePosition(index, platforms[p].pos_x, platforms[p].pos_y);
-		VDP_SetSpriteColorSM1(index, rewind ? COLOR_WHITE : COLOR_BLACK);
+		u8 shape;
+		if (lvl->platforms[p].dir_x != 0) {
+			shape = PLATFORMH_PATTERN_OFFSET;
+		} else {
+			shape = PLATFORMV_PATTERN_OFFSET;
+		}
+		u8 color;
+		if (rewind) {
+			color = COLOR_WHITE;
+		} else {
+			color = COLOR_BLACK;
+		}
+		VDP_SetSpriteSM1(index, platforms[p].pos_x, platforms[p].pos_y, shape, color);
+	}
+}
+
+void DrawMines(struct Level *lvl) {
+	struct Mine *mines = lvl->mines;
+
+	for (u8 m=0; m < lvl->num_mines; m++) {
+		u8 index = g_MineSpritesBaseID + m;
+		u8 color;
+
+		if (g_RemainingFS < 25) {
+			color = COLOR_BLACK;
+		} else {
+			color = COLOR_LIGHT_RED;
+		}
+
+        if (mines[m].enabled) {
+			VDP_SetSpriteSM1(index, mines[m].pos_x, mines[m].pos_y, MINE_PATTERN_OFFSET, color);
+        } else {
+			VDP_HideSprite(index);
+		}
+    }
+}
+
+void DrawEnemies(struct Level *lvl, bool rewind) {
+	struct Enemy *enemies = lvl->enemies;
+
+	// Simple animation: alternate between 2 frames every 10 ticks
+	g_EnemyAnimCounter++;
+	if (g_EnemyAnimCounter >= 20) {
+		g_EnemyAnimCounter = 0;
+	}
+
+	for (u8 e=0; e < lvl->num_enemies; e++) {
+		u8 index = g_EnemySpritesBaseID + e;
+
+		// Calculate base pattern offset for this enemy type
+		u8 type_offset = enemies[e].type * ENEMY_TYPE_PATTERN_TOTAL;
+
+		// Choose pattern based on state
+		u8 pattern;
+		u8 anim_pattern;
+		if (enemies[e].stunned_timer > 0) {
+			// Stunned
+			anim_pattern = 4 * 4;
+		} else if (enemies[e].dir_x < 0) {
+			// Moving left
+			anim_pattern = 0 * 4;
+		} else {
+			// Moving right
+			anim_pattern = 2 * 4;
+		}
+
+		if (g_EnemyAnimCounter >= 10) {
+			anim_pattern += 4;
+		}
+
+		pattern = ENEMY_PATTERN_OFFSET + type_offset + anim_pattern;
+
+		u8 color;
+		if (rewind) {
+			color = COLOR_WHITE;
+		} else {
+			color = COLOR_BLACK;
+		}
+
+		VDP_SetSpriteSM1(index, enemies[e].pos_x, enemies[e].pos_y, pattern, color);
+	}
+}
+
+void DrawEnergyFields(struct Level *lvl, bool rewind) {
+	struct Enemy *enemies = lvl->enemies;
+
+	// Animate energy fields
+	g_EnergyFieldAnimCounter++;
+	if (g_EnergyFieldAnimCounter >= 16) {
+		g_EnergyFieldAnimCounter = 0;
+	}
+
+	u8 pattern = ENERGYFIELD_PATTERN_OFFSET;
+
+	if (g_EnergyFieldAnimCounter >= 8) {
+		pattern += ENERGYFIELD_PATTERN_SIZE;
+	}
+
+	// Draw energy field for each enemy that has one active
+	for (u8 e=0; e < lvl->num_enemies; e++) {
+		u8 sprite_id = g_EnergyFieldSpritesBaseID + e;
+
+		if (enemies[e].field_state != 0) {
+			u8 color;
+			if (rewind) {
+				color = COLOR_WHITE;
+			} else {
+				if (g_EnergyFieldAnimCounter & 1) {
+					color = COLOR_DARK_GREEN;
+				} else {
+					color = COLOR_DARK_YELLOW;
+				}
+			}
+			// Field is active (either Type 2 stationary or Type 3 projectile)
+			VDP_SetSpriteSM1(sprite_id, enemies[e].field_x, enemies[e].field_y, pattern, color);
+		} else {
+			// No active field - hide the sprite
+			VDP_HideSprite(sprite_id);
+		}
 	}
 }
 
@@ -724,119 +877,6 @@ void UpdateEnemies(struct Level *lvl) {
 	}
 }
 
-void DrawEnemies(struct Level *lvl, bool rewind) {
-	struct Enemy *enemies = lvl->enemies;
-
-	// Simple animation: alternate between 2 frames every 10 ticks
-	g_EnemyAnimCounter++;
-	if (g_EnemyAnimCounter >= 20) {
-		g_EnemyAnimCounter = 0;
-	}
-
-	for (u8 e=0; e < lvl->num_enemies; e++) {
-		u8 index = g_EnemySpritesBaseID + e;
-
-		// Calculate base pattern offset for this enemy type
-		u8 type_offset = enemies[e].type * ENEMY_TYPE_PATTERN_TOTAL;
-
-		// Choose pattern based on state
-		u8 pattern;
-		if (enemies[e].stunned_timer > 0) {
-			// Stunned animation - frames 5 and 6
-			pattern = ENEMY_PATTERN_OFFSET + type_offset + (g_EnemyAnimCounter >= 10 ? 16 : 20);
-		} else if (enemies[e].dir_x < 0) {
-			// Moving left - frames 0 and 1
-			pattern = ENEMY_PATTERN_OFFSET + type_offset + (g_EnemyAnimCounter >= 10 ? 4 : 0);
-		} else {
-			// Moving right - frames 3 and 4
-			pattern = ENEMY_PATTERN_OFFSET + type_offset + (g_EnemyAnimCounter >= 10 ? 12 : 8);
-		}
-
-		u8 color;
-		if (rewind) {
-			color = COLOR_WHITE;
-		} else {
-			color = COLOR_BLACK;
-		}
-
-		VDP_SetSpriteSM1(index, enemies[e].pos_x, enemies[e].pos_y, pattern, color);
-	}
-}
-
-void DrawEnergyFields(struct Level *lvl, bool rewind) {
-	struct Enemy *enemies = lvl->enemies;
-
-	// Animate energy fields
-	g_EnergyFieldAnimCounter++;
-	if (g_EnergyFieldAnimCounter >= 16) {
-		g_EnergyFieldAnimCounter = 0;
-	}
-
-	u8 pattern = ENERGYFIELD_PATTERN_OFFSET + (g_EnergyFieldAnimCounter >= 8 ? ENERGYFIELD_PATTERN_SIZE : 0);
-
-	// Draw energy field for each enemy that has one active
-	for (u8 e=0; e < lvl->num_enemies; e++) {
-		u8 sprite_id = g_EnergyFieldSpritesBaseID + e;
-
-		if (enemies[e].field_state != 0) {
-			u8 color;
-			if (rewind) {
-				color = COLOR_WHITE;
-			} else {
-				color = (g_EnergyFieldAnimCounter & 1) ? COLOR_DARK_GREEN : COLOR_DARK_YELLOW;
-			}
-			// Field is active (either Type 2 stationary or Type 3 projectile)
-			VDP_SetSpriteSM1(sprite_id, enemies[e].field_x, enemies[e].field_y, pattern, color);
-		} else {
-			// No active field - hide the sprite
-			VDP_HideSprite(sprite_id);
-		}
-	}
-}
-
-void DrawMines(struct Level *lvl) {
-	struct Mine *mines = lvl->mines;
-
-	for (u8 m=0; m < lvl->num_mines; m++) {
-		u8 index = g_MineSpritesBaseID + m;
-		u8 color = g_RemainingFS < 25 ? COLOR_BLACK : COLOR_LIGHT_RED;
-		
-        if (mines[m].enabled) {
-			VDP_SetSpriteColorSM1(index, color);
-        } else {
-			VDP_HideSprite(index);
-        }
-    }
-}
-
-void DrawKey() {
-	if (!g_KeyEnabled)
-		return;
-
-	// Alterna i due fotogrammi ogni 20 tick
-	g_KeyAnimFrame++;
-	if (g_KeyAnimFrame >= 40) {
-		g_KeyAnimFrame = 0;
-	}
-
-	u8 pattern = KEY_PATTERN_OFFSET + (g_KeyAnimFrame >= 20 ? KEY_PATTERN_SIZE : 0);
-	VDP_SetSpritePattern(KEY_SPRITE_ID, pattern);
-}
-
-void DrawCrystal() {
-	if (!g_CrystalEnabled)
-		return;
-
-	// Alterna i due fotogrammi ogni 16 tick
-	g_CrystalAnimFrame++;
-	if (g_CrystalAnimFrame >= 32) {
-		g_CrystalAnimFrame = 0;
-	}
-
-	u8 pattern = CRYSTAL_PATTERN_OFFSET + (g_CrystalAnimFrame >= 16 ? CRYSTAL_PATTERN_SIZE : 0);
-	VDP_SetSpritePattern(CRYSTAL_SPRITE_ID, pattern);
-}
-
 void AllocateSpriteIDs(struct Level *lvl) {
 
 	// Gli sprite ID allocati fissi sono:
@@ -845,53 +885,25 @@ void AllocateSpriteIDs(struct Level *lvl) {
 	// 3: Crystal
 	// 4+: Platforms, Mines, Enemies, Energy Fields
 
-	VDP_SetSpriteSM1(KEY_SPRITE_ID, g_KeyPosX, g_KeyPosY, KEY_PATTERN_OFFSET, COLOR_BLACK);
-
-	VDP_SetSpriteSM1(CRYSTAL_SPRITE_ID, g_CrystalPosX, g_CrystalPosY, CRYSTAL_PATTERN_OFFSET, COLOR_MEDIUM_RED);
-	if (!g_CrystalEnabled) {
-		VDP_HideSprite(CRYSTAL_SPRITE_ID);
-	}
-
 	g_PlatformSpritesBaseID = 4;
 
 	// Imposta gli sprite piattaforma da usare nel livello corrente
 	u8 np = lvl->num_platforms;
-	struct Platform *platforms = lvl->platforms;
-	for (u8 p=0; p < np; p++) {
-		u8 index = g_PlatformSpritesBaseID + p;
-		u8 shape = platforms[p].dir_x != 0 ? PLATFORMH_PATTERN_OFFSET : PLATFORMV_PATTERN_OFFSET;
-		VDP_SetSpriteSM1(index, platforms[p].pos_x, platforms[p].pos_y, shape, COLOR_BLACK);
-	}
 
 	g_MineSpritesBaseID = g_PlatformSpritesBaseID + np;
 
 	// Imposta sprite per le mine
 	u8 nm = lvl->num_mines;
-	struct Mine *mines = lvl->mines;
-	for (u8 m=0; m < nm; m++) {
-		u8 index = g_MineSpritesBaseID + m;
-		VDP_SetSpriteSM1(index, mines[m].pos_x, mines[m].pos_y, MINE_PATTERN_OFFSET, COLOR_DARK_RED);
-	}
 
 	g_EnemySpritesBaseID = g_MineSpritesBaseID + nm;
 	g_EnemyAnimCounter = 0;
 
 	// Imposta sprite per i nemici
 	u8 ne = lvl->num_enemies;
-	struct Enemy *enemies = lvl->enemies;
-	for (u8 e=0; e < ne; e++) {
-		u8 index = g_EnemySpritesBaseID + e;
-		VDP_SetSpriteSM1(index, enemies[e].pos_x, enemies[e].pos_y, ENEMY_PATTERN_OFFSET, COLOR_BLACK);
-	}
 
 	// Campi di forza, uno per ciascun nemico
 	g_EnergyFieldSpritesBaseID = g_EnemySpritesBaseID + ne;
 	g_EnergyFieldAnimCounter = 0;
-
-	for (u8 e = 0; e < ne; e++) {
-		u8 sprite_id = g_EnergyFieldSpritesBaseID + e;
-		VDP_SetSpriteSM1(sprite_id, 0, 0, ENERGYFIELD_PATTERN_OFFSET, COLOR_LIGHT_BLUE);
-	}
 }
 
 
@@ -1117,12 +1129,12 @@ bool State_Game()
 	Pawn_Update(&g_PlayerPawn);
 	Pawn_Draw(&g_PlayerPawn);
 
+	DrawKey(lvl);
+	DrawCrystal(lvl);
 	DrawPlatforms(lvl, FALSE);
+	DrawMines(lvl);
 	DrawEnemies(lvl, FALSE);
 	DrawEnergyFields(lvl, FALSE);
-	DrawMines(lvl);
-	DrawKey();
-	DrawCrystal();
 
 	SetActiveSegment(0);
 
