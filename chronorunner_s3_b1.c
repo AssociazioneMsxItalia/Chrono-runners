@@ -39,7 +39,8 @@
  * @return void
  */
 void LoadPatternAndColor() {
-#if defined(FALSE)
+// Waiting for MSXgl to integrate https://github.com/aoineko-fr/MSXgl/pull/81
+#if 0
 	VDP_LoadColor_GM2(g_DataMapGM2_Colors, 0, 0);
 	VDP_LoadPattern_GM2(g_DataMapGM2_Patterns, 0, 0);
 #else
