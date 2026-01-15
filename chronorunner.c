@@ -201,6 +201,8 @@ extern void PrintGFXText(const c8 *text, u8 x, u8 y);
 extern void PrintGFXNumber(u8 number, u8 x, u8 y);
 extern void PrintTime();
 
+extern void DrawRewindGauge();
+
 //=============================================================================
 // MEMORY DATA
 //=============================================================================
@@ -264,18 +266,6 @@ u8 g_EnergyFieldAnimCounter;
 
 u8 g_CurrentLevel;
 u8 g_NextLevel;
-
-void DrawRewindGauge() {
-	// La barra di rewind può essere grande fino a 8 slot, un cristallo
-	// ne riempie due
-
-	u8 ntiles = g_PlayerRewindEnergy >> 4; // / 16
-
-	if (ntiles != 0)
-		VDP_FillLayout_GM2(45, 21, 0, ntiles, 1);
-	if (ntiles != 8)
-		VDP_FillLayout_GM2(47, 21 + ntiles, 0, 8 - ntiles, 1);
-}
 
 //=============================================================================
 // PHYSICS
@@ -1211,7 +1201,9 @@ bool State_Game()
 		}
 	}
 
+	SetActiveSegment(7);
 	DrawRewindGauge();
+	SetActiveSegment(0);
 
 	return TRUE;
 }
@@ -1313,7 +1305,9 @@ bool State_Rewind()
 	// e anche l'energia di rewind del giocatore
 	g_PlayerRewindEnergy--;
 
+	SetActiveSegment(7);
 	DrawRewindGauge();
+	SetActiveSegment(0);
 
 	// Restore all game objects to their state at this frame
 	SetSegmentForLevel(g_CurrentLevel);

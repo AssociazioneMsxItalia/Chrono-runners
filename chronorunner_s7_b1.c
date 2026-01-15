@@ -2,6 +2,9 @@
 
 extern u8 g_RemainingMinutes;
 extern u8 g_RemainingSeconds;
+extern u8 g_PlayerRewindEnergy;
+
+void DrawRewindGauge();
 
 void PrintGFXText(const c8 *text, u8 x, u8 y) {
 	while (*text != 0) {
@@ -57,4 +60,16 @@ void PrintGFXNumber(u8 number, u8 x, u8 y) {
 void PrintTime() {
 	PrintGFXNumber(g_RemainingMinutes, 7, 0);
 	PrintGFXNumber(g_RemainingSeconds, 10, 0);
+}
+
+void DrawRewindGauge() {
+	// La barra di rewind può essere grande fino a 8 slot, un cristallo
+	// ne riempie due
+
+	u8 ntiles = g_PlayerRewindEnergy >> 4; // / 16
+
+	if (ntiles != 0)
+		VDP_FillLayout_GM2(45, 21, 0, ntiles, 1);
+	if (ntiles != 8)
+		VDP_FillLayout_GM2(47, 21 + ntiles, 0, 8 - ntiles, 1);
 }
