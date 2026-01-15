@@ -40,8 +40,6 @@ void Mute(u8 chan, bool bMute);
 // READ-ONLY DATA
 //=============================================================================
 
-extern unsigned char g_chronorunner[];
-
 // Song data structure
 struct SongData
 {
@@ -194,6 +192,7 @@ extern void InitializeSprite();
 // SEGMENT 4, BANK 1
 //=============================================================================
 extern const u8 g_Intermission[];
+extern unsigned char g_chronorunner[];
 
 //=============================================================================
 // SEGMENT 7, BANK 1
