@@ -1,0 +1,41 @@
+extern unsigned char g_Level4TwisterOrazioCacciola[];
+
+struct Enemy enemies_twister[] = {
+  {17*8, 10*8,  // pos_x pos_y
+	       -1,  // dir_x
+	6*8, 20*8,  // min_x max_x
+	        3,  // type (0-3)
+	        0,  // mDX (initialized to 0)
+	        0,  // stunned_timer (initialized to 0)
+			0,  // field_state
+			0,  // field_timer
+			0,  // field_x
+			0,  // field_y
+			0}, // field_mDX
+  {12*8, 21*8,  // pos_x pos_y
+	       -1,  // dir_x
+    6*8, 24*8,  // min_x max_x
+	        3,  // type (0-3)
+	        0,  // mDX (initialized to 0)
+	        0,  // stunned_timer (initialized to 0)
+			0,  // field_state
+			0,  // field_timer
+			0,  // field_x
+			0,  // field_y
+			0}, // field_mDX
+};
+
+struct Level level_twister = {
+	28, 21,       // start_x start_y
+	2, 21,       // end_x end_y
+	25, 14,       // key_x key_y
+	0, 0,        // crystal_x crystal_y
+	0,           // num_platforms
+	NULL,        // platforms
+	0,           // num_mines
+	NULL,        // mines
+	2,           // num_enemies
+	enemies_twister,  // enemies
+	g_Level4TwisterOrazioCacciola,   // layout
+	"TWISTER - ORAZIO CACCIOLA", // name
+};
