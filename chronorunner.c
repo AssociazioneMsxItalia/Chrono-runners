@@ -4,6 +4,8 @@
 #include "msxgl.h"
 #include "game/state.h"
 #include "game/pawn.h"
+#include "pt3/pt3_player.h"
+#include "pt3/pt3_notetable2.h"
 #include "debug.h"
 
 #include "PawnData.h"
@@ -27,9 +29,31 @@ bool State_GameOver();
 
 void tick();
 
+void SetSong(u8 songId) __FASTCALL;
+void Play();
+void Pause();
+void Stop();
+void Loop(bool enable) __FASTCALL;
+void Mute(u8 chan, bool bMute);
+
 //=============================================================================
 // READ-ONLY DATA
 //=============================================================================
+
+extern unsigned char g_chronorunner[];
+
+// Song data structure
+struct SongData
+{
+	u8*			Raw;
+	const c8*	Name;
+	u16			Size;
+};
+
+u8   g_CurrentSong = 0;
+bool g_Loop = FALSE;
+bool g_Mute[3] = { FALSE, FALSE, FALSE };
+
 
 // Player sprite layers
 const Pawn_Sprite g_PlayerLayers[] =
@@ -1338,6 +1362,11 @@ void tick() {
 }
 
 void InterruptHook() {
+	SetActiveSegment(4);
+	PT3_Decode();
+	PT3_UpdatePSG();
+	SetActiveSegment(0);
+
     if (Game_GetCurrentState() != State_Game)
         return;
 
@@ -1348,6 +1377,16 @@ void main()
 {
 	DEBUG_INIT();
 
+	// INIT PT3
+
+	PT3_Init();
+	PT3_SetNoteTable(PT3_NT2);
+	PT3_SetLoop(TRUE);
+	PT3_SetFinishCB(Stop); //da riattivare
+	SetSong(0);
+	Loop(TRUE);
+	Play();
+
 	Bios_SetKeyClick(FALSE);
 
 	Game_SetState(State_Initialize);
@@ -1355,4 +1394,61 @@ void main()
 	Game_Start(VDP_MODE_GRAPHIC2, FALSE);
 
 	Bios_Exit(0);
+}
+
+
+// Set a new song
+void SetSong(u8 songId) __FASTCALL
+{
+	g_CurrentSong = songId;
+	SetActiveSegment(4);
+	PT3_InitSong(g_chronorunner);
+	SetActiveSegment(0);
+}
+
+
+//-----------------------------------------------------------------------------
+// Play/resume the current music
+void Play()
+{
+	PT3_Resume();
+}
+
+//-----------------------------------------------------------------------------
+// Pause the current music
+void Pause()
+{
+	PT3_Pause();
+}
+
+//-----------------------------------------------------------------------------
+// Stop the current music
+void Stop()
+{
+	PT3_Pause();
+	SetActiveSegment(4);
+	PT3_InitSong(g_chronorunner);
+	SetActiveSegment(0);
+}
+
+//-----------------------------------------------------------------------------
+// Set the current music loop flag
+void Loop(bool enable) __FASTCALL
+{
+
+	g_Loop = enable;
+	PT3_SetLoop(enable);
+	if (enable)
+		PT3_ResetFinishCB();
+	else
+		PT3_SetFinishCB(Stop);
+
+}
+
+//-----------------------------------------------------------------------------
+// Mute one of the channels
+void Mute(u8 chan, bool bMute)
+{
+	g_Mute[chan] = bMute;
+	PT3_Mute(chan, bMute);
 }
