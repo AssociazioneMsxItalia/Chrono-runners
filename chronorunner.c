@@ -1161,7 +1161,7 @@ bool State_Game()
     }
 
 	// Controlla se il giocatore ha raggiunto l'uscita
-	if (isPlayerAtExit()) {
+	if (isPlayerAtExit() || Keyboard_IsKeyPressed(KEY_F1)) {
 		Game_SetState(State_Intermission);
 		return TRUE;
 	}
