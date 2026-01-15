@@ -764,9 +764,9 @@ void DrawEnergyFields(struct Level *lvl, bool rewind) {
 				color = COLOR_WHITE;
 			} else {
 				if (g_EnergyFieldAnimCounter & 1) {
-					color = COLOR_DARK_GREEN;
+					color = COLOR_DARK_RED;
 				} else {
-					color = COLOR_DARK_YELLOW;
+					color = COLOR_MAGENTA;
 				}
 			}
 			// Field is active (either Type 2 stationary or Type 3 projectile)
