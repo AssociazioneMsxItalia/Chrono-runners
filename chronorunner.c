@@ -4,8 +4,6 @@
 #include "msxgl.h"
 #include "game/state.h"
 #include "game/pawn.h"
-#include "pt3/pt3_player.h"
-#include "pt3/pt3_notetable2.h"
 #include "debug.h"
 
 #include "PawnData.h"
@@ -29,22 +27,9 @@ bool State_GameOver();
 
 void tick();
 
-void SetSong(u8 songId);
-void Stop();
-void Loop(bool enable);
-void Mute(u8 chan, bool bMute);
-
 //=============================================================================
 // READ-ONLY DATA
 //=============================================================================
-
-// Songs data table
-const unsigned char* g_SongData[2];
-
-u8   g_CurrentSong = 0;
-bool g_Loop = FALSE;
-bool g_Mute[3] = { FALSE, FALSE, FALSE };
-
 
 // Player sprite layers
 const Pawn_Sprite g_PlayerLayers[] =
@@ -185,6 +170,16 @@ extern void InitializeSprite();
 extern const u8 g_Intermission[];
 extern unsigned char g_chronorunner[];
 extern unsigned char g_gameover[];
+
+extern const unsigned char* g_SongData[2];
+
+extern void SoundInit();
+extern void SoundPlay();
+extern void SoundSetSong(u8 songId);
+extern void SoundStop();
+extern void SoundLoop(bool enable);
+extern void SoundMute(u8 chan, bool bMute);
+extern void SoundUpdate();
 
 //=============================================================================
 // SEGMENT 7, BANK 1
@@ -800,11 +795,11 @@ bool State_Initialize()
 	SetActiveSegment(4);
 	g_SongData[0] = g_chronorunner;
 	g_SongData[1] = g_gameover;
+	SoundStop();
+	SoundSetSong(0);
+	SoundLoop(TRUE);
+	SoundPlay();
 	SetActiveSegment(0);
-
-	SetSong(0);
-	Loop(TRUE);
-	PT3_Resume();
 
 	// Imposta tempo iniziale
 	g_RemainingMinutes = 60;
@@ -1112,10 +1107,12 @@ bool State_GameOver()
 	// Prima volta in questo stato: prepara lo schermo
 	if (g_GameOverCounter == 0) {
 
-		Stop();
-		SetSong(1);
-		Loop(FALSE);
-		PT3_Resume();
+		SetActiveSegment(4);
+		SoundStop();
+		SoundSetSong(1);
+		SoundLoop(FALSE);
+		SoundPlay();
+		SetActiveSegment(0);
 
 		// Nasconde tutti gli sprite
 		VDP_HideAllSprites();
@@ -1212,8 +1209,7 @@ void tick() {
 
 void InterruptHook() {
 	SetActiveSegment(4);
-	PT3_Decode();
-	PT3_UpdatePSG();
+	SoundUpdate();
 	SetActiveSegment(0);
 
     if (Game_GetCurrentState() != State_Game)
@@ -1226,54 +1222,11 @@ void main()
 {
 	DEBUG_INIT();
 
-	// INIT PT3
-
-	PT3_Init();
-	PT3_SetNoteTable(PT3_NT2);
-	PT3_SetLoop(TRUE);
-	PT3_SetFinishCB(Stop);
+	SetActiveSegment(4);
+	SoundInit();
+	SetActiveSegment(0);
 
 	Game_SetState(State_Initialize);
 	Game_SetVSyncCallback(InterruptHook);
 	Game_Start(VDP_MODE_GRAPHIC2, FALSE);
-}
-
-
-// Set a new song
-void SetSong(u8 songId)
-{
-	g_CurrentSong = songId;
-	SetActiveSegment(4);
-	PT3_InitSong(g_SongData[g_CurrentSong]);
-	SetActiveSegment(0);
-}
-
-//-----------------------------------------------------------------------------
-// Stop the current music
-void Stop()
-{
-	PT3_Pause();
-	SetActiveSegment(4);
-	PT3_InitSong(g_SongData[g_CurrentSong]);
-	SetActiveSegment(0);
-}
-
-//-----------------------------------------------------------------------------
-// Set the current music loop flag
-void Loop(bool enable)
-{
-	g_Loop = enable;
-	PT3_SetLoop(enable);
-	if (enable)
-		PT3_ResetFinishCB();
-	else
-		PT3_SetFinishCB(Stop);
-}
-
-//-----------------------------------------------------------------------------
-// Mute one of the channels
-void Mute(u8 chan, bool bMute)
-{
-	g_Mute[chan] = bMute;
-	PT3_Mute(chan, bMute);
 }
