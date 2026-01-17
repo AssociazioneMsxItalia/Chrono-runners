@@ -150,7 +150,7 @@ void SetActiveSegment(u8 segment) {
 		g_PreviousSegment = -1;
 	} else {
 		if (g_PreviousSegment != -1) {
-			DEBUG_PRINT("Segment was %i\n", g_PreviousSegment);
+			DEBUG_PRINT("ERR %i\n", g_PreviousSegment);
 		}
 		g_PreviousSegment = GET_BANK_SEGMENT(1);
 		SET_BANK_SEGMENT(1, segment);
@@ -1174,7 +1174,6 @@ bool State_Rewind()
 	SetActiveSegment(0);
 
 	// Restore all game objects to their state at this frame
-	SetSegmentForLevel(g_CurrentLevel);
 	struct Level *lvl = &g_Levels[g_CurrentLevel];
 
 	u8 px, py, pf;
