@@ -135,8 +135,8 @@ void SetActiveSegment(u8 segment) {
 	}
 }
 
-u8 g_NumLevels = 16;
-struct Level g_Levels[16];
+u8 g_NumLevels = 17;
+struct Level g_Levels[17];
 
 void SetSegmentForLevel(u8 lvlidx) {
 	if (lvlidx < 11) {
@@ -766,6 +766,7 @@ void AllocateSpriteIDs(struct Level *lvl) {
 #include "content/levels/4_1_easypeasy_30_lvl.h"
 #include "content/levels/4_3_darkdescent_24_lvl.h"
 #include "content/levels/4_4_twister_29_lvl.h"
+#include "content/levels/4_6_level_32_lvl.h"
 
 bool State_Initialize()
 {
@@ -793,6 +794,7 @@ bool State_Initialize()
 	g_Levels[i++] = level_easypeasy;
 	g_Levels[i++] = level_darkdescent;
 	g_Levels[i++] = level_twister;
+	g_Levels[i++] = level_level32;
 
 	SetActiveSegment(4);
 	g_SongData[0] = g_chronorunner;
