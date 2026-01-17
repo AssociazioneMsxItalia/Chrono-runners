@@ -29,24 +29,17 @@ bool State_GameOver();
 
 void tick();
 
-void SetSong(u8 songId) __FASTCALL;
-void Play();
-void Pause();
+void SetSong(u8 songId);
 void Stop();
-void Loop(bool enable) __FASTCALL;
+void Loop(bool enable);
 void Mute(u8 chan, bool bMute);
 
 //=============================================================================
 // READ-ONLY DATA
 //=============================================================================
 
-// Song data structure
-struct SongData
-{
-	u8*			Raw;
-	const c8*	Name;
-	u16			Size;
-};
+// Songs data table
+const unsigned char* g_SongData[2];
 
 u8   g_CurrentSong = 0;
 bool g_Loop = FALSE;
@@ -191,6 +184,7 @@ extern void InitializeSprite();
 //=============================================================================
 extern const u8 g_Intermission[];
 extern unsigned char g_chronorunner[];
+extern unsigned char g_gameover[];
 
 //=============================================================================
 // SEGMENT 7, BANK 1
@@ -803,6 +797,15 @@ bool State_Initialize()
 	g_Levels[i++] = level_darkdescent;
 	g_Levels[i++] = level_twister;
 
+	SetActiveSegment(4);
+	g_SongData[0] = g_chronorunner;
+	g_SongData[1] = g_gameover;
+	SetActiveSegment(0);
+
+	SetSong(0);
+	Loop(TRUE);
+	PT3_Resume();
+
 	// Imposta tempo iniziale
 	g_RemainingMinutes = 60;
 	g_RemainingSeconds = 0;
@@ -1108,6 +1111,12 @@ bool State_GameOver()
 {
 	// Prima volta in questo stato: prepara lo schermo
 	if (g_GameOverCounter == 0) {
+
+		Stop();
+		SetSong(1);
+		Loop(FALSE);
+		PT3_Resume();
+
 		// Nasconde tutti gli sprite
 		VDP_HideAllSprites();
 
@@ -1121,6 +1130,7 @@ bool State_GameOver()
 	g_GameOverCounter++;
 
 	// Dopo 5 secondi (250 frame a 50 fps)
+	// XXX: taglia un po' di traccia g_gameover
 	if (g_GameOverCounter >= 250) {
 		g_GameOverCounter = 0;
 		Game_SetState(State_Initialize);
@@ -1221,10 +1231,7 @@ void main()
 	PT3_Init();
 	PT3_SetNoteTable(PT3_NT2);
 	PT3_SetLoop(TRUE);
-	PT3_SetFinishCB(Stop); //da riattivare
-	SetSong(0);
-	Loop(TRUE);
-	Play();
+	PT3_SetFinishCB(Stop);
 
 	Game_SetState(State_Initialize);
 	Game_SetVSyncCallback(InterruptHook);
@@ -1233,27 +1240,12 @@ void main()
 
 
 // Set a new song
-void SetSong(u8 songId) __FASTCALL
+void SetSong(u8 songId)
 {
 	g_CurrentSong = songId;
 	SetActiveSegment(4);
-	PT3_InitSong(g_chronorunner);
+	PT3_InitSong(g_SongData[g_CurrentSong]);
 	SetActiveSegment(0);
-}
-
-
-//-----------------------------------------------------------------------------
-// Play/resume the current music
-void Play()
-{
-	PT3_Resume();
-}
-
-//-----------------------------------------------------------------------------
-// Pause the current music
-void Pause()
-{
-	PT3_Pause();
 }
 
 //-----------------------------------------------------------------------------
@@ -1262,22 +1254,20 @@ void Stop()
 {
 	PT3_Pause();
 	SetActiveSegment(4);
-	PT3_InitSong(g_chronorunner);
+	PT3_InitSong(g_SongData[g_CurrentSong]);
 	SetActiveSegment(0);
 }
 
 //-----------------------------------------------------------------------------
 // Set the current music loop flag
-void Loop(bool enable) __FASTCALL
+void Loop(bool enable)
 {
-
 	g_Loop = enable;
 	PT3_SetLoop(enable);
 	if (enable)
 		PT3_ResetFinishCB();
 	else
 		PT3_SetFinishCB(Stop);
-
 }
 
 //-----------------------------------------------------------------------------
