@@ -344,10 +344,8 @@ bool bboxCollide(u8 x1, u8 y1, u8 x2, u8 y2) {
 void TakeKey() {
 	g_PlayerHasKey = TRUE;
 
-	SetSegmentForLevel(g_CurrentLevel);
 	u8 door_x = g_Levels[g_CurrentLevel].end_x;
 	u8 door_y = g_Levels[g_CurrentLevel].end_y;
-	SetActiveSegment(0);
 
 	// Luce verde sopra l'uscita
 	VDP_Poke_GM2(door_x, door_y - 1, 48);
@@ -368,10 +366,8 @@ bool isPlayerAtExit() {
 	if (!g_PlayerHasKey)
 		return FALSE;
 
-	SetSegmentForLevel(g_CurrentLevel);
 	u8 door_x = g_Levels[g_CurrentLevel].end_x;
 	u8 door_y = g_Levels[g_CurrentLevel].end_y;
-	SetActiveSegment(0);
 
 	return bboxCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY, door_x * 8, door_y * 8);
 }
@@ -823,10 +819,8 @@ bool State_Initialize()
 
 void PlayerRestart()
 {
-	SetSegmentForLevel(g_CurrentLevel);
 	u8 start_x = g_Levels[g_CurrentLevel].start_x;
 	u8 start_y = g_Levels[g_CurrentLevel].start_y;
-	SetActiveSegment(0);
 
 	// Init player pawn
 	ReinitPlayer(&g_PlayerPawn,
@@ -856,13 +850,8 @@ bool State_Intermission()
 		VDP_WriteLayout_GM2(g_Intermission, 0, 0, 32, 24);
 		SetActiveSegment(0);
 
-		SetSegmentForLevel(g_NextLevel);
-
 		// Prende il nome del prossimo livello
-		c8 level_name[32];
-		String_Copy(level_name, g_Levels[g_NextLevel].name);
-
-		SetActiveSegment(0);
+		const c8 *level_name = g_Levels[g_NextLevel].name;
 
 		// Progresso
 		u16 prog = (g_NextLevel * 30) / g_NumLevels;
@@ -921,8 +910,6 @@ bool State_ChangeLevel()
 		g_NextLevel += 1;
 	}
 
-	SetSegmentForLevel(g_CurrentLevel);
-
 	// Recupera livello corrente per passarlo esplicitamente alle funzioni che
 	// ne hanno bisogno
 	struct Level *lvl = &g_Levels[g_CurrentLevel];
@@ -945,11 +932,11 @@ bool State_ChangeLevel()
 	// Cancella lo schermo
 	VDP_FillScreen_GM2(44);
 
+	SetSegmentForLevel(g_CurrentLevel);
 	VDP_WriteLayout_GM2(lvl->layout, 0, 2, 32, 24);
+	SetActiveSegment(0);
 
 	AllocateSpriteIDs(lvl);
-
-	SetActiveSegment(0);
 
 	SetActiveSegment(7);
 	PrintGFXText("TIME   '  \"", 2, 0);
@@ -966,8 +953,6 @@ bool State_ChangeLevel()
 
 bool State_Game()
 {
-	SetSegmentForLevel(g_CurrentLevel);
-
 	// Recupera livello corrente per passarlo esplicitamente alle funzioni che
 	// ne hanno bisogno
 	struct Level *lvl = &g_Levels[g_CurrentLevel];
@@ -1005,8 +990,6 @@ bool State_Game()
 	Pawn_SetMovement(&g_PlayerPawn, g_DX, g_DY);
 	Pawn_Update(&g_PlayerPawn);
 	Pawn_Draw(&g_PlayerPawn);
-
-	SetActiveSegment(0);
 
 	DrawKey(lvl);
 	DrawCrystal(lvl);
