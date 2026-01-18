@@ -13,6 +13,7 @@
 #include "content/levels/screen_7.h"
 #include "content/levels/screen_6.h"
 #include "content/levels/screen_19.h"
+#include "content/levels/screen_26.h"
 #include "content/levels/screen_9.h"
 #include "content/levels/screen_8.h"
 #include "content/levels/screen_17.h"

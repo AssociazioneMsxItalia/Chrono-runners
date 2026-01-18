@@ -22,7 +22,7 @@ struct Platform plat5[] = {
      22*8, 21*8}, // max_x max_y
 };
 
-struct Level level5 = {
+struct Level level_theabyss = {
 	2, 4,        // start_x start_y
 	28, 4,       // end_x end_y
 	15, 20,      // key_x key_y

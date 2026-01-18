@@ -146,26 +146,34 @@ void SetActiveSegment(u8 segment) {
 #include "content/levels/1_4_thefactory_07_lvl.h"
 #include "content/levels/1_5_theprison_06_lvl.h"
 #include "content/levels/1_6_suicidepit_19_lvl.h"
+#include "content/levels/2_0_corridor_26_lvl.h"
 #include "content/levels/2_1_thetower_09_lvl.h"
 #include "content/levels/2_2_thechasm_08_lvl.h"
 #include "content/levels/2_3_sf_17_lvl.h"
 #include "content/levels/2_4_whatliesbeneath_22_lvl.h"
 #include "content/levels/2_5_pipesandrobots_23_lvl.h"
 #include "content/levels/2_6_crystalchem_31_lvl.h"
+#include "content/levels/3_0_corridor_27_lvl.h"
 #include "content/levels/3_1_punisher_18_lvl.h"
+#include "content/levels/3_2_thefortress_11_lvl.h"
 #include "content/levels/3_3_level_33_lvl.h"
-#include "content/levels/3_4_challenge_20_lvl.h"
+#include "content/levels/3_4_theabyss_10_lvl.h"
 #include "content/levels/3_5_level_35_lvl.h"
+#include "content/levels/3_6_challenge_20_lvl.h"
+#include "content/levels/4_0_corridor_28_lvl.h"
 #include "content/levels/4_1_easypeasy_30_lvl.h"
+#include "content/levels/4_2_thesummit_12_lvl.h"
 #include "content/levels/4_3_darkdescent_24_lvl.h"
 #include "content/levels/4_4_twister_29_lvl.h"
+#include "content/levels/4_5_fielddescent_21_lvl.h"
 #include "content/levels/4_6_level_32_lvl.h"
+#include "content/levels/4_7_theescape_13_lvl.h"
 
-u8 g_NumLevels = 21;
-struct Level g_Levels[21];
+u8 g_NumLevels = 29;
+struct Level g_Levels[29];
 
 void SetSegmentForLevel(u8 lvlidx) {
-	if (lvlidx < 13) {
+	if (lvlidx < 14) {
 		SetActiveSegment(1);
 	} else {
 		SetActiveSegment(2);
@@ -181,20 +189,28 @@ void InitLevels() {
 	g_Levels[i++] = level_thefactory;
 	g_Levels[i++] = level_theprison;
 	g_Levels[i++] = level_suicidepit;
+	g_Levels[i++] = level_corridor2;
 	g_Levels[i++] = level_thetower;
 	g_Levels[i++] = level_thechasm;
 	g_Levels[i++] = level_sf;
 	g_Levels[i++] = level_whatliesbeneath;
 	g_Levels[i++] = level_pipesandrobots;
 	g_Levels[i++] = level_crystalchem;
+	g_Levels[i++] = level_corridor3;
 	g_Levels[i++] = level_punisher;
+	g_Levels[i++] = level_thefortress;
 	g_Levels[i++] = level_level33;
-	g_Levels[i++] = level_challenge;
+	g_Levels[i++] = level_theabyss;
 	g_Levels[i++] = level_level35;
+	g_Levels[i++] = level_challenge;
+	g_Levels[i++] = level_corridor4;
 	g_Levels[i++] = level_easypeasy;
+	g_Levels[i++] = level_thesummit;
 	g_Levels[i++] = level_darkdescent;
 	g_Levels[i++] = level_twister;
+	g_Levels[i++] = level_fielddescent;
 	g_Levels[i++] = level_level32;
+	g_Levels[i++] = level_theescape;
 }
 
 //=============================================================================

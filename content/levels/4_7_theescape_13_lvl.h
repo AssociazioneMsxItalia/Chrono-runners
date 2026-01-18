@@ -21,7 +21,7 @@ struct Enemy enemies8[] = {
 			0}, // field_mDX
 };
 
-struct Level level8 = {
+struct Level level_theescape = {
 	2, 20,       // start_x start_y
 	15, 8,       // end_x end_y
 	15, 14,      // key_x key_y

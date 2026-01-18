@@ -12,7 +12,7 @@ struct Platform plat7[] = {
     19*8,  21*8}, // max_x max_y
 };
 
-struct Level level7 = {
+struct Level level_thesummit = {
 	1, 10,       // start_x start_y
 	29, 10,      // end_x end_y
 	15, 21,      // key_x key_y
