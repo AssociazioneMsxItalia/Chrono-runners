@@ -431,9 +431,9 @@ bool isPlayerOnMines(struct Level *lvl) {
 		if (!mines[m].enabled)
 			continue;
 
-		// Confronta un bbox parziale (14x16) del giocatore con un bbox 2x1 della mina
-		if (rectCollide(g_PlayerPawn.PositionX +  1, g_PlayerPawn.PositionY,
-					    g_PlayerPawn.PositionX + 14, g_PlayerPawn.PositionY + 15,
+		// Confronta un bbox parziale (12x16) del giocatore con un bbox 2x1 della mina
+		if (rectCollide(g_PlayerPawn.PositionX +  2, g_PlayerPawn.PositionY,
+					    g_PlayerPawn.PositionX + 13, g_PlayerPawn.PositionY + 15,
 				        mines[m].pos_x + 7, mines[m].pos_y - 1,
 				        mines[m].pos_x + 7 + 1, mines[m].pos_y)) {
 
