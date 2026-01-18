@@ -182,13 +182,15 @@ def main():
 
     # Export screens
     if args.screen is not None:
+        screen = args.screen - 1
+
         # Export single screen
-        if args.screen not in screens:
-            print(f"Error: Screen {args.screen} not found. Available: {sorted(screens.keys())}",
+        if screen not in screens:
+            print(f"Error: Screen {screen} not found. Available: {sorted(screens.keys())}",
                   file=sys.stderr)
             sys.exit(1)
 
-        output_path, byte_count = write_screen_header(args.screen, screens[args.screen], args.output_dir)
+        output_path, byte_count = write_screen_header(screen, screens[screen], args.output_dir)
         print(f"Exported MD{args.screen} -> {output_path} ({byte_count} bytes)")
     else:
         # Export all screens
