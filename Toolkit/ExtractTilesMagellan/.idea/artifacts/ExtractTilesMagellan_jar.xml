@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="jar" build-on-make="true" name="ExtractTilesMagellan:jar">
-    <output-path>$PROJECT_DIR$/classes/artifacts/ExtractTilesMagellan_jar</output-path>
-    <root id="archive" name="ExtractTilesMagellan.jar">
-      <element id="module-output" name="ExtractTilesMagellan" />
-    </root>
-  </artifact>
-</component>
