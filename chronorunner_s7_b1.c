@@ -35,7 +35,7 @@ void PrintGFXText(const c8 *text, u8 x, u8 y) {
 		}
 		// -
 		else if (c == 45) {
-			tile = 47;
+			tile = 42;
 		}
 		// .
 		else if (c == 46) {

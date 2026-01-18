@@ -1,4 +1,4 @@
-extern unsigned char g_Level4DarkDescentAlfioAntoninoCorsaro[];
+extern unsigned char g_Screen24[];
 
 struct Platform plat_darkdescent[] = {
    {1*8,  17*8,  // pos_x pos_y
@@ -42,6 +42,6 @@ struct Level level_darkdescent = {
 	NULL,        // mines
 	1,           // num_enemies
 	enemies_darkdescent,        // enemies
-	g_Level4DarkDescentAlfioAntoninoCorsaro,   // layout
+	g_Screen24,   // layout
 	"DARK DESCENT - ALFIO A. CORSARO", // name
 };

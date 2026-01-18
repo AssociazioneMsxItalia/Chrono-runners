@@ -1,4 +1,4 @@
-extern unsigned char g_Level2WhatLiesBeneathOrazioCacciola[];
+extern unsigned char g_Screen22[];
 
 struct Platform plat_whatliesbeneath[] = {
    {7*8,  9*8,  // pos_x pos_y
@@ -23,6 +23,6 @@ struct Level level_whatliesbeneath = {
 	NULL,        // mines
 	0,           // num_enemies
 	NULL,        // enemies
-	g_Level2WhatLiesBeneathOrazioCacciola,   // layout
+	g_Screen22,   // layout
 	"WHAT LIES BENEATH - O.CACCIOLA", // name
 };

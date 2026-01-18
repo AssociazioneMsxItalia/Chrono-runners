@@ -1,4 +1,4 @@
-extern unsigned char g_Level1RoninGianlucaGaggi[];
+extern unsigned char g_Screen16[];
 
 struct Enemy enemies_ronin[] = {
   {9*8, 10*8,  // pos_x pos_y
@@ -25,6 +25,6 @@ struct Level level_ronin = {
 	NULL,        // mines
 	1,           // num_enemies
 	enemies_ronin,  // enemies
-	g_Level1RoninGianlucaGaggi,   // layout
+	g_Screen16,   // layout
 	"RONIN - GIANLUCA GAGGI", // name
 };

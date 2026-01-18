@@ -1,4 +1,4 @@
-extern unsigned char g_Level4EasyPeasyLorenzoMiretti[];
+extern unsigned char g_Screen30[];
 
 struct Mine mines_easypeasy[] = {
 	{29*8, 13*8, TRUE}, // pos_x pos_y
@@ -71,6 +71,6 @@ struct Level level_easypeasy = {
 	mines_easypeasy,        // mines
 	4,           // num_enemies
 	enemies_easypeasy,        // enemies
-	g_Level4EasyPeasyLorenzoMiretti,   // layout
+	g_Screen30,   // layout
 	"EASY PEASY - LORENZO MIRETTI", // name
 };

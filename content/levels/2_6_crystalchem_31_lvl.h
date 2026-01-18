@@ -1,4 +1,4 @@
-extern unsigned char g_Level2CrystalChemMaxPrivrat[];
+extern unsigned char g_Screen31[];
 
 struct Platform plat_crystalchem[] = {
    {19*8,  6*8,  // pos_x pos_y
@@ -61,6 +61,6 @@ struct Enemy enemies_crystalchem[] = {
 	NULL,        // mines
 	3,           // num_enemies
 	enemies_crystalchem,        // enemies
-	g_Level2CrystalChemMaxPrivrat,   // layout
+	g_Screen31,   // layout
 	"CRYSTALCHEM - MAX PRIVRAT", // name
 };

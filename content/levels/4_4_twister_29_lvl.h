@@ -1,4 +1,4 @@
-extern unsigned char g_Level4TwisterOrazioCacciola[];
+extern unsigned char g_Screen29[];
 
 struct Enemy enemies_twister[] = {
   {17*8, 10*8,  // pos_x pos_y
@@ -36,6 +36,6 @@ struct Level level_twister = {
 	NULL,        // mines
 	2,           // num_enemies
 	enemies_twister,  // enemies
-	g_Level4TwisterOrazioCacciola,   // layout
+	g_Screen29,   // layout
 	"TWISTER - ORAZIO CACCIOLA", // name
 };

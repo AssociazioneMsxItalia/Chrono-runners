@@ -1,4 +1,4 @@
-extern unsigned char g_Level_intro[];
+extern unsigned char g_Screen4[];
 
 struct Mine mines0[] = {
 	{22*8,  20*8, TRUE}, // pos_x pos_y
@@ -15,6 +15,6 @@ struct Level level_intro = {
 	mines0,      // mines
 	0,           // num_enemies
 	NULL,        // enemies
-	g_Level_intro,   // layout
+	g_Screen4,   // layout
 	"SO IT BEGINS - LEONARDO VETTORI", // name
 };

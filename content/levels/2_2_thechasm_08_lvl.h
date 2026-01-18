@@ -1,4 +1,4 @@
-extern unsigned char g_Level03[];
+extern unsigned char g_Screen8[];
 
 struct Platform plat3[] = {
    {23*8, 13*8,  // pos_x pos_y
@@ -28,6 +28,6 @@ struct Level level_thechasm = {
 	NULL,        // mines
 	0,           // num_enemies
 	NULL,        // enemies
-	g_Level03,   // layout
-	"\"THE CHASM\" BY L.VETTORI", // name
+	g_Screen8,   // layout
+	"THE CHASM - L.VETTORI", // name
 };

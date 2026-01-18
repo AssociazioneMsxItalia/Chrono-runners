@@ -6,11 +6,11 @@
 // LEVELS
 //=============================================================================
 
-#include "content/levels/3_1_punisher_18.h"
-#include "content/levels/3_3_level_33.h"
-#include "content/levels/3_4_challenge_20.h"
-#include "content/levels/3_5_level_35.h"
-#include "content/levels/4_1_easypeasy_30.h"
-#include "content/levels/4_3_darkdescent_24.h"
-#include "content/levels/4_4_twister_29.h"
-#include "content/levels/4_6_level_32.h"
+#include "content/levels/screen_18.h"
+#include "content/levels/screen_33.h"
+#include "content/levels/screen_20.h"
+#include "content/levels/screen_35.h"
+#include "content/levels/screen_30.h"
+#include "content/levels/screen_24.h"
+#include "content/levels/screen_29.h"
+#include "content/levels/screen_32.h"

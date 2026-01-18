@@ -1,4 +1,4 @@
-extern unsigned char g_Level2SFStefanoForte[];
+extern unsigned char g_Screen17[];
 
 struct Platform plat_sf[] = {
    {25*8,  16*8,  // pos_x pos_y
@@ -44,6 +44,6 @@ struct Level level_sf = {
 	NULL,        // mines
 	2,           // num_enemies
 	enemies_sf,        // enemies
-	g_Level2SFStefanoForte,   // layout
+	g_Screen17,   // layout
 	"SF - STEFANO FORTE", // name
 };

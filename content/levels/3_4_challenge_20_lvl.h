@@ -1,4 +1,4 @@
-extern unsigned char g_Level3ChallengeEmanueleDelCucina[];
+extern unsigned char g_Screen20[];
 
 struct Platform plat_challenge[] = {
    {9*8,  17*8,  // pos_x pos_y
@@ -49,6 +49,6 @@ struct Level level_challenge = {
 	NULL,        // mines
 	2,           // num_enemies
 	enemies_challenge,        // enemies
-	g_Level3ChallengeEmanueleDelCucina,   // layout
+	g_Screen20,   // layout
 	"CHALLENGE - E. DEL CUCINA", // name
 };

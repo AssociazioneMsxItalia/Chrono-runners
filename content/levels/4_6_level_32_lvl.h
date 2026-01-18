@@ -1,4 +1,4 @@
-extern unsigned char g_Level32[];
+extern unsigned char g_Screen32[];
 
 struct Mine mines_level32[] = {
 	{9*8, 10*8, TRUE}, // pos_x pos_y
@@ -42,6 +42,6 @@ struct Level level_level32 = {
 	mines_level32,        // mines
 	1,           // num_enemies
 	enemies_level32,        // enemies
-	g_Level32,   // layout
+	g_Screen32,   // layout
 	"LEVEL 32 - ORAZIO CACCIOLA", // name
 };

@@ -1,7 +1,7 @@
-extern unsigned char g_level33[];
+extern unsigned char g_Screen33[];
 
 struct Platform plat_level33[] = {
-   {17*8,  19*8,  // pos_x pos_y
+   {17*8,  10*8,  // pos_x pos_y
        0,    -1,  // dir_x dir_y
     17*8,   8*8,  // min_x min_y
     17*8,  12*8}, // max_x max_y
@@ -38,6 +38,6 @@ struct Level level_level33 = {
 	NULL,        // mines
 	1,           // num_enemies
 	enemies_level33,        // enemies
-	g_level33,   // layout
+	g_Screen33,   // layout
 	"LEVEL 33 - FABRIZIO LUGLIO", // name
 };

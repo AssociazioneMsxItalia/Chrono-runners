@@ -1,4 +1,4 @@
-extern const unsigned char g_level35[];
+extern const unsigned char g_Screen35[];
 
 struct Platform plat_level35[] = {
    { 7*8,  17*8,  // pos_x pos_y
@@ -49,6 +49,6 @@ struct Level level_level35 = {
 	NULL,        // mines
 	2,           // num_enemies
 	enemies_level35,        // enemies
-	g_level35,   // layout
+	g_Screen35,   // layout
 	"LEVEL 35 - FABRIZIO LUGLIO", // name
 };

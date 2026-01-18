@@ -1,4 +1,4 @@
-extern unsigned char g_Level2PipesAndRobotsOrazioCacciola[];
+extern unsigned char g_Screen23[];
 
 struct Platform plat_pipesandrobots[] = {
    {6*8,  17*8,  // pos_x pos_y
@@ -44,6 +44,6 @@ struct Level level_pipesandrobots = {
 	NULL,        // mines
 	2,           // num_enemies
 	enemies_pipesandrobots,        // enemies
-	g_Level2PipesAndRobotsOrazioCacciola,   // layout
+	g_Screen23,   // layout
 	"PIPES AND ROBOTS - O. CACCIOLA", // name
 };

@@ -1,4 +1,4 @@
-extern unsigned char g_Level1SuicidePitEmanueleDelCucina[];
+extern unsigned char g_Screen19[];
 
 struct Mine mines_suicidepit[] = {
 	{7*8,  12*8, TRUE}, // pos_x pos_y
@@ -56,6 +56,6 @@ struct Level level_suicidepit = {
 	mines_suicidepit,        // mines
 	3,           // num_enemies
 	enemies_suicidepit,  // enemies
-	g_Level1SuicidePitEmanueleDelCucina,   // layout
+	g_Screen19,   // layout
 	"SUICIDE PIT - E. DEL CUCINA", // name
 };

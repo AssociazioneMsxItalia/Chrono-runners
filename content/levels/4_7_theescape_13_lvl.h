@@ -1,4 +1,4 @@
-extern unsigned char g_Level08[];
+extern unsigned char g_Screen13[];
 
 struct Platform plat8[] = {
    {15*8, 19*8,  // pos_x pos_y
@@ -32,6 +32,6 @@ struct Level level8 = {
 	NULL,        // mines
 	numberof(enemies8), // num_enemies
 	enemies8,    // enemies
-	g_Level08,   // layout
-	"\"THE ESCAPE\" BY L.VETTORI", // name
+	g_Screen13,   // layout
+	"THE ESCAPE - L.VETTORI", // name
 };

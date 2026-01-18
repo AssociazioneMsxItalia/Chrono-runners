@@ -1,4 +1,4 @@
-extern unsigned char g_Level02[];
+extern unsigned char g_Screen7[];
 
 struct Mine mines2[] = {
 	{5*8,  22*8, TRUE}, // pos_x pos_y
@@ -54,6 +54,6 @@ struct Level level_thefactory = {
 	mines2,      // mines
 	numberof(enemies2), // num_enemies
 	enemies2,    // enemies
-	g_Level02,   // layout
-	"\"THE FACTORY\" BY L.VETTORI", // name
+	g_Screen7,   // layout
+	"THE FACTORY - L.VETTORI", // name
 };
