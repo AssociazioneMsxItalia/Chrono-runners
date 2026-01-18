@@ -427,13 +427,11 @@ bool isPlayerAtExit() {
 }
 
 bool isPlayerOnSpikes() {
-    for (i8 t = -1; t < 2; t++) {
-        u8 tile = VDP_Peek_GM2((g_PlayerPawn.PositionX >> 3) + t,
-                               (g_PlayerPawn.PositionY >> 3) + 2);
-        if (tile >= 192 && tile <= 199) {
-            return TRUE;
-        }
-    }
+	u8 tile = VDP_Peek_GM2((g_PlayerPawn.PositionX >> 3) + 1,
+							(g_PlayerPawn.PositionY >> 3) + 2);
+	if (tile >= 192 && tile <= 199) {
+		return TRUE;
+	}
     return FALSE;
 }
 
