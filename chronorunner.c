@@ -135,15 +135,64 @@ void SetActiveSegment(u8 segment) {
 	}
 }
 
-u8 g_NumLevels = 19;
-struct Level g_Levels[19];
+//=============================================================================
+// LEVELS
+//=============================================================================
+
+#include "content/levels/1_0_intro_04_lvl.h"
+#include "content/levels/1_1_ronin_16_lvl.h"
+#include "content/levels/1_2_theclimb_34_lvl.h"
+#include "content/levels/1_3_thefactory_07_lvl.h"
+#include "content/levels/1_4_theprison_06_lvl.h"
+#include "content/levels/1_5_suicidepit_19_lvl.h"
+#include "content/levels/2_1_thetower_09_lvl.h"
+#include "content/levels/2_2_thechasm_08_lvl.h"
+#include "content/levels/2_3_sf_17_lvl.h"
+#include "content/levels/2_4_whatliesbeneath_22_lvl.h"
+#include "content/levels/2_5_pipesandrobots_23_lvl.h"
+#include "content/levels/2_6_crystalchem_31_lvl.h"
+#include "content/levels/3_1_punisher_18_lvl.h"
+#include "content/levels/3_3_level_33_lvl.h"
+#include "content/levels/3_4_challenge_20_lvl.h"
+#include "content/levels/3_5_level_35_lvl.h"
+#include "content/levels/4_1_easypeasy_30_lvl.h"
+#include "content/levels/4_3_darkdescent_24_lvl.h"
+#include "content/levels/4_4_twister_29_lvl.h"
+#include "content/levels/4_6_level_32_lvl.h"
+
+u8 g_NumLevels = 20;
+struct Level g_Levels[20];
 
 void SetSegmentForLevel(u8 lvlidx) {
-	if (lvlidx < 11) {
+	if (lvlidx < 12) {
 		SetActiveSegment(1);
 	} else {
 		SetActiveSegment(2);
 	}
+}
+
+void InitLevels() {
+	u8 i = 0;
+	g_Levels[i++] = level_intro;
+	g_Levels[i++] = level_ronin;
+	g_Levels[i++] = level_theclimb;
+	g_Levels[i++] = level_thefactory;
+	g_Levels[i++] = level_theprison;
+	g_Levels[i++] = level_suicidepit;
+	g_Levels[i++] = level_thetower;
+	g_Levels[i++] = level_thechasm;
+	g_Levels[i++] = level_sf;
+	g_Levels[i++] = level_whatliesbeneath;
+	g_Levels[i++] = level_pipesandrobots;
+	g_Levels[i++] = level_crystalchem;
+	g_Levels[i++] = level_punisher;
+	g_Levels[i++] = level_level33;
+	g_Levels[i++] = level_challenge;
+	g_Levels[i++] = level_level35;
+	g_Levels[i++] = level_easypeasy;
+	g_Levels[i++] = level_darkdescent;
+	g_Levels[i++] = level_twister;
+	g_Levels[i++] = level_level32;
 }
 
 //=============================================================================
@@ -287,7 +336,7 @@ void PlayerPhysicsEvent(u8 event, u8 tile)
 // Collision callback
 bool PlayerPhysicsCollision(u8 tile)
 {
-	return tile >= 200 || tile == 196;
+	return tile >= 200;
 }
 
 //=============================================================================
@@ -748,26 +797,6 @@ void AllocateSpriteIDs(struct Level *lvl) {
 // STATES
 //=============================================================================
 
-#include "content/levels/1_0_intro_04_lvl.h"
-#include "content/levels/1_1_ronin_16_lvl.h"
-#include "content/levels/1_2_thefactory_07_lvl.h"
-#include "content/levels/1_3_theprison_06_lvl.h"
-#include "content/levels/1_4_suicidepit_19_lvl.h"
-#include "content/levels/2_1_thetower_09_lvl.h"
-#include "content/levels/2_2_thechasm_08_lvl.h"
-#include "content/levels/2_3_sf_17_lvl.h"
-#include "content/levels/2_4_whatliesbeneath_22_lvl.h"
-#include "content/levels/2_5_pipesandrobots_23_lvl.h"
-#include "content/levels/2_6_crystalchem_31_lvl.h"
-#include "content/levels/3_1_punisher_18_lvl.h"
-#include "content/levels/3_3_level_33_lvl.h"
-#include "content/levels/3_4_challenge_20_lvl.h"
-#include "content/levels/3_5_level_35_lvl.h"
-#include "content/levels/4_1_easypeasy_30_lvl.h"
-#include "content/levels/4_3_darkdescent_24_lvl.h"
-#include "content/levels/4_4_twister_29_lvl.h"
-#include "content/levels/4_6_level_32_lvl.h"
-
 bool State_Initialize()
 {
 	// Switch Segment 3
@@ -777,27 +806,7 @@ bool State_Initialize()
 	InitializeSprite();	    // Initialize sprite
 	SetActiveSegment(0);
 
-	u8 i = 0;
-	g_Levels[i++] = level_intro;
-	g_Levels[i++] = level_ronin;
-	g_Levels[i++] = level_thefactory;
-	g_Levels[i++] = level_theprison;
-	g_Levels[i++] = level_suicidepit;
-	g_Levels[i++] = level_thetower;
-	g_Levels[i++] = level_thechasm;
-	g_Levels[i++] = level_sf;
-	g_Levels[i++] = level_whatliesbeneath;
-	g_Levels[i++] = level_pipesandrobots;
-	g_Levels[i++] = level_crystalchem;
-	g_Levels[i++] = level_punisher;
-	g_Levels[i++] = level_level33;
-	g_Levels[i++] = level_challenge;
-	g_Levels[i++] = level_level35;
-	g_Levels[i++] = level_easypeasy;
-	g_Levels[i++] = level_darkdescent;
-	g_Levels[i++] = level_twister;
-	g_Levels[i++] = level_level32;
-
+	InitLevels();
 
 	SetActiveSegment(4);
 	g_SongData[0] = g_chronorunner;

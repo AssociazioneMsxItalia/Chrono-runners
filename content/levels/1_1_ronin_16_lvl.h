@@ -14,6 +14,11 @@ struct Enemy enemies_ronin[] = {
 			0}, // field_mDX
 };
 
+struct Mine mines_ronin[] = {
+	{10*8, 20*8, TRUE}, // pos_x pos_y
+	{18*8, 20*8, TRUE},
+};
+
 struct Level level_ronin = {
 	2, 4,        // start_x start_y
 	28, 21,      // end_x end_y
@@ -21,8 +26,8 @@ struct Level level_ronin = {
 	0, 0,        // crystal_x crystal_y
 	0,           // num_platforms
 	NULL,        // platforms
-	0,           // num_mines
-	NULL,        // mines
+	2,           // num_mines
+	mines_ronin,        // mines
 	1,           // num_enemies
 	enemies_ronin,  // enemies
 	g_Screen16,   // layout

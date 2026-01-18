@@ -8,6 +8,7 @@
 
 #include "content/levels/screen_4.h"
 #include "content/levels/screen_16.h"
+#include "content/levels/screen_34.h"
 #include "content/levels/screen_7.h"
 #include "content/levels/screen_6.h"
 #include "content/levels/screen_19.h"
