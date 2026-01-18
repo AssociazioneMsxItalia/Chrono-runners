@@ -1,7 +1,7 @@
 extern unsigned char g_Screen9[];
 
 struct Platform plat4[] = {
-   {1*8,  7*8,  // pos_x pos_y
+   {1*8,  11*8,  // pos_x pos_y
       0,    1,  // dir_x dir_y
     1*8,  5*8,  // min_x min_y
     1*8, 18*8}, // max_x max_y
