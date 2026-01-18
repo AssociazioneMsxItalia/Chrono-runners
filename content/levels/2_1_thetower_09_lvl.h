@@ -30,7 +30,7 @@ struct Level level_thetower = {
 	2, 21,       // start_x start_y
 	28, 21,      // end_x end_y
 	15, 11,      // key_x key_y
-	15, 21,      // crystal_x crystal_y
+	0, 0,      // crystal_x crystal_y
 	2,           // num_platforms
 	plat4,       // platforms
 	0,           // num_mines

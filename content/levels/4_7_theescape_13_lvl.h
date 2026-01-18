@@ -25,7 +25,7 @@ struct Level level8 = {
 	2, 20,       // start_x start_y
 	15, 8,       // end_x end_y
 	15, 14,      // key_x key_y
-	28, 18,      // crystal_x crystal_y
+	0, 0,      // crystal_x crystal_y
 	1,           // num_platforms
 	plat8,       // platforms
 	0,           // num_mines

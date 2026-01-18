@@ -139,12 +139,13 @@ void SetActiveSegment(u8 segment) {
 // LEVELS
 //=============================================================================
 
-#include "content/levels/1_0_intro_04_lvl.h"
-#include "content/levels/1_1_ronin_16_lvl.h"
-#include "content/levels/1_2_theclimb_34_lvl.h"
-#include "content/levels/1_3_thefactory_07_lvl.h"
-#include "content/levels/1_4_theprison_06_lvl.h"
-#include "content/levels/1_5_suicidepit_19_lvl.h"
+#include "content/levels/1_0_corridor_25_lvl.h"
+#include "content/levels/1_1_intro_04_lvl.h"
+#include "content/levels/1_2_ronin_16_lvl.h"
+#include "content/levels/1_3_theclimb_34_lvl.h"
+#include "content/levels/1_4_thefactory_07_lvl.h"
+#include "content/levels/1_5_theprison_06_lvl.h"
+#include "content/levels/1_6_suicidepit_19_lvl.h"
 #include "content/levels/2_1_thetower_09_lvl.h"
 #include "content/levels/2_2_thechasm_08_lvl.h"
 #include "content/levels/2_3_sf_17_lvl.h"
@@ -160,11 +161,11 @@ void SetActiveSegment(u8 segment) {
 #include "content/levels/4_4_twister_29_lvl.h"
 #include "content/levels/4_6_level_32_lvl.h"
 
-u8 g_NumLevels = 20;
-struct Level g_Levels[20];
+u8 g_NumLevels = 21;
+struct Level g_Levels[21];
 
 void SetSegmentForLevel(u8 lvlidx) {
-	if (lvlidx < 12) {
+	if (lvlidx < 13) {
 		SetActiveSegment(1);
 	} else {
 		SetActiveSegment(2);
@@ -173,6 +174,7 @@ void SetSegmentForLevel(u8 lvlidx) {
 
 void InitLevels() {
 	u8 i = 0;
+	g_Levels[i++] = level_corridor1;
 	g_Levels[i++] = level_intro;
 	g_Levels[i++] = level_ronin;
 	g_Levels[i++] = level_theclimb;
@@ -279,7 +281,7 @@ i8	 g_mDY = 0;
 i8   g_DX;
 i8   g_DY;
 bool g_PlayerHasKey = FALSE;
-u8 g_PlayerMaxRewindEnergy = 25;
+u8 g_PlayerMaxRewindEnergy = 0;
 u8 g_PlayerRewindEnergy = 0;
 
 // Key sprite

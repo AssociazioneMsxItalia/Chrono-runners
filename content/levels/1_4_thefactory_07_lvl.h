@@ -47,7 +47,7 @@ struct Level level_thefactory = {
 	29, 6,       // start_x start_y
 	9, 13,       // end_x end_y
 	29, 11,      // key_x key_y
-	2, 11,       // crystal_x crystal_y
+	0, 0,       // crystal_x crystal_y
 	0,           // num_platforms
 	NULL,        // platforms
 	2,           // num_mines

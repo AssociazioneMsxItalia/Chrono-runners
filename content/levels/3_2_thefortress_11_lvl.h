@@ -47,7 +47,7 @@ struct Level level6 = {
 	1, 20,       // start_x start_y
 	29, 20,      // end_x end_y
 	1, 3,        // key_x key_y
-	13, 3,       // crystal_x crystal_y
+	0, 0,       // crystal_x crystal_y
 	1,           // num_platforms
 	plat6,       // platforms
 	0,           // num_mines

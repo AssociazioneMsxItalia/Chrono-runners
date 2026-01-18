@@ -6,6 +6,7 @@
 // LEVELS
 //=============================================================================
 
+#include "content/levels/screen_25.h"
 #include "content/levels/screen_4.h"
 #include "content/levels/screen_16.h"
 #include "content/levels/screen_34.h"
