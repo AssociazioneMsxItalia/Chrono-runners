@@ -2,6 +2,7 @@
 
 #include "sprite_defs.h"
 #include "level_defs.h"
+#include "PawnData.h"
 
 extern u8 g_RemainingMinutes;
 extern u8 g_RemainingSeconds;
@@ -69,7 +70,7 @@ void DrawRewindGauge() {
 	// La barra di rewind può essere grande fino a 8 slot, un cristallo
 	// ne riempie due
 
-	u8 ntiles = g_PlayerRewindEnergy >> 4; // / 16
+	u8 ntiles = g_PlayerRewindEnergy >> 5; // / 32
 
 	if (ntiles != 0)
 		VDP_FillLayout_GM2(45, 21, 0, ntiles, 1);
@@ -255,4 +256,38 @@ void DrawEnergyFields(struct Level *lvl, bool rewind) {
 			VDP_HideSprite(sprite_id);
 		}
 	}
+}
+
+extern bool g_PlayerInputRight;
+extern bool g_PlayerInputLeft;
+extern bool g_PlayerInputUp;
+
+void UpdatePlayerInput() {
+	g_PlayerInputRight = FALSE;
+	g_PlayerInputLeft = FALSE;
+	g_PlayerInputUp = FALSE;
+
+	u8 row8 = Keyboard_Read(8);
+	u8 joy = Joystick_Read(JOY_PORT_1);
+
+	if (IS_KEY_PRESSED(row8, KEY_RIGHT)) {
+		g_PlayerInputRight = TRUE;
+	} else if (IS_KEY_PRESSED(row8, KEY_LEFT)) {
+		g_PlayerInputLeft = TRUE;
+	}
+
+	if (IS_KEY_PRESSED(row8, KEY_UP) || IS_JOY_PRESSED(joy, JOY_INPUT_TRIGGER_B)) {
+		g_PlayerInputUp = TRUE;
+	}
+}
+
+extern i8 g_VelocityY;
+extern i8 g_mDY;
+
+void UpdatePlayerGravity() {
+	g_mDY -= g_VelocityY;
+
+	g_VelocityY -= GRAVITY;
+	if (g_VelocityY < -FORCE)
+		g_VelocityY = -FORCE;
 }

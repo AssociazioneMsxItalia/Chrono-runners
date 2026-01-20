@@ -263,6 +263,9 @@ extern void DrawMines(struct Level *lvl);
 extern void DrawEnemies(struct Level *lvl, bool rewind);
 extern void DrawEnergyFields(struct Level *lvl, bool rewind);
 
+extern void UpdatePlayerInput();
+extern void UpdatePlayerGravity();
+
 //=============================================================================
 // MEMORY DATA
 //=============================================================================
@@ -413,7 +416,10 @@ void TakeKey() {
 }
 
 void TakeCrystal() {
-	g_PlayerMaxRewindEnergy += 25;
+	if (g_PlayerMaxRewindEnergy < 192)
+		g_PlayerMaxRewindEnergy += 64;
+	else
+		g_PlayerMaxRewindEnergy = 255;
 }
 
 bool isPlayerAtExit() {
@@ -534,33 +540,6 @@ i8 GetDPos(i8* m) {
 		(*m) += 8;
 
 	return rv;
-}
-
-void UpdatePlayerInput() {
-	g_PlayerInputRight = FALSE;
-	g_PlayerInputLeft = FALSE;
-	g_PlayerInputUp = FALSE;
-
-	u8 row8 = Keyboard_Read(8);
-	u8 joy = Joystick_Read(JOY_PORT_1);
-
-	if (IS_KEY_PRESSED(row8, KEY_RIGHT)) {
-		g_PlayerInputRight = TRUE;
-	} else if (IS_KEY_PRESSED(row8, KEY_LEFT)) {
-		g_PlayerInputLeft = TRUE;
-	}
-
-	if (IS_KEY_PRESSED(row8, KEY_UP) || IS_JOY_PRESSED(joy, JOY_INPUT_TRIGGER_B)) {
-		g_PlayerInputUp = TRUE;
-	}
-}
-
-void UpdatePlayerGravity() {
-	g_mDY -= g_VelocityY;
-
-	g_VelocityY -= GRAVITY;
-	if (g_VelocityY < -FORCE)
-		g_VelocityY = -FORCE;
 }
 
 void UpdatePlayerMovement(struct Platform *platform) {
@@ -988,6 +967,8 @@ bool State_Game()
 	// ne hanno bisogno
 	struct Level *lvl = &g_Levels[g_CurrentLevel];
 
+	SetActiveSegment(7);
+
 	// Gestione input
 	UpdatePlayerInput();
 
@@ -1003,6 +984,8 @@ bool State_Game()
 	UpdatePlayerMovement(platform);
 
 	UpdatePlayerAction();
+
+	SetActiveSegment(0);
 
 	// Testi a video
 	if (g_RemainingFS == 0) {
@@ -1022,12 +1005,14 @@ bool State_Game()
 	Pawn_Update(&g_PlayerPawn);
 	Pawn_Draw(&g_PlayerPawn);
 
+	SetActiveSegment(7);
 	DrawKey(lvl);
 	DrawCrystal(lvl);
 	DrawPlatforms(lvl, FALSE);
 	DrawMines(lvl);
 	DrawEnemies(lvl, FALSE);
 	DrawEnergyFields(lvl, FALSE);
+	SetActiveSegment(0);
 
 	// Controlla la collisione tra giocatore e chiave
 	if (g_KeyEnabled && bboxCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY, g_KeyPosX, g_KeyPosY)) {
@@ -1098,7 +1083,10 @@ bool State_Death()
 
 	// Ancora il personaggio non è uscito dallo schermo
 	if (g_PlayerPawn.PositionY < 192) {
+		SetActiveSegment(7);
 		UpdatePlayerGravity();
+		SetActiveSegment(0);
+
 		g_DY = GetDPos(&g_mDY);
 
 		Pawn_SetAction(&g_PlayerPawn, ACTION_DEATH);
