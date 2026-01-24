@@ -1,13 +1,7 @@
 #pragma once
 
 #include "msxgl.h"
-
-//=============================================================================
-// FORWARD DECLARATIONS
-//=============================================================================
-
-// Forward declare Level to avoid circular dependency
-struct Level;
+#include "level_defs.h"
 
 //=============================================================================
 // SNAPSHOT SYSTEM FOR TIME REWIND
@@ -76,14 +70,6 @@ typedef struct {
     u8 enemy_field_x[MAX_ENEMIES];       // Energy field X position
     u8 enemy_field_y[MAX_ENEMIES];       // Energy field Y position
 } GameSnapshot;
-
-/**
- * @brief Circular buffer for game snapshots
- */
-extern GameSnapshot g_SnapshotBuffer[SNAPSHOT_BUFFER_SIZE];
-extern u8 g_SnapshotHead;
-extern u8 g_SnapshotTail;
-extern u8 g_SnapshotCount;
 
 /**
  * @brief Capture current game state into the snapshot buffer

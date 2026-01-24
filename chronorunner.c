@@ -845,7 +845,9 @@ void PlayerRestart()
 	g_PlayerRewindEnergy = 0;
 
 	// Initialize snapshot system for player and object rewind
+	SetActiveSegment(7);
 	Snapshot_Initialize();
+	SetActiveSegment(0);
 }
 
 bool State_Intermission()
@@ -1043,7 +1045,9 @@ bool State_Game()
 	}
 
 	// Capture snapshot of all game objects and player state
+	SetActiveSegment(7);
 	Snapshot_Capture(lvl, g_PlayerPawn.PositionX, g_PlayerPawn.PositionY, g_PlayerPawn.AnimFrame);
+	SetActiveSegment(0);
 
 	u8 row8 = Keyboard_Read(8);
 	if (IS_KEY_PRESSED(row8, KEY_SPACE)) {
@@ -1177,7 +1181,9 @@ bool State_Rewind()
 	}
 
 	// Ogni passo di rewind consuma un elemento del buffer snapshot
+	SetActiveSegment(7);
 	u8 snapshot_idx = Snapshot_RewindStep();
+	SetActiveSegment(0);
 
 	// e anche l'energia di rewind del giocatore
 	g_PlayerRewindEnergy--;
@@ -1190,7 +1196,9 @@ bool State_Rewind()
 	struct Level *lvl = &g_Levels[g_CurrentLevel];
 
 	u8 px, py, pf;
+	SetActiveSegment(7);
 	Snapshot_Restore(lvl, snapshot_idx, &px, &py, &pf);
+	SetActiveSegment(0);
 
 	// Aggiorna la posizione e il fotogramma. Per forzare quest'ultimo,
 	// imposta a mano il flag di aggiornamento pattern.
