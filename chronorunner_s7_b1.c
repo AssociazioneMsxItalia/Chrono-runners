@@ -1,4 +1,5 @@
 #include "msxgl.h"
+#include "game/pawn.h"
 
 #include "sprite_defs.h"
 #include "level_defs.h"
@@ -263,6 +264,18 @@ extern bool g_PlayerInputRight;
 extern bool g_PlayerInputLeft;
 extern bool g_PlayerInputUp;
 
+extern Pawn g_PlayerPawn;
+extern u8   g_PlayerAction;
+extern bool g_PlayerMovingRight;
+extern bool g_PlayerMovingLeft;
+extern bool g_PlayerJumping;
+extern bool g_PlayerDying;
+extern i8   g_mDX;
+extern i8   g_DX;
+extern i8   g_DY;
+
+extern i8 GetDPos(i8* m);
+
 void UpdatePlayerInput() {
 	g_PlayerInputRight = FALSE;
 	g_PlayerInputLeft = FALSE;
@@ -291,6 +304,197 @@ void UpdatePlayerGravity() {
 	g_VelocityY -= GRAVITY;
 	if (g_VelocityY < -FORCE)
 		g_VelocityY = -FORCE;
+}
+
+void UpdatePlayerMovement(struct Platform *platform) {
+
+	g_PlayerMovingRight = g_PlayerMovingLeft = FALSE;
+
+	u8 x_incr = 8;
+
+	if (g_PlayerInputRight)
+	{
+		g_mDX += x_incr;
+		g_PlayerMovingRight = TRUE;
+	}
+	else if (g_PlayerInputLeft)
+	{
+		g_mDX -= x_incr;
+		g_PlayerMovingLeft = TRUE;
+	}
+
+	// Se preme su E non è su una piattaforma né sta già saltando, allora
+	// esegue il salto
+	if (g_PlayerInputUp && (platform != NULL || !g_PlayerJumping)) {
+		// Inizia il salto
+		g_PlayerJumping = TRUE;
+		g_VelocityY = FORCE;
+		// Ora NON è più su piattaforma
+		platform = NULL;
+	}
+
+	// Gestisce esplicitamente la piattaforma. Entra qua solo se non abbiamo
+	// appena saltato
+	if (platform != NULL) {
+		// Forza posizione Y sulla piattaforma
+		g_PlayerPawn.PositionY = platform->pos_y - 16;
+
+		// Siccome è sulla piattaforma, il personaggio NON sta saltando
+		g_PlayerJumping = FALSE;
+
+		// Aggiungi movimento piattaforma (moltiplicato per 8 per ottavi di pixel)
+		g_mDX += (platform->dir_x * 8);
+	}
+
+	if (g_PlayerJumping)
+	{
+		UpdatePlayerGravity();
+	}
+
+	// Gli spostamenti sono espressi in ottavi di pixel
+	g_DX = GetDPos(&g_mDX);
+	g_DY = GetDPos(&g_mDY);
+}
+
+void UpdatePlayerAction() {
+	g_PlayerAction = ACTION_IDLE;
+	if (g_PlayerDying) {
+		g_PlayerAction = ACTION_DEATH;
+	}
+	else if (g_PlayerJumping && (g_VelocityY >= 0))
+	{
+		if (g_PlayerMovingRight)
+			g_PlayerAction = ACTION_JUMPRIGHT;
+		else
+			g_PlayerAction = ACTION_JUMPLEFT;
+	}
+	else if (g_PlayerJumping) {
+		if (g_PlayerMovingRight)
+			g_PlayerAction = ACTION_FALLRIGHT;
+		else
+			g_PlayerAction = ACTION_FALLLEFT;
+	}
+	else if (g_PlayerMovingRight)
+		g_PlayerAction = ACTION_MOVERIGHT;
+	else if (g_PlayerMovingLeft)
+		g_PlayerAction = ACTION_MOVELEFT;
+}
+
+void UpdatePlatforms(struct Level *lvl) {
+	struct Platform *platforms = lvl->platforms;
+
+	for (u8 p=0; p < lvl->num_platforms; p++) {
+		struct Platform *plat = &platforms[p];
+
+		plat->pos_x += plat->dir_x;
+		if (plat->pos_x == plat->max_x || plat->pos_x == plat->min_x) {
+			plat->dir_x = (-plat->dir_x);
+		}
+
+		plat->pos_y += plat->dir_y;
+		if (plat->pos_y == plat->max_y || plat->pos_y == plat->min_y) {
+			plat->dir_y = (-plat->dir_y);
+		}
+	}
+}
+
+void UpdateEnemies(struct Level *lvl) {
+	struct Enemy *enemies = lvl->enemies;
+
+	for (u8 e=0; e < lvl->num_enemies; e++) {
+		struct Enemy *enemy = &enemies[e];
+
+		// Muovi i proiettili indipendentemente dallo stato del nemico
+		if (enemy->field_state == 2) {
+
+			enemy->field_mDX += 12 * enemy->dir_x;
+			i8 dx = GetDPos(&enemy->field_mDX);
+			enemy->field_x += dx;
+
+			// Se esce dallo schermo, resettalo
+			if (enemy->field_x < 8 || enemy->field_x > 240) {
+				enemy->field_state = 0;
+			}
+		}
+
+		// Stato stunned. Per un nemico in questo stato ci fermiamo qua:
+		// no movimento, no nuovi field.
+		if (enemy->stunned_timer > 0) {
+			enemy->stunned_timer--;
+			continue;
+		}
+
+		// Nemici tipo 2, campo di forza locale
+		if (enemy->type == 2) {
+			if (enemy->field_state == 1) {
+				enemy->field_timer--;
+
+				if (enemy->field_timer == 0) {
+					// Al termine del timer disattiva il campo di forza
+					enemy->field_state = 0;
+				}
+
+				// Se il campo di forza è attivo, il nemico non si muove
+				continue;
+
+			} else if (enemy->field_state == 0) {
+				// Spawn window based on g_RemainingFS cycle
+				// Different enemies check at different counter values (offset by enemy index)
+				// This creates a natural phase offset without multiplication
+				u8 check_value = g_RemainingFS + e;
+				if (check_value >= 50) check_value -= 50;
+
+				// 10-frame window out of 50
+				if (check_value < 10 && Math_GetRandom8() < 10) {
+					enemy->field_state = 1;
+					enemy->field_timer = 100;
+
+					// Il campo di forza appare davanti al nemico
+					enemy->field_x = enemy->pos_x + (enemy->dir_x * 16);
+					enemy->field_y = enemy->pos_y;
+				}
+			}
+		}
+
+		// Nemici tipo 3, campo di forza proiettile
+		if (enemy->type == 3) {
+			if (enemy->field_state == 0) {
+				// Spawn window based on g_RemainingFS cycle
+				// Different enemies check at different counter values (offset by enemy index)
+				u8 check_value = g_RemainingFS + e;
+				if (check_value >= 50) check_value -= 50;
+
+				// 8-frame window out of 50
+				if (check_value < 8 && Math_GetRandom8() < 5) {
+					enemy->field_state = 2;
+
+					enemy->field_x = enemy->pos_x + (enemy->dir_x * 16);
+					enemy->field_y = enemy->pos_y;
+					enemy->field_mDX = 0;
+				}
+			}
+		}
+
+		// Check boundaries and reverse direction
+		if (enemy->pos_x < enemy->min_x) {
+			enemy->pos_x = enemy->min_x;
+			enemy->dir_x = -enemy->dir_x;
+		}
+
+		if (enemy->pos_x > enemy->max_x) {
+			enemy->pos_x = enemy->max_x;
+			enemy->dir_x = -enemy->dir_x;
+		}
+
+		// Add speed to accumulated movement (in eighths of pixel)
+		// Type 0: 2 eighths/frame, all others: 4 eighths/frame
+		u8 speed = (enemy->type == 0) ? 2 : 4;
+		enemy->mDX += speed * enemy->dir_x;
+
+		// Convert eighths-of-pixel to actual pixel movement
+		i8 dx = GetDPos(&enemy->mDX);
+		enemy->pos_x += dx;
+	}
 }
 
 //=============================================================================
