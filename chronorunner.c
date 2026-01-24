@@ -1106,7 +1106,9 @@ bool State_Death()
 		for (u16 t=0; t < 300; t++) {
 			tick();
 		}
+		SetActiveSegment(7);
 		PrintTime();
+		SetActiveSegment(0);
 
 		if (g_CountDownTicks > 0) {
 			g_CountDownTicks--;
@@ -1141,8 +1143,10 @@ bool State_GameOver()
 		// Cancella lo schermo con tile vuoto
 		VDP_FillScreen_GM2(44);
 
+		SetActiveSegment(7);
 		// Stampa "GAME OVER" centrato (10 caratteri = 5 a sinistra del centro)
 		PrintGFXText("GAME OVER", 11, 12);
+		SetActiveSegment(0);
 	}
 
 	g_GameOverCounter++;
