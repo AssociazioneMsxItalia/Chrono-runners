@@ -282,8 +282,8 @@ u8 g_CountDownTicks;
 // Controlla lo stato dell'intermission
 u8 g_IntermissionState = 0;
 
-// Contatore per lo stato di game over (50 fps * 5 secondi = 250)
-u8 g_GameOverCounter = 0;
+// Contatore per lo stato di game over
+u16 g_GameOverCounter = 0;
 
 Pawn g_PlayerPawn;
 u8	 g_PlayerAction;
@@ -1147,9 +1147,7 @@ bool State_GameOver()
 
 	g_GameOverCounter++;
 
-	// Dopo 5 secondi (250 frame a 50 fps)
-	// XXX: taglia un po' di traccia g_gameover
-	if (g_GameOverCounter >= 250) {
+	if (g_GameOverCounter >= 500) {
 		g_GameOverCounter = 0;
 		Game_SetState(State_Initialize);
 	}
