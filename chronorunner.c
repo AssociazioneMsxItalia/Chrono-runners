@@ -114,26 +114,20 @@ const Pawn_Action g_AnimActions[] =
 	{ g_PlayerFramesDeath,     numberof(g_PlayerFramesDeath),     TRUE, TRUE },
 };
 
+
 /**
- * @brief Switch dei segmenti nel banco 1
+ * @brief Switch dei segmenti nel banco 1. In uscita reimposta il 7 che è il default.
  *
- * @param u8 segment, imposta il numero del segmento da assegnare. Se il valore è 0, viene ripristinato il segmento precedente
+ * @param u8 seg numero del segmento da assegnare al banco 1.
  */
 
-i8 g_PreviousSegment = -1;
+u8 g_seg_guard = 1;
 
-void SetActiveSegment(u8 segment) {
-	if(segment == 0) {
-		SET_BANK_SEGMENT(1, g_PreviousSegment);
-		g_PreviousSegment = -1;
-	} else {
-		if (g_PreviousSegment != -1) {
-			DEBUG_PRINT("ERR %i\n", g_PreviousSegment);
-		}
-		g_PreviousSegment = GET_BANK_SEGMENT(1);
-		SET_BANK_SEGMENT(1, segment);
-	}
-}
+#define WITH_SEGMENT(seg) \
+    for (SET_BANK_SEGMENT(1, seg), g_seg_guard = 0; \
+         !g_seg_guard; \
+         g_seg_guard = 1, SET_BANK_SEGMENT(1, 7))
+
 
 //=============================================================================
 // LEVELS
@@ -172,11 +166,11 @@ void SetActiveSegment(u8 segment) {
 u8 g_NumLevels = 29;
 struct Level g_Levels[29];
 
-void SetSegmentForLevel(u8 lvlidx) {
+u8 SegmentForLevel(u8 lvlidx) {
 	if (lvlidx < 14) {
-		SetActiveSegment(1);
+		return 1;
 	} else {
-		SetActiveSegment(2);
+		return 2;
 	}
 }
 
@@ -608,23 +602,22 @@ void AllocateSpriteIDs(struct Level *lvl) {
 
 bool State_Initialize()
 {
-	// Switch Segment 3
-	SetActiveSegment(3);
+WITH_SEGMENT(3) {
 	SetVRAMTable();			// RAM Tables Address and Setup video
 	LoadPatternAndColor();  // Load Pattern and color
 	InitializeSprite();	    // Initialize sprite
-	SetActiveSegment(0);
+}
 
 	InitLevels();
 
-	SetActiveSegment(4);
+WITH_SEGMENT(4) {
 	g_SongData[0] = g_chronorunner;
 	g_SongData[1] = g_gameover;
 	SoundStop();
 	SoundSetSong(0);
 	SoundLoop(TRUE);
 	SoundPlay();
-	SetActiveSegment(0);
+}
 
 	// Imposta tempo iniziale
 	g_RemainingMinutes = 60;
@@ -658,9 +651,7 @@ void PlayerRestart()
 	g_PlayerRewindEnergy = 0;
 
 	// Initialize snapshot system for player and object rewind
-	SetActiveSegment(7);
 	Snapshot_Initialize();
-	SetActiveSegment(0);
 }
 
 bool State_Intermission()
@@ -671,9 +662,9 @@ bool State_Intermission()
 		// in ciascun livello
 		VDP_HideAllSprites();
 
-		SetActiveSegment(4);
+WITH_SEGMENT(4) {
 		VDP_WriteLayout_GM2(g_Intermission, 0, 0, 32, 24);
-		SetActiveSegment(0);
+}
 
 		// Prende il nome del prossimo livello
 		const c8 *level_name = g_Levels[g_NextLevel].name;
@@ -691,8 +682,6 @@ bool State_Intermission()
 		// Posizione
 		VDP_Poke_GM2(2 + prog, 16, 48);
 
-		SetActiveSegment(7);
-
 		PrintGFXText("ROOM", 5, 18);
 		PrintGFXNumber(g_NextLevel + 1, 10, 18);
 
@@ -707,8 +696,6 @@ bool State_Intermission()
 		PrintGFXText(level_name, 16 - (String_Length(level_name) / 2), 20);
 
 		PrintGFXText("PRESS SPACE KEY", 8, 23);
-
-		SetActiveSegment(0);
 
 		g_IntermissionState = 1;
 	}
@@ -757,16 +744,15 @@ bool State_ChangeLevel()
 	// Cancella lo schermo
 	VDP_FillScreen_GM2(44);
 
-	SetSegmentForLevel(g_CurrentLevel);
+	u8 seg = SegmentForLevel(g_CurrentLevel);
+WITH_SEGMENT(seg) {
 	VDP_WriteLayout_GM2(lvl->layout, 0, 2, 32, 24);
-	SetActiveSegment(0);
+}
 
 	AllocateSpriteIDs(lvl);
 
-	SetActiveSegment(7);
 	PrintGFXText("TIME   '  \"", 2, 0);
 	PrintTime();
-	SetActiveSegment(0);
 
 	g_PlayerHasKey = FALSE;
 	PlayerRestart();
@@ -781,8 +767,6 @@ bool State_Game()
 	// Recupera livello corrente per passarlo esplicitamente alle funzioni che
 	// ne hanno bisogno
 	struct Level *lvl = &g_Levels[g_CurrentLevel];
-
-	SetActiveSegment(7);
 
 	// Gestione input
 	UpdatePlayerInput();
@@ -800,13 +784,9 @@ bool State_Game()
 
 	UpdatePlayerAction();
 
-	SetActiveSegment(0);
-
 	// Testi a video
 	if (g_RemainingFS == 0) {
-		SetActiveSegment(7);
 		PrintTime();
-		SetActiveSegment(0);
 	}
 
 	// Controlla se il tempo è esaurito
@@ -820,14 +800,12 @@ bool State_Game()
 	Pawn_Update(&g_PlayerPawn);
 	Pawn_Draw(&g_PlayerPawn);
 
-	SetActiveSegment(7);
 	DrawKey(lvl);
 	DrawCrystal(lvl);
 	DrawPlatforms(lvl, FALSE);
 	DrawMines(lvl);
 	DrawEnemies(lvl, FALSE);
 	DrawEnergyFields(lvl, FALSE);
-	SetActiveSegment(0);
 
 	// Controlla la collisione tra giocatore e chiave
 	if (g_KeyEnabled && bboxCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY, g_KeyPosX, g_KeyPosY)) {
@@ -858,9 +836,7 @@ bool State_Game()
 	}
 
 	// Capture snapshot of all game objects and player state
-	SetActiveSegment(7);
 	Snapshot_Capture(lvl, g_PlayerPawn.PositionX, g_PlayerPawn.PositionY, g_PlayerPawn.AnimFrame);
-	SetActiveSegment(0);
 
 	u8 row8 = Keyboard_Read(8);
 	if (IS_KEY_PRESSED(row8, KEY_SPACE)) {
@@ -881,9 +857,7 @@ bool State_Game()
 		}
 	}
 
-	SetActiveSegment(7);
 	DrawRewindGauge();
-	SetActiveSegment(0);
 
 	return TRUE;
 }
@@ -900,9 +874,7 @@ bool State_Death()
 
 	// Ancora il personaggio non è uscito dallo schermo
 	if (g_PlayerPawn.PositionY < 192) {
-		SetActiveSegment(7);
 		UpdatePlayerGravity();
-		SetActiveSegment(0);
 
 		g_DY = GetDPos(&g_mDY);
 
@@ -923,9 +895,7 @@ bool State_Death()
 		for (u16 t=0; t < 300; t++) {
 			tick();
 		}
-		SetActiveSegment(7);
 		PrintTime();
-		SetActiveSegment(0);
 
 		if (g_CountDownTicks > 0) {
 			g_CountDownTicks--;
@@ -947,12 +917,12 @@ bool State_GameOver()
 	// Prima volta in questo stato: prepara lo schermo
 	if (g_GameOverCounter == 0) {
 
-		SetActiveSegment(4);
+WITH_SEGMENT(4) {
 		SoundStop();
 		SoundSetSong(1);
 		SoundLoop(FALSE);
 		SoundPlay();
-		SetActiveSegment(0);
+}
 
 		// Nasconde tutti gli sprite
 		VDP_HideAllSprites();
@@ -960,10 +930,8 @@ bool State_GameOver()
 		// Cancella lo schermo con tile vuoto
 		VDP_FillScreen_GM2(44);
 
-		SetActiveSegment(7);
 		// Stampa "GAME OVER" centrato (10 caratteri = 5 a sinistra del centro)
 		PrintGFXText("GAME OVER", 11, 12);
-		SetActiveSegment(0);
 	}
 
 	g_GameOverCounter++;
@@ -994,24 +962,18 @@ bool State_Rewind()
 	}
 
 	// Ogni passo di rewind consuma un elemento del buffer snapshot
-	SetActiveSegment(7);
 	u8 snapshot_idx = Snapshot_RewindStep();
-	SetActiveSegment(0);
 
 	// e anche l'energia di rewind del giocatore
 	g_PlayerRewindEnergy--;
 
-	SetActiveSegment(7);
 	DrawRewindGauge();
-	SetActiveSegment(0);
 
 	// Restore all game objects to their state at this frame
 	struct Level *lvl = &g_Levels[g_CurrentLevel];
 
 	u8 px, py, pf;
-	SetActiveSegment(7);
 	Snapshot_Restore(lvl, snapshot_idx, &px, &py, &pf);
-	SetActiveSegment(0);
 
 	// Aggiorna la posizione e il fotogramma. Per forzare quest'ultimo,
 	// imposta a mano il flag di aggiornamento pattern.
@@ -1021,11 +983,9 @@ bool State_Rewind()
 	Pawn_Draw(&g_PlayerPawn);
 
 	// Redraw all objects at their rewound positions in white
-	SetActiveSegment(7);
 	DrawPlatforms(lvl, TRUE);
 	DrawEnemies(lvl, TRUE);
 	DrawEnergyFields(lvl, TRUE);
-	SetActiveSegment(0);
 
 	return TRUE;
 }
@@ -1054,9 +1014,14 @@ void tick() {
 }
 
 void InterruptHook() {
-	SetActiveSegment(4);
+	// Qua non può usare il context manager WITH_SEGMENT perché l'interruzione
+	// potrebbe arrivare mentre il banco 1 è già puntato su un segmento
+	// diverso dal 7 che è il default. Quindi semplicemente salva il segmento
+	// corrente, aggiorna il PSG e lo reimposta subito dopo.
+	u8 prevSeg = GET_BANK_SEGMENT(1);
+	SET_BANK_SEGMENT(1, 4);
 	SoundUpdate();
-	SetActiveSegment(0);
+	SET_BANK_SEGMENT(1, prevSeg);
 
     if (Game_GetCurrentState() != State_Game)
         return;
@@ -1068,9 +1033,9 @@ void main()
 {
 	DEBUG_INIT();
 
-	SetActiveSegment(4);
+WITH_SEGMENT(4) {
 	SoundInit();
-	SetActiveSegment(0);
+}
 
 	Game_SetState(State_Initialize);
 	Game_SetVSyncCallback(InterruptHook);
