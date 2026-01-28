@@ -164,7 +164,12 @@ u8 g_seg_guard = 1;
 #include "content/levels/4_7_theescape_13_lvl.h"
 
 u8 g_NumLevels = 29;
-struct Level g_Levels[29];
+
+// Array con l'ordine dei livelli
+const struct Level* g_LevelOrder[29];
+
+// Copia locale del livello attuale
+struct Level g_ActiveLevel;
 
 u8 SegmentForLevel(u8 lvlidx) {
 	if (lvlidx < 14) {
@@ -176,35 +181,35 @@ u8 SegmentForLevel(u8 lvlidx) {
 
 void InitLevels() {
 	u8 i = 0;
-	g_Levels[i++] = level_corridor1;
-	g_Levels[i++] = level_intro;
-	g_Levels[i++] = level_ronin;
-	g_Levels[i++] = level_theclimb;
-	g_Levels[i++] = level_thefactory;
-	g_Levels[i++] = level_theprison;
-	g_Levels[i++] = level_suicidepit;
-	g_Levels[i++] = level_corridor2;
-	g_Levels[i++] = level_thetower;
-	g_Levels[i++] = level_thechasm;
-	g_Levels[i++] = level_sf;
-	g_Levels[i++] = level_whatliesbeneath;
-	g_Levels[i++] = level_pipesandrobots;
-	g_Levels[i++] = level_crystalchem;
-	g_Levels[i++] = level_corridor3;
-	g_Levels[i++] = level_punisher;
-	g_Levels[i++] = level_thefortress;
-	g_Levels[i++] = level_level33;
-	g_Levels[i++] = level_theabyss;
-	g_Levels[i++] = level_level35;
-	g_Levels[i++] = level_challenge;
-	g_Levels[i++] = level_corridor4;
-	g_Levels[i++] = level_easypeasy;
-	g_Levels[i++] = level_thesummit;
-	g_Levels[i++] = level_darkdescent;
-	g_Levels[i++] = level_twister;
-	g_Levels[i++] = level_fielddescent;
-	g_Levels[i++] = level_level32;
-	g_Levels[i++] = level_theescape;
+	g_LevelOrder[i++] = &level_corridor1;
+	g_LevelOrder[i++] = &level_intro;
+	g_LevelOrder[i++] = &level_ronin;
+	g_LevelOrder[i++] = &level_theclimb;
+	g_LevelOrder[i++] = &level_thefactory;
+	g_LevelOrder[i++] = &level_theprison;
+	g_LevelOrder[i++] = &level_suicidepit;
+	g_LevelOrder[i++] = &level_corridor2;
+	g_LevelOrder[i++] = &level_thetower;
+	g_LevelOrder[i++] = &level_thechasm;
+	g_LevelOrder[i++] = &level_sf;
+	g_LevelOrder[i++] = &level_whatliesbeneath;
+	g_LevelOrder[i++] = &level_pipesandrobots;
+	g_LevelOrder[i++] = &level_crystalchem;
+	g_LevelOrder[i++] = &level_corridor3;
+	g_LevelOrder[i++] = &level_punisher;
+	g_LevelOrder[i++] = &level_thefortress;
+	g_LevelOrder[i++] = &level_level33;
+	g_LevelOrder[i++] = &level_theabyss;
+	g_LevelOrder[i++] = &level_level35;
+	g_LevelOrder[i++] = &level_challenge;
+	g_LevelOrder[i++] = &level_corridor4;
+	g_LevelOrder[i++] = &level_easypeasy;
+	g_LevelOrder[i++] = &level_thesummit;
+	g_LevelOrder[i++] = &level_darkdescent;
+	g_LevelOrder[i++] = &level_twister;
+	g_LevelOrder[i++] = &level_fielddescent;
+	g_LevelOrder[i++] = &level_level32;
+	g_LevelOrder[i++] = &level_theescape;
 }
 
 //=============================================================================
@@ -263,6 +268,8 @@ extern void UpdatePlayerMovement(struct Platform *platform);
 extern void UpdatePlayerAction();
 extern void UpdatePlatforms(struct Level *lvl);
 extern void UpdateEnemies(struct Level *lvl);
+
+extern void LoadLevel(u8 levelIndex);
 
 //=============================================================================
 // MEMORY DATA
@@ -325,8 +332,8 @@ u8 g_EnergyFieldAnimCounter;
 // LEVELS
 //=============================================================================
 
-u8 g_CurrentLevel;
-u8 g_NextLevel;
+u8 g_CurrentLevelIdx;
+u8 g_NextLevelIdx;
 
 //=============================================================================
 // PHYSICS
@@ -399,8 +406,8 @@ bool bboxCollide(u8 x1, u8 y1, u8 x2, u8 y2) {
 void TakeKey() {
 	g_PlayerHasKey = TRUE;
 
-	u8 door_x = g_Levels[g_CurrentLevel].end_x;
-	u8 door_y = g_Levels[g_CurrentLevel].end_y;
+	u8 door_x = g_ActiveLevel.end_x;
+	u8 door_y = g_ActiveLevel.end_y;
 
 	// Luce verde sopra l'uscita
 	VDP_Poke_GM2(door_x, door_y - 1, 48);
@@ -424,8 +431,8 @@ bool isPlayerAtExit() {
 	if (!g_PlayerHasKey)
 		return FALSE;
 
-	u8 door_x = g_Levels[g_CurrentLevel].end_x;
-	u8 door_y = g_Levels[g_CurrentLevel].end_y;
+	u8 door_x = g_ActiveLevel.end_x;
+	u8 door_y = g_ActiveLevel.end_y;
 
 	return bboxCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY, door_x * 8, door_y * 8);
 }
@@ -625,8 +632,8 @@ WITH_SEGMENT(4) {
 	g_RemainingFS = 0;
 
 	// Reset livelli
-	g_CurrentLevel = 0;
-	g_NextLevel = 0;
+	g_CurrentLevelIdx = 0;
+	g_NextLevelIdx = 0;
 
 	Game_SetState(State_Intermission);
 
@@ -635,10 +642,28 @@ WITH_SEGMENT(4) {
 
 void PlayerRestart()
 {
-	u8 start_x = g_Levels[g_CurrentLevel].start_x;
-	u8 start_y = g_Levels[g_CurrentLevel].start_y;
+	// Reset level state (mines, enemies, platforms) from source data
+	LoadLevel(g_CurrentLevelIdx);
+
+	// Reset key state
+	g_KeyPosX = g_ActiveLevel.key_x * 8;
+	g_KeyPosY = g_ActiveLevel.key_y * 8;
+	g_KeyAnimFrame = 0;
+	g_KeyEnabled = TRUE;
+	g_PlayerHasKey = FALSE;
+
+	// Reset crystal state
+	g_CrystalPosX = g_ActiveLevel.crystal_x * 8;
+	g_CrystalPosY = g_ActiveLevel.crystal_y * 8;
+	g_CrystalAnimFrame = 0;
+	if (g_CrystalPosX == 0 && g_CrystalPosY == 0)
+		g_CrystalEnabled = FALSE;
+	else
+		g_CrystalEnabled = TRUE;
 
 	// Init player pawn
+	u8 start_x = g_ActiveLevel.start_x;
+	u8 start_y = g_ActiveLevel.start_y;
 	ReinitPlayer(&g_PlayerPawn,
 		         g_PlayerLayers, numberof(g_PlayerLayers),
 				 start_x * 8, start_y * 8);
@@ -667,10 +692,10 @@ WITH_SEGMENT(4) {
 }
 
 		// Prende il nome del prossimo livello
-		const c8 *level_name = g_Levels[g_NextLevel].name;
+		const c8 *level_name = g_LevelOrder[g_NextLevelIdx]->name;
 
 		// Progresso
-		u16 prog = (g_NextLevel * 30) / g_NumLevels;
+		u16 prog = (g_NextLevelIdx * 30) / g_NumLevels;
 
 		// Barra verde
 		if (prog != 0)
@@ -683,7 +708,7 @@ WITH_SEGMENT(4) {
 		VDP_Poke_GM2(2 + prog, 16, 48);
 
 		PrintGFXText("ROOM", 5, 18);
-		PrintGFXNumber(g_NextLevel + 1, 10, 18);
+		PrintGFXNumber(g_NextLevelIdx + 1, 10, 18);
 
 		// Tempo rimanente
 		PrintGFXText("TIME", 18, 18);
@@ -713,49 +738,30 @@ WITH_SEGMENT(4) {
 bool State_ChangeLevel()
 {
 	// Passa al livello successivo
-	g_CurrentLevel = g_NextLevel;
+	g_CurrentLevelIdx = g_NextLevelIdx;
 
 	// Se i livelli sono finiti, al giro successivo ricomincia da capo XXX: sistemare
-	if (g_NextLevel == g_NumLevels - 1) {
-		g_NextLevel = 0;
+	if (g_NextLevelIdx == g_NumLevels - 1) {
+		g_NextLevelIdx = 0;
 	} else {
-		g_NextLevel += 1;
+		g_NextLevelIdx += 1;
 	}
 
-	// Recupera livello corrente per passarlo esplicitamente alle funzioni che
-	// ne hanno bisogno
-	struct Level *lvl = &g_Levels[g_CurrentLevel];
-
-	g_KeyPosX = lvl->key_x * 8;
-	g_KeyPosY = lvl->key_y * 8;
-	g_KeyAnimFrame = 0;
-
-	g_KeyEnabled = TRUE;
-
-	g_CrystalPosX = lvl->crystal_x * 8;
-	g_CrystalPosY = lvl->crystal_y * 8;
-	g_CrystalAnimFrame = 0;
-
-	if (g_CrystalPosX == 0 && g_CrystalPosY == 0)
-		g_CrystalEnabled = FALSE;
-	else
-		g_CrystalEnabled = TRUE;
+	// Reset level and player state (LoadLevel + key/crystal/player init)
+	PlayerRestart();
 
 	// Cancella lo schermo
 	VDP_FillScreen_GM2(44);
 
-	u8 seg = SegmentForLevel(g_CurrentLevel);
+	u8 seg = SegmentForLevel(g_CurrentLevelIdx);
 WITH_SEGMENT(seg) {
-	VDP_WriteLayout_GM2(lvl->layout, 0, 2, 32, 24);
+	VDP_WriteLayout_GM2(g_ActiveLevel.layout, 0, 2, 32, 24);
 }
 
-	AllocateSpriteIDs(lvl);
+	AllocateSpriteIDs(&g_ActiveLevel);
 
 	PrintGFXText("TIME   '  \"", 2, 0);
 	PrintTime();
-
-	g_PlayerHasKey = FALSE;
-	PlayerRestart();
 
 	Game_SetState(State_Game);
 
@@ -766,7 +772,7 @@ bool State_Game()
 {
 	// Recupera livello corrente per passarlo esplicitamente alle funzioni che
 	// ne hanno bisogno
-	struct Level *lvl = &g_Levels[g_CurrentLevel];
+	struct Level *lvl = &g_ActiveLevel;
 
 	// Gestione input
 	UpdatePlayerInput();
@@ -969,9 +975,8 @@ bool State_Rewind()
 
 	DrawRewindGauge();
 
-	// Restore all game objects to their state at this frame
-	struct Level *lvl = &g_Levels[g_CurrentLevel];
-
+	// Imposta lo stato del livello a questo passo di rewind
+	struct Level *lvl = &g_ActiveLevel;
 	u8 px, py, pf;
 	Snapshot_Restore(lvl, snapshot_idx, &px, &py, &pf);
 
@@ -982,7 +987,7 @@ bool State_Rewind()
 	g_PlayerPawn.AnimFrame = pf;
 	Pawn_Draw(&g_PlayerPawn);
 
-	// Redraw all objects at their rewound positions in white
+	// Disegna oggetti in bianco per evidenziare che sono soggetti a rewind
 	DrawPlatforms(lvl, TRUE);
 	DrawEnemies(lvl, TRUE);
 	DrawEnergyFields(lvl, TRUE);

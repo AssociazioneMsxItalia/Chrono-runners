@@ -1,5 +1,6 @@
 #include "msxgl.h"
 #include "game/pawn.h"
+#include "debug.h"
 
 #include "sprite_defs.h"
 #include "level_defs.h"
@@ -9,8 +10,6 @@
 extern u8 g_RemainingMinutes;
 extern u8 g_RemainingSeconds;
 extern u8 g_PlayerRewindEnergy;
-
-void DrawRewindGauge();
 
 void PrintGFXText(const c8 *text, u8 x, u8 y) {
 	while (*text != 0) {
@@ -79,6 +78,10 @@ void DrawRewindGauge() {
 	if (ntiles != 8)
 		VDP_FillLayout_GM2(47, 21 + ntiles, 0, 8 - ntiles, 1);
 }
+
+//=============================================================================
+// DRAW FUNCTIONS
+//=============================================================================
 
 extern bool g_KeyEnabled;
 extern bool g_CrystalEnabled;
@@ -259,6 +262,10 @@ void DrawEnergyFields(struct Level *lvl, bool rewind) {
 		}
 	}
 }
+
+//=============================================================================
+// UPDATE FUNCTIONS
+//=============================================================================
 
 extern bool g_PlayerInputRight;
 extern bool g_PlayerInputLeft;
@@ -494,6 +501,49 @@ void UpdateEnemies(struct Level *lvl) {
 		// Convert eighths-of-pixel to actual pixel movement
 		i8 dx = GetDPos(&enemy->mDX);
 		enemy->pos_x += dx;
+	}
+}
+
+//=============================================================================
+// LEVEL LOADING
+//=============================================================================
+
+extern const struct Level* g_LevelOrder[];
+extern struct Level g_ActiveLevel;
+
+// Runtime storage for mutable arrays (max sizes across all levels)
+#define MAX_PLATFORMS 4
+#define MAX_MINES     6
+#define MAX_ENEMIES   4
+
+struct Platform g_RuntimePlatforms[MAX_PLATFORMS];
+struct Mine     g_RuntimeMines[MAX_MINES];
+struct Enemy    g_RuntimeEnemies[MAX_ENEMIES];
+
+void LoadLevel(u8 levelIndex) {
+	const struct Level* src = g_LevelOrder[levelIndex];
+
+	// Copy scalar fields (this overwrites pointers too)
+	g_ActiveLevel = *src;
+
+	// Set pointers to runtime arrays
+	g_ActiveLevel.platforms = g_RuntimePlatforms;
+	g_ActiveLevel.mines = g_RuntimeMines;
+	g_ActiveLevel.enemies = g_RuntimeEnemies;
+
+	// Deep copy platforms
+	for (u8 i = 0; i < src->num_platforms; i++) {
+		g_RuntimePlatforms[i] = src->platforms[i];
+	}
+
+	// Deep copy mines
+	for (u8 i = 0; i < src->num_mines; i++) {
+		g_RuntimeMines[i] = src->mines[i];
+	}
+
+	// Deep copy enemies
+	for (u8 i = 0; i < src->num_enemies; i++) {
+		g_RuntimeEnemies[i] = src->enemies[i];
 	}
 }
 
