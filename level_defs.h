@@ -34,6 +34,11 @@ struct Enemy {
     i8 field_mDX;  // Accumulated movement for Type 3 projectiles (in eighths of pixel)
 };
 
+// Runtime storage for mutable arrays (max sizes across all levels)
+#define MAX_PLATFORMS 4
+#define MAX_MINES     6
+#define MAX_ENEMIES   4
+
 struct Level
 {
     u8 start_x;

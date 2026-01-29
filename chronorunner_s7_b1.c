@@ -511,11 +511,6 @@ void UpdateEnemies(struct Level *lvl) {
 extern const struct Level* g_LevelOrder[];
 extern struct Level g_ActiveLevel;
 
-// Runtime storage for mutable arrays (max sizes across all levels)
-#define MAX_PLATFORMS 4
-#define MAX_MINES     6
-#define MAX_ENEMIES   4
-
 struct Platform g_RuntimePlatforms[MAX_PLATFORMS];
 struct Mine     g_RuntimeMines[MAX_MINES];
 struct Enemy    g_RuntimeEnemies[MAX_ENEMIES];

@@ -41,10 +41,6 @@ Le invarianti di questo buffer sono:
 // Snapshot buffer size: 100 frames = 2 seconds at 50 fps
 #define SNAPSHOT_BUFFER_SIZE 100
 
-// Maximum objects per level (adjust if your levels have more)
-#define MAX_PLATFORMS 4
-#define MAX_ENEMIES 4
-
 /**
  * @brief Complete snapshot of all dynamic game object states
  *
