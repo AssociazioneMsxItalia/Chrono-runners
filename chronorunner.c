@@ -418,10 +418,9 @@ void TakeKey() {
 }
 
 void TakeCrystal() {
-	if (g_PlayerMaxRewindEnergy < 192)
-		g_PlayerMaxRewindEnergy += 64;
-	else
-		g_PlayerMaxRewindEnergy = 255;
+	g_PlayerMaxRewindEnergy += (SNAPSHOT_BUFFER_SIZE / 4);
+	if (g_PlayerMaxRewindEnergy > SNAPSHOT_BUFFER_SIZE)
+		g_PlayerMaxRewindEnergy = SNAPSHOT_BUFFER_SIZE;
 }
 
 bool isPlayerAtExit() {
