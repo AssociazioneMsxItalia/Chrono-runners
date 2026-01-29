@@ -281,6 +281,8 @@ extern i8   g_DY;
 
 extern i8 GetDPos(i8* m);
 
+extern void FxPlay(u8 id);
+
 void UpdatePlayerInput() {
 	g_PlayerInputRight = FALSE;
 	g_PlayerInputLeft = FALSE;
@@ -336,6 +338,8 @@ void UpdatePlayerMovement(struct Platform *platform) {
 		g_VelocityY = FORCE;
 		// Ora NON è più su piattaforma
 		platform = NULL;
+
+		FxPlay(4);
 	}
 
 	// Gestisce esplicitamente la piattaforma. Entra qua solo se non abbiamo

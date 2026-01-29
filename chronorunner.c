@@ -247,6 +247,8 @@ extern void SoundLoop(bool enable);
 extern void SoundMute(u8 chan, bool bMute);
 extern void SoundUpdate();
 
+extern void S4_FxPlay(u8 id);
+
 //=============================================================================
 // SEGMENT 7, BANK 1
 //=============================================================================
@@ -607,6 +609,12 @@ void SetMessageScreen(const c8* text, i8 songId, u16 duration) {
 	g_MessageScreenText = text;
 	g_MessageScreenSongId = songId;
 	g_MessageScreenDuration = duration;
+}
+
+void FxPlay(u8 id) {
+WITH_SEGMENT(4) {
+	S4_FxPlay(id);
+}
 }
 
 //=============================================================================

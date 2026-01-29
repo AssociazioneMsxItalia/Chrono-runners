@@ -1,11 +1,14 @@
 #include "msxgl.h"
 #include "pt3/pt3_player.h"
+#include "ayfx/ayfx_player.h"
 #include "pt3/pt3_notetable2.h"
 
 #include "content/levels/intermission.h"
 
 #include "content/pt3/chronorunner.h"
 #include "content/pt3/gameover.h"
+
+#include "content/ayfx/test_effects.h"
 
 void SoundInit();
 void SoundPlay();
@@ -14,6 +17,8 @@ void SoundStop();
 void SoundLoop(bool enable);
 void SoundMute(u8 chan, bool bMute);
 void SoundUpdate();
+
+void S4_FxPlay(u8 id);
 
 // Songs data table
 const unsigned char* g_SongData[2];
@@ -32,6 +37,10 @@ void SoundInit() {
 	PT3_SetNoteTable(PT3_NT2);
 	PT3_SetLoop(TRUE);
 	PT3_SetFinishCB(SoundStop);
+
+	ayFX_InitBank(g_test_effects);
+	ayFX_SetChannel(PSG_CHANNEL_C);
+	ayFX_SetMode(AYFX_MODE_FIXED);
 }
 
 void SoundPlay() {
@@ -74,5 +83,10 @@ void SoundMute(u8 chan, bool bMute)
 
 void SoundUpdate() {
     PT3_Decode();
+	ayFX_Update();
 	PT3_UpdatePSG();
+}
+
+void S4_FxPlay(u8 id) {
+	ayFX_PlayBank(id, 0);
 }
