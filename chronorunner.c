@@ -677,6 +677,12 @@ void PlayerRestart()
 
 	// Initialize snapshot system for player and object rewind
 	Snapshot_Initialize();
+
+	// Redraw level layout (resets door appearance if key was taken)
+	u8 seg = SegmentForLevel(g_CurrentLevelIdx);
+WITH_SEGMENT(seg) {
+	VDP_WriteLayout_GM2(g_ActiveLevel.layout, 0, 2, 32, 24);
+}
 }
 
 bool State_Intermission()
@@ -747,16 +753,11 @@ bool State_ChangeLevel()
 		g_NextLevelIdx += 1;
 	}
 
-	// Reset level and player state (LoadLevel + key/crystal/player init)
-	PlayerRestart();
-
 	// Cancella lo schermo
 	VDP_FillScreen_GM2(44);
 
-	u8 seg = SegmentForLevel(g_CurrentLevelIdx);
-WITH_SEGMENT(seg) {
-	VDP_WriteLayout_GM2(g_ActiveLevel.layout, 0, 2, 32, 24);
-}
+	// Reset level and player state (LoadLevel + key/crystal/player init + layout redraw)
+	PlayerRestart();
 
 	AllocateSpriteIDs(&g_ActiveLevel);
 
