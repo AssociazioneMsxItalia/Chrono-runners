@@ -414,10 +414,7 @@ void TakeKey() {
 	VDP_Poke_GM2(door_x + 1, door_y - 1, 49);
 
 	// Porta si apre
-	VDP_Poke_GM2(door_x, door_y, 44);
-	VDP_Poke_GM2(door_x + 1, door_y, 44);
-	VDP_Poke_GM2(door_x, door_y + 1, 44);
-	VDP_Poke_GM2(door_x + 1, door_y + 1, 44);
+	VDP_FillLayout_GM2(44, door_x, door_y, 2, 2);
 }
 
 void TakeCrystal() {
