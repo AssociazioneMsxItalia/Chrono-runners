@@ -50,7 +50,6 @@ void SoundSetSong(u8 songId)
 void SoundStop()
 {
 	PT3_Pause();
-	PT3_InitSong(g_SongData[g_CurrentSong]);
 }
 
 //-----------------------------------------------------------------------------

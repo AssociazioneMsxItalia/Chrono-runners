@@ -23,7 +23,7 @@ bool State_Death();
 bool State_Rewind();
 bool State_ChangeLevel();
 bool State_Intermission();
-bool State_GameOver();
+bool State_MessageScreen();
 
 void tick();
 
@@ -287,8 +287,13 @@ u8 g_CountDownTicks;
 // Controlla lo stato dell'intermission
 u8 g_IntermissionState = 0;
 
-// Contatore per lo stato di game over
-u16 g_GameOverCounter = 0;
+// Contatore per lo stato di message screen (intro, game over, you won, etc.)
+u16 g_MessageScreenCounter = 0;
+
+// Configurazione message screen
+const c8* g_MessageScreenText = NULL;
+i8 g_MessageScreenSongId = 1;
+u16 g_MessageScreenDuration = 500;
 
 Pawn g_PlayerPawn;
 u8	 g_PlayerAction;
@@ -305,8 +310,8 @@ i8	 g_mDY = 0;
 i8   g_DX;
 i8   g_DY;
 bool g_PlayerHasKey = FALSE;
-u8 g_PlayerMaxRewindEnergy = 0;
-u8 g_PlayerRewindEnergy = 0;
+u8 g_PlayerMaxRewindEnergy;
+u8 g_PlayerRewindEnergy;
 
 // Key sprite
 bool g_KeyEnabled;
@@ -598,6 +603,11 @@ void AllocateSpriteIDs(struct Level *lvl) {
 	g_EnergyFieldAnimCounter = 0;
 }
 
+void SetMessageScreen(const c8* text, i8 songId, u16 duration) {
+	g_MessageScreenText = text;
+	g_MessageScreenSongId = songId;
+	g_MessageScreenDuration = duration;
+}
 
 //=============================================================================
 // STATES
@@ -626,6 +636,10 @@ WITH_SEGMENT(4) {
 	g_RemainingMinutes = 60;
 	g_RemainingSeconds = 0;
 	g_RemainingFS = 0;
+
+	// Reset cristalli e rewind energy
+	g_PlayerMaxRewindEnergy = 0;
+	g_PlayerRewindEnergy = 0;
 
 	// Reset livelli
 	g_CurrentLevelIdx = 0;
@@ -741,13 +755,7 @@ bool State_ChangeLevel()
 {
 	// Passa al livello successivo
 	g_CurrentLevelIdx = g_NextLevelIdx;
-
-	// Se i livelli sono finiti, al giro successivo ricomincia da capo XXX: sistemare
-	if (g_NextLevelIdx == g_NumLevels - 1) {
-		g_NextLevelIdx = 0;
-	} else {
-		g_NextLevelIdx += 1;
-	}
+	g_NextLevelIdx += 1;
 
 	// Cancella lo schermo
 	VDP_FillScreen_GM2(44);
@@ -834,7 +842,13 @@ bool State_Game()
 
 	// Controlla se il giocatore ha raggiunto l'uscita
 	if (isPlayerAtExit() || Keyboard_IsKeyPressed(KEY_F1)) {
-		Game_SetState(State_Intermission);
+		// Se era l'ultimo livello, mostra uno schermo di vittoria e reinizializza
+		if (g_CurrentLevelIdx == g_NumLevels - 1) {
+			SetMessageScreen("YOU WON!", -1, 500);
+			Game_SetState(State_MessageScreen);
+		} else {
+			Game_SetState(State_Intermission);
+		}
 		return TRUE;
 	}
 
@@ -905,7 +919,8 @@ bool State_Death()
 		} else {
 			// Se il tempo è esaurito, vai a Game Over
 			if (g_RemainingMinutes == 0 && g_RemainingSeconds == 0) {
-				Game_SetState(State_GameOver);
+				SetMessageScreen("GAME OVER", 1, 500);
+				Game_SetState(State_MessageScreen);
 			} else {
 				PlayerRestart();
 				Game_SetState(State_Game);
@@ -915,16 +930,18 @@ bool State_Death()
 	return TRUE;
 }
 
-bool State_GameOver()
+bool State_MessageScreen()
 {
 	// Prima volta in questo stato: prepara lo schermo
-	if (g_GameOverCounter == 0) {
+	if (g_MessageScreenCounter == 0) {
 
 WITH_SEGMENT(4) {
 		SoundStop();
-		SoundSetSong(1);
-		SoundLoop(FALSE);
-		SoundPlay();
+		if (g_MessageScreenSongId != -1) {
+			SoundSetSong(g_MessageScreenSongId);
+			SoundLoop(FALSE);
+			SoundPlay();
+		}
 }
 
 		// Nasconde tutti gli sprite
@@ -933,14 +950,15 @@ WITH_SEGMENT(4) {
 		// Cancella lo schermo con tile vuoto
 		VDP_FillScreen_GM2(44);
 
-		// Stampa "GAME OVER" centrato (10 caratteri = 5 a sinistra del centro)
-		PrintGFXText("GAME OVER", 11, 12);
+		// Stampa il testo centrato
+		u8 textLen = String_Length(g_MessageScreenText);
+		PrintGFXText(g_MessageScreenText, 16 - (textLen / 2), 12);
 	}
 
-	g_GameOverCounter++;
+	g_MessageScreenCounter++;
 
-	if (g_GameOverCounter >= 500) {
-		g_GameOverCounter = 0;
+	if (g_MessageScreenCounter >= g_MessageScreenDuration) {
+		g_MessageScreenCounter = 0;
 		Game_SetState(State_Initialize);
 	}
 
