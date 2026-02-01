@@ -11,6 +11,7 @@
 #include "sprite_defs.h"
 #include "math_utils.h"
 #include "snapshot.h"
+#include "cutscene.h"
 
 //=============================================================================
 // DEFINES
@@ -24,6 +25,7 @@ bool State_Rewind();
 bool State_ChangeLevel();
 bool State_Intermission();
 bool State_MessageScreen();
+bool State_Cutscene();  // Cutscene system state
 
 void tick();
 
@@ -229,6 +231,7 @@ extern const unsigned char g_DataMapGM2_Colors[];
 extern void LoadPatternAndColor();
 extern void SetVRAMTable();
 extern void InitializeSprite();
+extern void AllocateSpriteIDs(struct Level *lvl);
 
 //=============================================================================
 // SEGMENT 4, BANK 1
@@ -272,6 +275,8 @@ extern void UpdatePlatforms(struct Level *lvl);
 extern void UpdateEnemies(struct Level *lvl);
 
 extern void LoadLevel(u8 levelIndex);
+
+extern const CutCmd g_IntroCutscene[];
 
 //=============================================================================
 // MEMORY DATA
@@ -576,40 +581,15 @@ struct Platform* isPlayerOnPlatform(struct Level *lvl) {
 	return NULL;
 }
 
-void AllocateSpriteIDs(struct Level *lvl) {
-
-	// Gli sprite ID allocati fissi sono:
-	// 0-1: Player (2 layers)
-	// 2: Key
-	// 3: Crystal
-	// 4+: Platforms, Mines, Enemies, Energy Fields
-
-	g_PlatformSpritesBaseID = 4;
-
-	// Imposta gli sprite piattaforma da usare nel livello corrente
-	u8 np = lvl->num_platforms;
-
-	g_MineSpritesBaseID = g_PlatformSpritesBaseID + np;
-
-	// Imposta sprite per le mine
-	u8 nm = lvl->num_mines;
-
-	g_EnemySpritesBaseID = g_MineSpritesBaseID + nm;
-	g_EnemyAnimCounter = 0;
-
-	// Imposta sprite per i nemici
-	u8 ne = lvl->num_enemies;
-
-	// Campi di forza, uno per ciascun nemico
-	g_EnergyFieldSpritesBaseID = g_EnemySpritesBaseID + ne;
-	g_EnergyFieldAnimCounter = 0;
-}
-
 void SetMessageScreen(const c8* text, i8 songId, u16 duration) {
 	g_MessageScreenText = text;
 	g_MessageScreenSongId = songId;
 	g_MessageScreenDuration = duration;
 }
+
+//=============================================================================
+// TRAMPOLINE FUNCTIONS FOR OTHER SEGMENTS
+//=============================================================================
 
 void FxPlay(u8 id) {
 WITH_SEGMENT(4) {
@@ -653,7 +633,10 @@ WITH_SEGMENT(4) {
 	g_CurrentLevelIdx = 0;
 	g_NextLevelIdx = 0;
 
-	Game_SetState(State_Intermission);
+	// Initialize cutscene system
+	Cutscene_Initialize();
+
+	Cutscene_Start(g_IntroCutscene, State_Intermission, NULL);
 
 	return TRUE;
 }
@@ -768,10 +751,12 @@ bool State_ChangeLevel()
 	// Cancella lo schermo
 	VDP_FillScreen_GM2(44);
 
-	// Reset level and player state (LoadLevel + key/crystal/player init + layout redraw)
+	// Reset level and player state
 	PlayerRestart();
 
+WITH_SEGMENT(3) {
 	AllocateSpriteIDs(&g_ActiveLevel);
+}
 
 	PrintGFXText("TIME   '  \"", 2, 0);
 	PrintTime();

@@ -3,7 +3,7 @@
 #include "ayfx/ayfx_player.h"
 #include "pt3/pt3_notetable2.h"
 
-#include "content/levels/intermission.h"
+#include "content/cutscenes/intermission.h"
 
 #include "content/pt3/chronorunner.h"
 #include "content/pt3/gameover.h"

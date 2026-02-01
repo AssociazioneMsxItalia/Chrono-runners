@@ -11,45 +11,34 @@ extern u8 g_RemainingMinutes;
 extern u8 g_RemainingSeconds;
 extern u8 g_PlayerRewindEnergy;
 
+//-----------------------------------------------------------------------------
+// Character to tile conversion
+//-----------------------------------------------------------------------------
+u8 CharToTile(c8 c) {
+	// Numbers 0-9
+	if (c >= 48 && c <= 57) {
+		return 1 + (c - 48);
+	}
+	// Letters A-Z
+	else if (c >= 65 && c <= 90) {
+		return 11 + (c - 65);
+	}
+	// Special characters
+	else if (c == 34) return 40;  // "
+	else if (c == 39) return 38;  // '
+	else if (c == 44) return 39;  // ,
+	else if (c == 45) return 42;  // -
+	else if (c == 46) return 37;  // .
+	else if (c == 58) return 41;  // :
+	else if (c == 33) return 43;  // !
+	else if (c == 63) return 46;  // ?
+
+	return 0;  // Space or unknown
+}
+
 void PrintGFXText(const c8 *text, u8 x, u8 y) {
 	while (*text != 0) {
-		c8 c = *text;
-		u8 tile = 0;
-		// Numero
-		if (c >= 48 && c <= 57) {
-			tile = 1 + (c - 48);
-		}
-		// Lettera
-		else if (c >= 65 && c <= 90) {
-			tile = 11 + (c - 65);
-		}
-		// "
-		else if (c == 34) {
-			tile = 40;
-		}
-		// '
-		else if (c == 39) {
-			tile = 38;
-		}
-		// ,
-		else if (c == 44) {
-			tile = 39;
-		}
-		// -
-		else if (c == 45) {
-			tile = 42;
-		}
-		// .
-		else if (c == 46) {
-			tile = 37;
-		}
-		// :
-		else if (c == 58) {
-			tile = 41;
-		}
-
-		VDP_Poke_GM2(x, y, tile);
-
+		VDP_Poke_GM2(x, y, CharToTile(*text));
 		x++;
 		text++;
 	}
@@ -89,12 +78,11 @@ extern u8 g_CrystalAnimFrame;
 extern u8 g_PlatformSpritesBaseID;
 extern u8 g_MineSpritesBaseID;
 
-extern u8 g_EnemyAnimCounter;
 extern u8 g_EnemySpritesBaseID;
-
-extern u8 g_EnergyFieldAnimCounter;
+extern u8 g_EnemyAnimCounter;
 
 extern u8 g_EnergyFieldSpritesBaseID;
+extern u8 g_EnergyFieldAnimCounter;
 
 extern u8 g_RemainingFS;
 
@@ -679,3 +667,158 @@ u8 Snapshot_RewindStep() {
     g_SnapshotCount--;
     return g_SnapshotHead;
 }
+
+//=============================================================================
+// CUTSCENE FUNCTIONS
+//=============================================================================
+
+#include "cutscene.c"
+
+// Player character walk definition (2 layers, 3 animation frames)
+// Adjust frame values to match your player sprite frames
+static const CutSpriteAnimDef g_PlayerWalkRight = {
+    .baseId = 0,  // First sprite ID (uses 0 and 1 for 2 layers)
+    .numLayers = 2,                 // Player has 2 sprite layers
+    .numFrames = 3,                 // 3-frame walk cycle
+    .frames = { PLAYER_FRAME(1), PLAYER_FRAME(2), PLAYER_FRAME(3) },
+    .idleFrame = PLAYER_FRAME(0),   // Idle frame when walk completes
+    .animSpeed = 6,                 // Frames between animation changes
+    .layerOffset = laySize,         // Pattern offset between layers
+    .colors = { COLOR_BLACK, COLOR_LIGHT_RED }  // Layer colors
+};
+
+static const CutSpriteAnimDef g_PlayerWalkLeft = {
+    .baseId = 0,
+    .numLayers = 2,
+    .numFrames = 3,                 // 3-frame walk cycle
+    .frames = { PLAYER_FRAME(4), PLAYER_FRAME(5), PLAYER_FRAME(6) },
+    .idleFrame = PLAYER_FRAME(0),   // Idle frame when walk completes
+    .animSpeed = 6,
+    .layerOffset = laySize,
+    .colors = { COLOR_BLACK, COLOR_LIGHT_RED }
+};
+
+static const CutSpriteAnimDef g_DocWalkLeft = {
+    .baseId = 2,
+    .numLayers = 1,
+    .numFrames = 2,
+    .frames = { DOC_FRAME(0), DOC_FRAME(1), NULL },
+    .idleFrame = DOC_FRAME(0),   // Idle frame when walk completes
+    .animSpeed = 6,
+    .layerOffset = laySize,
+    .colors = { COLOR_BLACK, 0 }
+};
+
+static const CutSpriteAnimDef g_DocWalkRight = {
+    .baseId = 2,
+    .numLayers = 1,
+    .numFrames = 2,
+    .frames = { DOC_FRAME(2), DOC_FRAME(3), NULL },
+    .idleFrame = DOC_FRAME(0),   // Idle frame when walk completes
+    .animSpeed = 6,
+    .layerOffset = laySize,
+    .colors = { COLOR_BLACK, 0 }
+};
+
+static const CutSpriteAnimDef g_PlayerFreaked = {
+    .baseId = 0,
+    .numLayers = 2,
+    .numFrames = 2,
+    .frames = { PLAYER_FRAME(7), PLAYER_FRAME(8), NULL },
+    .idleFrame = PLAYER_FRAME(0),   // Idle frame when walk completes
+    .animSpeed = 12,
+    .layerOffset = laySize,
+    .colors = { COLOR_BLACK, COLOR_LIGHT_RED }
+};
+
+#include "content/cutscenes/doorway.h"
+
+//-----------------------------------------------------------------------------
+// Intro cutscene
+//-----------------------------------------------------------------------------
+const CutCmd g_IntroCutscene[] = {
+
+	CUT_TEXT("PRESS SPACE KEY", 23),
+
+    CUT_WAIT_KEY(),
+    CUT_WAIT(10),
+
+    // Clear and show new text
+    CUT_CLEAR_TEXT(),
+
+    CUT_LOAD_LAYOUT(g_CutsceneDoorway, 0, CUTSCENE_GFX_Y, CUTSCENE_SCREEN_W, 12),
+
+    CUT_TEXT_TYPE("...ALARM BELLS RINGING...", 20),
+    CUT_WAIT_KEY(),
+    CUT_CLEAR_TEXT(),
+
+    CUT_SPRITE_WALK(&g_DocWalkLeft, 29*8, 11*8, 20*8, 11*8, 1),
+
+    CUT_TEXT_TYPE("\"TIME IS RUNNING OUT...", 19),
+	CUT_TEXT_TYPE("...WHERE IS CHRONO RUNNER?\"", 21),
+	CUT_WAIT_KEY(),
+	CUT_CLEAR_TEXT(),
+
+	// Entra Chrono
+    CUT_SPRITE_WALK(&g_PlayerWalkRight, 0*8, 11*8, 14*8, 11*8, 2),
+
+	CUT_TEXT_TYPE("\"AT LAST. AGENT, THIS WILL BE", 19),
+	CUT_TEXT_TYPE("YOUR HARDEST MISSION SO FAR.\"", 21),
+	CUT_WAIT_KEY(),
+	CUT_CLEAR_TEXT(),
+
+	CUT_TEXT_TYPE("\"DOCTOR CRAZY IS BUILDING A TIME", 19),
+	CUT_TEXT_TYPE("MACHINE. HE WANTS TO BRING BACK", 21),
+	CUT_TEXT_TYPE("THE NAZI REGIME!\"", 23),
+	CUT_WAIT_KEY(),
+	CUT_CLEAR_TEXT(),
+
+	CUT_SPRITE_ANIM(&g_PlayerFreaked, 14*8, 11*8, 100),
+
+	CUT_TEXT_TYPE("\"YOU ONLY HAVE ONE HOUR TO", 19),
+	CUT_TEXT_TYPE("RECOVER ALL FOUR TIME CRYSTALS.\"", 21),
+	CUT_WAIT_KEY(),
+	CUT_CLEAR_TEXT(),
+
+	CUT_TEXT_TYPE("\"THEY GRANT YOU THE POWER TO", 19),
+	CUT_TEXT_TYPE("REWIND TIME. USE IT WISELY!\"", 21),
+	CUT_WAIT_KEY(),
+	CUT_CLEAR_TEXT(),
+
+	CUT_TEXT_TYPE("\"CRYSTALS ALSO PROTECT YOU FROM", 19),
+	CUT_TEXT_TYPE("DEATH, BUT BE CAREFUL!\"", 21),
+	CUT_WAIT_KEY(),
+	CUT_CLEAR_TEXT(),
+
+	CUT_TEXT_TYPE("EACH TIME YOU ARE REVIVED, YOU", 19),
+	CUT_TEXT_TYPE("WILL LOSE 5 MINUTES!\"", 21),
+	CUT_WAIT_KEY(),
+	CUT_CLEAR_TEXT(),
+
+	CUT_SPRITE_ANIM(&g_PlayerFreaked, 14*8, 11*8, 100),
+
+	CUT_TEXT_TYPE("\"BRING ALL FOUR CRYSTALS TO ME", 19),
+	CUT_TEXT_TYPE("AND WE WILL SAVE THE WORLD!", 21),
+	CUT_TEXT_TYPE("GO!\"", 23),
+	CUT_WAIT_KEY(),
+	CUT_CLEAR_TEXT(),
+
+    // Chrono esce
+    CUT_SPRITE_WALK(&g_PlayerWalkLeft, 14*8, 11*8, 0*8, 11*8, 2),
+	CUT_SPRITE_HIDE(0),
+	CUT_SPRITE_HIDE(1),
+
+	CUT_TEXT_TYPE("\"...THIS WILL BE OUR TRIUMPH...", 19),
+	CUT_TEXT_TYPE("FINALLY.\"", 21),
+	CUT_WAIT_KEY(),
+	CUT_CLEAR_TEXT(),
+
+	CUT_SPRITE_WALK(&g_DocWalkRight, 20*8, 11*8, 29*8, 11*8, 1),
+
+    CUT_TEXT("PRESS SPACE KEY", 23),
+
+    CUT_WAIT_KEY(),
+	CUT_WAIT(10),
+
+    CUT_END(),
+};

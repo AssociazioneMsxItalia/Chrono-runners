@@ -8,21 +8,28 @@
 // INCLUDES
 //=============================================================================
 #include "msxgl.h"
+#include "debug.h"
+
 #include "sprite_defs.h"
+#include "level_defs.h"
+
 #include "content/sprite/player_sprt_layer.h"
 #include "content/sprite/key_sprt_layer.h"
+#include "content/sprite/crystal_sprt_layer.h"
+#include "content/sprite/doc_sprt_layer.h"
+
+#include "content/sprite/platformv_sprt_layer.h"
+#include "content/sprite/platformh_sprt_layer.h"
+#include "content/sprite/mine_sprt_layer.h"
 
 #include "content/sprite/enemy0_sprt_layer.h"  // Enemy type 0
 #include "content/sprite/enemy1_sprt_layer.h"  // Enemy type 1
 #include "content/sprite/enemy2_sprt_layer.h"  // Enemy type 2
 #include "content/sprite/enemy3_sprt_layer.h"  // Enemy type 3
-
-#include "content/sprite/crystal_sprt_layer.h"
-#include "content/sprite/platformv_sprt_layer.h"
-#include "content/sprite/platformh_sprt_layer.h"
-#include "content/sprite/mine_sprt_layer.h"
 #include "content/sprite/energyfield_sprt_layer.h"  // Energy field sprite
+
 #include "content/tile/data_tile_gm2.h"
+
 
 //=============================================================================
 // DEFINE
@@ -89,6 +96,9 @@ void InitializeSprite() {
 	// Load crystal sprites
 	VDP_LoadSpritePattern(g_CrystalSprtLayer, CRYSTAL_PATTERN_OFFSET, CRYSTAL_PATTERN_TOTAL);
 
+	// Load evil doctor sprite
+	VDP_LoadSpritePattern(g_DocSprtLayer, DOC_PATTERN_OFFSET, DOC_PATTERN_TOTAL);
+
 	// Load Platform / Mine sprites
 	VDP_LoadSpritePattern(g_PlatformVSprtLayer, PLATFORMV_PATTERN_OFFSET, PLATFORMV_PATTERN_TOTAL);
 	VDP_LoadSpritePattern(g_PlatformHSprtLayer, PLATFORMH_PATTERN_OFFSET, PLATFORMH_PATTERN_TOTAL);
@@ -102,4 +112,43 @@ void InitializeSprite() {
 
 	// Load energy field sprite (2 frames for animation)
 	VDP_LoadSpritePattern(g_EnergyFieldSprtLayer, ENERGYFIELD_PATTERN_OFFSET, ENERGYFIELD_PATTERN_TOTAL);
+}
+
+extern u8 g_PlatformSpritesBaseID;
+extern u8 g_MineSpritesBaseID;
+
+extern u8 g_EnemySpritesBaseID;
+extern u8 g_EnemyAnimCounter;
+
+extern u8 g_EnergyFieldSpritesBaseID;
+extern u8 g_EnergyFieldAnimCounter;
+
+void AllocateSpriteIDs(struct Level *lvl) {
+
+	// Gli sprite ID allocati fissi sono:
+	// 0-1: Player (2 layers)
+	// 2: Key
+	// 3: Crystal
+	// 4: Evil doctor
+	// 5+: Platforms, Mines, Enemies, Energy Fields
+
+	g_PlatformSpritesBaseID = 5;
+
+	// Imposta gli sprite piattaforma da usare nel livello corrente
+	u8 np = lvl->num_platforms;
+
+	g_MineSpritesBaseID = g_PlatformSpritesBaseID + np;
+
+	// Imposta sprite per le mine
+	u8 nm = lvl->num_mines;
+
+	g_EnemySpritesBaseID = g_MineSpritesBaseID + nm;
+	g_EnemyAnimCounter = 0;
+
+	// Imposta sprite per i nemici
+	u8 ne = lvl->num_enemies;
+
+	// Campi di forza, uno per ciascun nemico
+	g_EnergyFieldSpritesBaseID = g_EnemySpritesBaseID + ne;
+	g_EnergyFieldAnimCounter = 0;
 }
