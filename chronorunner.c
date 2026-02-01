@@ -19,6 +19,7 @@
 
 // Function prototypes
 bool State_Initialize();
+bool State_Menu();
 bool State_Game();
 bool State_Death();
 bool State_Rewind();
@@ -636,7 +637,8 @@ WITH_SEGMENT(4) {
 	// Initialize cutscene system
 	Cutscene_Initialize();
 
-	Cutscene_Start(g_IntroCutscene, State_Intermission, NULL);
+	// Start at main menu
+	Game_SetState(State_Menu);
 
 	return TRUE;
 }

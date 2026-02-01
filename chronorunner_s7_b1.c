@@ -1,5 +1,6 @@
 #include "msxgl.h"
 #include "game/pawn.h"
+#include "game/state.h"
 #include "debug.h"
 
 #include "sprite_defs.h"
@@ -737,6 +738,7 @@ static const CutSpriteAnimDef g_PlayerFreaked = {
 // Intro cutscene
 //-----------------------------------------------------------------------------
 const CutCmd g_IntroCutscene[] = {
+	CUT_WAIT(25),
 
 	CUT_TEXT("PRESS SPACE KEY", 23),
 
@@ -822,3 +824,67 @@ const CutCmd g_IntroCutscene[] = {
 
     CUT_END(),
 };
+
+//=============================================================================
+// MENU STATE
+//=============================================================================
+
+#include "content/menu/menu_screen.h"
+
+u8 g_MenuState = 0;
+u8 g_MenuSelection = 0;
+u8 g_MenuWait = 0;
+
+// Menu option Y positions (rows 11, 13, 15, 17)
+#define MENU_NUM_OPTIONS    4
+#define MENU_HIGHLIGHT_TILE 49
+#define MENU_EMPTY_TILE     44
+
+static const u8 g_MenuRows[MENU_NUM_OPTIONS] = { 11, 13, 15, 17 };
+static const u8 g_MenuColumns[MENU_NUM_OPTIONS] = { 14, 12, 10, 8 };
+
+extern bool State_Intermission();
+
+bool State_Menu()
+{
+    if (g_MenuState == 0) {
+        VDP_HideAllSprites();
+        VDP_WriteLayout_GM2(g_MenuLayout, 0, 0, 32, 24);
+        g_MenuSelection = 0;
+        VDP_Poke_GM2(g_MenuColumns[0], g_MenuRows[0], MENU_HIGHLIGHT_TILE);
+        g_MenuWait = 0;
+        g_MenuState = 1;
+    }
+
+    u8 row8 = Keyboard_Read(8);
+
+    // Wait for all keys to be released before accepting new input
+    if (g_MenuWait && IS_KEY_RELEASED(row8, KEY_UP) && IS_KEY_RELEASED(row8, KEY_DOWN) && IS_KEY_RELEASED(row8, KEY_SPACE)) {
+        g_MenuWait = 0;
+    }
+
+    if (g_MenuWait) return TRUE;
+
+    u8 prev = g_MenuSelection;
+
+    if (IS_KEY_PRESSED(row8, KEY_UP) && g_MenuSelection > 0) {
+        g_MenuSelection--;
+        g_MenuWait = 1;
+    } else if (IS_KEY_PRESSED(row8, KEY_DOWN) && g_MenuSelection < MENU_NUM_OPTIONS - 1) {
+        g_MenuSelection++;
+        g_MenuWait = 1;
+    } else if (IS_KEY_PRESSED(row8, KEY_SPACE)) {
+        if (g_MenuSelection == 0) {
+			g_MenuState = 0;
+            Cutscene_Start(g_IntroCutscene, State_Intermission, NULL);
+        }
+        return TRUE;
+    }
+
+    if (prev != g_MenuSelection) {
+        VDP_Poke_GM2(g_MenuColumns[prev], g_MenuRows[prev], MENU_EMPTY_TILE);
+        VDP_Poke_GM2(g_MenuColumns[g_MenuSelection], g_MenuRows[g_MenuSelection], MENU_HIGHLIGHT_TILE);
+    }
+
+    return TRUE;
+}
