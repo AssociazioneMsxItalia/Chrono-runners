@@ -254,6 +254,12 @@ extern void SoundUpdate();
 extern void S4_FxPlay(u8 id);
 
 //=============================================================================
+// SEGMENT 6, BANK 1
+//=============================================================================
+
+extern void ShowAmi();
+
+//=============================================================================
 // SEGMENT 7, BANK 1
 //=============================================================================
 extern void PrintGFXText(const c8 *text, u8 x, u8 y);
@@ -1050,6 +1056,10 @@ void main()
 
 WITH_SEGMENT(4) {
 	SoundInit();
+}
+
+WITH_SEGMENT(6) {
+	ShowAmi();
 }
 
 	Game_SetState(State_Initialize);
