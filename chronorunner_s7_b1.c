@@ -685,7 +685,7 @@ static const CutSpriteAnimDef g_PlayerWalkRight = {
     .idleFrame = PLAYER_FRAME(0),   // Idle frame when walk completes
     .animSpeed = 6,                 // Frames between animation changes
     .layerOffset = laySize,         // Pattern offset between layers
-    .colors = { COLOR_BLACK, COLOR_LIGHT_RED }  // Layer colors
+    .colors = { COLOR_BLACK, COLOR_LIGHT_YELLOW }  // Layer colors
 };
 
 static const CutSpriteAnimDef g_PlayerWalkLeft = {
@@ -696,7 +696,7 @@ static const CutSpriteAnimDef g_PlayerWalkLeft = {
     .idleFrame = PLAYER_FRAME(0),   // Idle frame when walk completes
     .animSpeed = 6,
     .layerOffset = laySize,
-    .colors = { COLOR_BLACK, COLOR_LIGHT_RED }
+    .colors = { COLOR_BLACK, COLOR_LIGHT_YELLOW }
 };
 
 static const CutSpriteAnimDef g_DocWalkLeft = {
@@ -729,7 +729,7 @@ static const CutSpriteAnimDef g_PlayerFreaked = {
     .idleFrame = PLAYER_FRAME(0),   // Idle frame when walk completes
     .animSpeed = 12,
     .layerOffset = laySize,
-    .colors = { COLOR_BLACK, COLOR_LIGHT_RED }
+    .colors = { COLOR_BLACK, COLOR_LIGHT_YELLOW }
 };
 
 #include "content/cutscenes/doorway.h"

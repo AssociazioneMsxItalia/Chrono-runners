@@ -36,9 +36,9 @@ void tick();
 
 // Player sprite layers
 const Pawn_Sprite g_PlayerLayers[] =
-{//   X  Y  DataOffset    Color            Flag
-	{ 0, 0, 0,            COLOR_BLACK,     0 },
-	{ 0, 0, laySize,      COLOR_LIGHT_RED, 0 },
+{//   X  Y  DataOffset    Color               Flag
+	{ 0, 0, 0,            COLOR_BLACK,        0 },
+	{ 0, 0, laySize,      COLOR_LIGHT_YELLOW, 0 },
 };
 
 // Player sprite layers in rewind mode
