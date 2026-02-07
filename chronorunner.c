@@ -258,6 +258,7 @@ extern void S4_FxPlay(u8 id);
 //=============================================================================
 
 extern void ShowAmi();
+extern void ShowSplashScreen();
 
 //=============================================================================
 // SEGMENT 7, BANK 1
@@ -1060,6 +1061,7 @@ WITH_SEGMENT(4) {
 
 WITH_SEGMENT(6) {
 	ShowAmi();
+	ShowSplashScreen();
 }
 
 	Game_SetState(State_Initialize);
