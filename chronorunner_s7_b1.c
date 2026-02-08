@@ -26,14 +26,16 @@ u8 CharToTile(c8 c) {
 		return 11 + (c - 65);
 	}
 	// Special characters
+	else if (c == 33) return 43;  // !
 	else if (c == 34) return 40;  // "
 	else if (c == 39) return 38;  // '
+	else if (c == 40) return 45;  // (
+	else if (c == 41) return 46;  // )
 	else if (c == 44) return 39;  // ,
 	else if (c == 45) return 42;  // -
 	else if (c == 46) return 37;  // .
 	else if (c == 58) return 41;  // :
-	else if (c == 33) return 43;  // !
-	else if (c == 63) return 46;  // ?
+	else if (c == 63) return 44;  // ?
 
 	return 0;  // Space or unknown
 }
@@ -63,9 +65,9 @@ void DrawRewindGauge() {
 	u8 ntiles = g_PlayerRewindEnergy / (SNAPSHOT_BUFFER_SIZE / 8);
 
 	if (ntiles != 0)
-		VDP_FillLayout_GM2(45, 21, 0, ntiles, 1);
+		VDP_FillLayout_GM2(62, 21, 0, ntiles, 1);
 	if (ntiles != 8)
-		VDP_FillLayout_GM2(47, 21 + ntiles, 0, 8 - ntiles, 1);
+		VDP_FillLayout_GM2(63, 21 + ntiles, 0, 8 - ntiles, 1);
 }
 
 //=============================================================================
@@ -737,7 +739,7 @@ static const CutSpriteAnimDef g_PlayerFreaked = {
     .colors = { COLOR_BLACK, COLOR_LIGHT_YELLOW }
 };
 
-#include "content/cutscenes/doorway.h"
+#include "content/screens/screen_5.h"
 
 //-----------------------------------------------------------------------------
 // Intro cutscene
@@ -753,60 +755,60 @@ const CutCmd g_IntroCutscene[] = {
     // Clear and show new text
     CUT_CLEAR_TEXT(),
 
-    CUT_LOAD_LAYOUT(g_CutsceneDoorway, 0, CUTSCENE_GFX_Y, CUTSCENE_SCREEN_W, 12),
+    CUT_LOAD_LAYOUT(g_Screen5, 0, CUTSCENE_GFX_Y, CUTSCENE_SCREEN_W, 24),
 
-    CUT_TEXT_TYPE("...ALARM BELLS RINGING...", 20),
+    CUT_TEXT_TYPE("(...ALARM BELLS RINGING...)", 20),
     CUT_WAIT_KEY(),
     CUT_CLEAR_TEXT(),
 
     CUT_SPRITE_WALK(&g_DocWalkLeft, 29*8, 11*8, 20*8, 11*8, 1),
 
-    CUT_TEXT_TYPE("\"TIME IS RUNNING OUT...", 19),
-	CUT_TEXT_TYPE("...WHERE IS CHRONO RUNNER?\"", 21),
+    CUT_TEXT_TYPE("TIME IS RUNNING OUT...", 19),
+	CUT_TEXT_TYPE("...WHERE IS CHRONO RUNNER?", 21),
 	CUT_WAIT_KEY(),
 	CUT_CLEAR_TEXT(),
 
 	// Entra Chrono
     CUT_SPRITE_WALK(&g_PlayerWalkRight, 0*8, 11*8, 14*8, 11*8, 2),
 
-	CUT_TEXT_TYPE("\"AT LAST. AGENT, THIS WILL BE", 19),
-	CUT_TEXT_TYPE("YOUR HARDEST MISSION SO FAR.\"", 21),
+	CUT_TEXT_TYPE("AT LAST. AGENT, THIS WILL BE", 19),
+	CUT_TEXT_TYPE("YOUR HARDEST MISSION SO FAR.", 21),
 	CUT_WAIT_KEY(),
 	CUT_CLEAR_TEXT(),
 
-	CUT_TEXT_TYPE("\"DOCTOR CRAZY IS BUILDING A TIME", 19),
+	CUT_TEXT_TYPE("DOCTOR CRAZY IS BUILDING A TIME", 19),
 	CUT_TEXT_TYPE("MACHINE. HE WANTS TO BRING BACK", 21),
-	CUT_TEXT_TYPE("THE NAZI REGIME!\"", 23),
+	CUT_TEXT_TYPE("THE NAZI REGIME!", 23),
 	CUT_WAIT_KEY(),
 	CUT_CLEAR_TEXT(),
 
 	CUT_SPRITE_ANIM(&g_PlayerFreaked, 14*8, 11*8, 100),
 
-	CUT_TEXT_TYPE("\"YOU ONLY HAVE ONE HOUR TO", 19),
-	CUT_TEXT_TYPE("RECOVER ALL FOUR TIME CRYSTALS.\"", 21),
+	CUT_TEXT_TYPE("YOU ONLY HAVE ONE HOUR TO", 19),
+	CUT_TEXT_TYPE("RECOVER ALL FOUR TIME CRYSTALS.", 21),
 	CUT_WAIT_KEY(),
 	CUT_CLEAR_TEXT(),
 
-	CUT_TEXT_TYPE("\"THEY GRANT YOU THE POWER TO", 19),
-	CUT_TEXT_TYPE("REWIND TIME. USE IT WISELY!\"", 21),
+	CUT_TEXT_TYPE("THEY GRANT YOU THE POWER TO", 19),
+	CUT_TEXT_TYPE("REWIND TIME. USE IT WISELY!", 21),
 	CUT_WAIT_KEY(),
 	CUT_CLEAR_TEXT(),
 
-	CUT_TEXT_TYPE("\"CRYSTALS ALSO PROTECT YOU FROM", 19),
-	CUT_TEXT_TYPE("DEATH, BUT BE CAREFUL!\"", 21),
+	CUT_TEXT_TYPE("CRYSTALS ALSO PROTECT YOU FROM", 19),
+	CUT_TEXT_TYPE("DEATH, BUT BE CAREFUL!", 21),
 	CUT_WAIT_KEY(),
 	CUT_CLEAR_TEXT(),
 
 	CUT_TEXT_TYPE("EACH TIME YOU ARE REVIVED, YOU", 19),
-	CUT_TEXT_TYPE("WILL LOSE 5 MINUTES!\"", 21),
+	CUT_TEXT_TYPE("WILL LOSE 5 MINUTES!", 21),
 	CUT_WAIT_KEY(),
 	CUT_CLEAR_TEXT(),
 
 	CUT_SPRITE_ANIM(&g_PlayerFreaked, 14*8, 11*8, 100),
 
-	CUT_TEXT_TYPE("\"BRING ALL FOUR CRYSTALS TO ME", 19),
+	CUT_TEXT_TYPE("BRING ALL FOUR CRYSTALS TO ME", 19),
 	CUT_TEXT_TYPE("AND WE WILL SAVE THE WORLD!", 21),
-	CUT_TEXT_TYPE("GO!\"", 23),
+	CUT_TEXT_TYPE("GO!", 23),
 	CUT_WAIT_KEY(),
 	CUT_CLEAR_TEXT(),
 
@@ -815,8 +817,8 @@ const CutCmd g_IntroCutscene[] = {
 	CUT_SPRITE_HIDE(0),
 	CUT_SPRITE_HIDE(1),
 
-	CUT_TEXT_TYPE("\"...THIS WILL BE OUR TRIUMPH...", 19),
-	CUT_TEXT_TYPE("FINALLY.\"", 21),
+	CUT_TEXT_TYPE("...THIS WILL BE OUR TRIUMPH...", 19),
+	CUT_TEXT_TYPE("FINALLY.", 21),
 	CUT_WAIT_KEY(),
 	CUT_CLEAR_TEXT(),
 
@@ -834,7 +836,7 @@ const CutCmd g_IntroCutscene[] = {
 // MENU STATE
 //=============================================================================
 
-#include "content/menu/menu_screen.h"
+#include "content/screens/screen_2.h"
 
 u8 g_MenuState = 0;
 u8 g_MenuSelection = 0;
@@ -843,7 +845,7 @@ u8 g_MenuWait = 0;
 // Menu option Y positions (rows 11, 13, 15, 17)
 #define MENU_NUM_OPTIONS    4
 #define MENU_HIGHLIGHT_TILE 49
-#define MENU_EMPTY_TILE     44
+#define MENU_EMPTY_TILE     47
 
 static const u8 g_MenuRows[MENU_NUM_OPTIONS] = { 11, 13, 15, 17 };
 static const u8 g_MenuColumns[MENU_NUM_OPTIONS] = { 14, 12, 10, 8 };
@@ -854,7 +856,7 @@ bool State_Menu()
 {
     if (g_MenuState == 0) {
         VDP_HideAllSprites();
-        VDP_WriteLayout_GM2(g_MenuLayout, 0, 0, 32, 24);
+        VDP_WriteLayout_GM2(g_Screen2, 0, 0, 32, 24);
         g_MenuSelection = 0;
         VDP_Poke_GM2(g_MenuColumns[0], g_MenuRows[0], MENU_HIGHLIGHT_TILE);
         g_MenuWait = 0;

@@ -18,6 +18,8 @@
 // DEFINES
 //=============================================================================
 
+#define TILE_EMPTY 47
+
 // Function prototypes
 bool State_Initialize();
 bool State_Menu();
@@ -238,7 +240,8 @@ extern void AllocateSpriteIDs(struct Level *lvl);
 //=============================================================================
 // SEGMENT 4, BANK 1
 //=============================================================================
-extern const u8 g_Intermission[];
+// Intermission screen
+extern const u8 g_Screen15[];
 extern unsigned char g_chronorunner[];
 extern unsigned char g_gameover[];
 
@@ -364,7 +367,7 @@ u8 g_EnergyFieldAnimCounter;
 //=============================================================================
 
 u8 g_CurrentLevelIdx;
-u8 g_NextLevelIdx;
+u8 g_NextLevelIdx = 2;
 
 //=============================================================================
 // PHYSICS
@@ -445,7 +448,7 @@ void TakeKey() {
 	VDP_Poke_GM2(door_x + 1, door_y - 1, 49);
 
 	// Porta si apre
-	VDP_FillLayout_GM2(44, door_x, door_y, 2, 2);
+	VDP_FillLayout_GM2(TILE_EMPTY, door_x, door_y, 2, 2);
 
 	FxPlay(FX_GET_KEY);
 }
@@ -644,13 +647,17 @@ WITH_SEGMENT(4) {
 
 	// Reset livelli
 	g_CurrentLevelIdx = 0;
-	g_NextLevelIdx = 0;
+	g_NextLevelIdx = 2;
 
 	// Initialize cutscene system
 	Cutscene_Initialize();
 
 	// Start at main menu
-	Game_SetState(State_Menu);
+	if (g_NextLevelIdx == 0) {
+		Game_SetState(State_Menu);
+	} else {
+		Game_SetState(State_Intermission);
+	}
 
 	return TRUE;
 }
@@ -709,7 +716,7 @@ bool State_Intermission()
 		VDP_HideAllSprites();
 
 WITH_SEGMENT(4) {
-		VDP_WriteLayout_GM2(g_Intermission, 0, 0, 32, 24);
+		VDP_WriteLayout_GM2(g_Screen15, 0, 0, 32, 24);
 }
 
 		// Prende il nome del prossimo livello
@@ -763,7 +770,7 @@ bool State_ChangeLevel()
 	g_NextLevelIdx += 1;
 
 	// Cancella lo schermo
-	VDP_FillScreen_GM2(44);
+	VDP_FillScreen_GM2(TILE_EMPTY);
 
 	// Reset level and player state
 	PlayerRestart();
@@ -960,7 +967,7 @@ WITH_SEGMENT(4) {
 		VDP_HideAllSprites();
 
 		// Cancella lo schermo con tile vuoto
-		VDP_FillScreen_GM2(44);
+		VDP_FillScreen_GM2(TILE_EMPTY);
 
 		// Stampa il testo centrato
 		u8 textLen = String_Length(g_MessageScreenText);
@@ -1070,8 +1077,10 @@ WITH_SEGMENT(4) {
 }
 
 WITH_SEGMENT(6) {
-	ShowAmi();
-	ShowSplashScreen();
+	if (g_NextLevelIdx == 0) {
+		ShowAmi();
+		ShowSplashScreen();
+	}
 }
 
 	Game_SetState(State_Initialize);
