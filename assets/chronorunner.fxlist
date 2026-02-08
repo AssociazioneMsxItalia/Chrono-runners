@@ -1,0 +1,16 @@
+#define FX_EXIT_DOOR 0
+sfxcollection/zxgames/mineman2_5.afx
+#define FX_GET_KEY 1
+sfxcollection/zxgames/exolon_7.afx
+#define FX_REWIND 2
+sfxcollection/zxmsxdemo/zanac_1.afx
+#define FX_SHOW_KEY 3
+sfxcollection/zxmsxdemo/nemesis_6.afx
+#define FX_FORCE_FIELD 4
+sfxcollection/zxmsxdemo/girlyblock_3.afx
+#define FX_DEATH 5
+sfxcollection/zxmsxdemo/druid_5.afx
+#define FX_JUMP 6
+sfxcollection/chrono_jump.afx
+#define FX_STOMP_ROBOT 7
+sfxcollection/zxmsxdemo/aleste_9.afx

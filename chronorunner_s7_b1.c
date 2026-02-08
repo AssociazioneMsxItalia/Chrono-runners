@@ -7,6 +7,7 @@
 #include "level_defs.h"
 #include "PawnData.h"
 #include "snapshot.h"
+#include "fx_sounds.h"
 
 extern u8 g_RemainingMinutes;
 extern u8 g_RemainingSeconds;
@@ -328,7 +329,7 @@ void UpdatePlayerMovement(struct Platform *platform) {
 		// Ora NON è più su piattaforma
 		platform = NULL;
 
-		FxPlay(4);
+		FxPlay(FX_JUMP);
 	}
 
 	// Gestisce esplicitamente la piattaforma. Entra qua solo se non abbiamo
@@ -444,6 +445,8 @@ void UpdateEnemies(struct Level *lvl) {
 
 				// 10-frame window out of 50
 				if (check_value < 10 && Math_GetRandom8() < 10) {
+					FxPlay(FX_FORCE_FIELD);
+
 					enemy->field_state = 1;
 					enemy->field_timer = 100;
 
@@ -464,6 +467,8 @@ void UpdateEnemies(struct Level *lvl) {
 
 				// 8-frame window out of 50
 				if (check_value < 8 && Math_GetRandom8() < 5) {
+					FxPlay(FX_FORCE_FIELD);
+
 					enemy->field_state = 2;
 
 					enemy->field_x = enemy->pos_x + (enemy->dir_x * 16);

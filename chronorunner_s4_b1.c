@@ -8,7 +8,7 @@
 #include "content/pt3/chronorunner.h"
 #include "content/pt3/gameover.h"
 
-#include "content/ayfx/test_effects.h"
+#include "content/ayfx/fx_chronorunner.h"
 
 void SoundInit();
 void SoundPlay();
@@ -38,7 +38,7 @@ void SoundInit() {
 	PT3_SetLoop(TRUE);
 	PT3_SetFinishCB(SoundStop);
 
-	ayFX_InitBank(g_test_effects);
+	ayFX_InitBank(g_fx_chronorunner);
 	ayFX_SetChannel(PSG_CHANNEL_C);
 	ayFX_SetMode(AYFX_MODE_FIXED);
 }

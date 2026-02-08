@@ -12,6 +12,7 @@
 #include "math_utils.h"
 #include "snapshot.h"
 #include "cutscene.h"
+#include "fx_sounds.h"
 
 //=============================================================================
 // DEFINES
@@ -287,6 +288,16 @@ extern void LoadLevel(u8 levelIndex);
 extern const CutCmd g_IntroCutscene[];
 
 //=============================================================================
+// TRAMPOLINE FUNCTIONS FOR OTHER SEGMENTS
+//=============================================================================
+
+void FxPlay(u8 id) {
+WITH_SEGMENT(4) {
+	S4_FxPlay(id);
+}
+}
+
+//=============================================================================
 // MEMORY DATA
 //=============================================================================
 
@@ -435,6 +446,8 @@ void TakeKey() {
 
 	// Porta si apre
 	VDP_FillLayout_GM2(44, door_x, door_y, 2, 2);
+
+	FxPlay(FX_GET_KEY);
 }
 
 void TakeCrystal() {
@@ -510,6 +523,8 @@ bool isPlayerHitByEnemies(struct Level *lvl) {
 				// Piccolo salto verso l'alto
 				g_VelocityY = FORCE;
 				g_PlayerJumping = TRUE;
+
+				FxPlay(FX_STOMP_ROBOT);
 
 				return FALSE;
 			} else {
@@ -593,16 +608,6 @@ void SetMessageScreen(const c8* text, i8 songId, u16 duration) {
 	g_MessageScreenText = text;
 	g_MessageScreenSongId = songId;
 	g_MessageScreenDuration = duration;
-}
-
-//=============================================================================
-// TRAMPOLINE FUNCTIONS FOR OTHER SEGMENTS
-//=============================================================================
-
-void FxPlay(u8 id) {
-WITH_SEGMENT(4) {
-	S4_FxPlay(id);
-}
 }
 
 //=============================================================================
@@ -844,6 +849,8 @@ bool State_Game()
 
 	// Controlla se il giocatore ha raggiunto l'uscita
 	if (isPlayerAtExit() || Keyboard_IsKeyPressed(KEY_F1)) {
+		FxPlay(FX_EXIT_DOOR);
+
 		// Se era l'ultimo livello, mostra uno schermo di vittoria e reinizializza
 		if (g_CurrentLevelIdx == g_NumLevels - 1) {
 			SetMessageScreen("YOU WON!", -1, 500);
@@ -868,6 +875,7 @@ bool State_Game()
 
 			// Entra in modalità rewind
 			Game_SetState(State_Rewind);
+			FxPlay(FX_REWIND);
 			return TRUE;
 		}
 	} else {
@@ -889,6 +897,8 @@ bool State_Death()
         g_mDY = 0;
         g_VelocityY = FORCE;
         g_PlayerDying = TRUE;
+
+		FxPlay(FX_DEATH);
     }
 
 	// Ancora il personaggio non è uscito dallo schermo
