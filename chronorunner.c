@@ -1078,8 +1078,10 @@ WITH_SEGMENT(4) {
 
 WITH_SEGMENT(6) {
 	if (g_NextLevelIdx == 0) {
+#if RELEASE
 		ShowAmi();
 		ShowSplashScreen();
+#endif
 	}
 }
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#define RELEASE 0
+
 struct Platform {
     u8 pos_x;
     u8 pos_y;

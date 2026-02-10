@@ -883,7 +883,11 @@ bool State_Menu()
     } else if (IS_KEY_PRESSED(row8, KEY_SPACE)) {
         if (g_MenuSelection == 0) {
 			g_MenuState = 0;
+#if RELEASE
             Cutscene_Start(g_IntroCutscene, State_Intermission, NULL);
+#else
+			Game_SetState(State_Intermission);
+#endif
         }
         return TRUE;
     }
