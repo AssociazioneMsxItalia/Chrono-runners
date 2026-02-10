@@ -1,9 +1,20 @@
 extern unsigned char g_Screen29[];
 
-struct Enemy enemies_twister[] = {
-  {17*8, 10*8,  // pos_x pos_y
-	       -1,  // dir_x
-	6*8, 20*8,  // min_x max_x
+struct Enemy enemies_map29[] = {
+  {11*8, 15*8,  // pos_x pos_y
+	        1,  // dir_x  TODO: set direction (-1 or 1)
+	10*8, 21*8,  // min_x max_x  TODO: adjust patrol range
+	        2,  // type (0-3)
+	        0,  // mDX (initialized to 0)
+	        0,  // stunned_timer (initialized to 0)
+			0,  // field_state
+			0,  // field_timer
+			0,  // field_x
+			0,  // field_y
+			0}, // field_mDX
+  {19*8, 9*8,  // pos_x pos_y
+	        1,  // dir_x  TODO: set direction (-1 or 1)
+	6*8, 21*8,  // min_x max_x  TODO: adjust patrol range
 	        3,  // type (0-3)
 	        0,  // mDX (initialized to 0)
 	        0,  // stunned_timer (initialized to 0)
@@ -12,9 +23,9 @@ struct Enemy enemies_twister[] = {
 			0,  // field_x
 			0,  // field_y
 			0}, // field_mDX
-  {12*8, 21*8,  // pos_x pos_y
-	       -1,  // dir_x
-    6*8, 24*8,  // min_x max_x
+  {10*8, 21*8,  // pos_x pos_y
+	        1,  // dir_x  TODO: set direction (-1 or 1)
+	6*8, 18*8,  // min_x max_x  TODO: adjust patrol range
 	        3,  // type (0-3)
 	        0,  // mDX (initialized to 0)
 	        0,  // stunned_timer (initialized to 0)
@@ -22,20 +33,20 @@ struct Enemy enemies_twister[] = {
 			0,  // field_timer
 			0,  // field_x
 			0,  // field_y
-			0}, // field_mDX
+			0} // field_mDX
 };
 
 struct Level level_twister = {
-	28, 21,       // start_x start_y
+	22, 21,       // start_x start_y
 	2, 21,       // end_x end_y
-	25, 14,       // key_x key_y
+	29, 11,      // key_x key_y
 	0, 0,        // crystal_x crystal_y
 	0,           // num_platforms
-	NULL,        // platforms
+	NULL,       // platforms
 	0,           // num_mines
 	NULL,        // mines
-	2,           // num_enemies
-	enemies_twister,  // enemies
+	numberof(enemies_map29),  // num_enemies
+	enemies_map29,  // enemies
 	g_Screen29,   // layout
 	"TWISTER - ORAZIO CACCIOLA", // name
 };

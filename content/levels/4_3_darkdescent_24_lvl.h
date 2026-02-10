@@ -1,47 +1,52 @@
 extern unsigned char g_Screen24[];
 
-struct Platform plat_darkdescent[] = {
-   {1*8,  17*8,  // pos_x pos_y
-      0,    -1,  // dir_x dir_y
-    1*8,  12*8,  // min_x min_y
-    1*8,  21*8}, // max_x max_y
-
-   {8*8,  22*8,  // pos_x pos_y
-       1,    0,  // dir_x dir_y
-     1*8, 22*8,  // min_x min_y
-    10*8, 22*8}, // max_x max_y
-
-   {29*8, 19*8,  // pos_x pos_y
-       0,   -1,  // dir_x dir_y
-    29*8,  6*8,  // min_x min_y
-    29*8, 21*8}, // max_x max_y
+struct Platform platforms_map24[] = {
+   {1*8, 12*8,  // pos_x pos_y
+       0,    1,  // dir_x dir_y
+    1*8, 8*8,  // min_x min_y
+    1*8, 21*8}, // max_x max_y
+   {29*8, 12*8,  // pos_x pos_y
+       0,    1,  // dir_x dir_y
+    29*8, 6*8,  // min_x min_y
+    29*8, 21*8} // max_x max_y
 };
 
-struct Enemy enemies_darkdescent[] = {
-  {21*8, 6*8,  // pos_x pos_y
-		   1,  // dir_x
-   12*8, 26*8,   // min_x max_x
-			3,  // type (0-3)
-			0,  // mDX (initialized to 0)
-			0,  // stunned_timer (initialized to 0)
+struct Enemy enemies_map24[] = {
+  {16*8, 21*8,  // pos_x pos_y
+	        1,  // dir_x  TODO: set direction (-1 or 1)
+	13*8, 25*8,  // min_x max_x  TODO: adjust patrol range
+	        3,  // type (0-3)
+	        0,  // mDX (initialized to 0)
+	        0,  // stunned_timer (initialized to 0)
 			0,  // field_state
 			0,  // field_timer
 			0,  // field_x
 			0,  // field_y
 			0}, // field_mDX
+  {23*8, 6*8,  // pos_x pos_y
+	        1,  // dir_x  TODO: set direction (-1 or 1)
+	12*8, 26*8,  // min_x max_x  TODO: adjust patrol range
+	        3,  // type (0-3)
+	        0,  // mDX (initialized to 0)
+	        0,  // stunned_timer (initialized to 0)
+			0,  // field_state
+			0,  // field_timer
+			0,  // field_x
+			0,  // field_y
+			0} // field_mDX
 };
 
 struct Level level_darkdescent = {
 	2, 4,       // start_x start_y
 	13, 6,       // end_x end_y
-	17, 21,      // key_x key_y
+	4, 8,      // key_x key_y
 	0, 0,        // crystal_x crystal_y
-	3,           // num_platforms
-	plat_darkdescent,       // platforms
+	numberof(platforms_map24),  // num_platforms
+	platforms_map24,       // platforms
 	0,           // num_mines
 	NULL,        // mines
-	1,           // num_enemies
-	enemies_darkdescent,        // enemies
+	numberof(enemies_map24),  // num_enemies
+	enemies_map24,  // enemies
 	g_Screen24,   // layout
 	"DARK DESCENT - ALFIO A. CORSARO", // name
 };

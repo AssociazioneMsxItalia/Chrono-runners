@@ -1,8 +1,8 @@
 extern unsigned char g_Screen16[];
 
 struct Enemy enemies_ronin[] = {
-  {6*8, 7*8,  // pos_x pos_y
-	        1,  // dir_x
+  {10*8, 7*8,  // pos_x pos_y
+	        -1,  // dir_x
 	1*8, 22*8,  // min_x max_x
 	        0,  // type (0-3)
 	        0,  // mDX (initialized to 0)
@@ -12,8 +12,8 @@ struct Enemy enemies_ronin[] = {
 			0,  // field_x
 			0,  // field_y
 			0}, // field_mDX
-   {13*8, 13*8,  // pos_x pos_y
-	        -1,  // dir_x
+   {12*8, 13*8,  // pos_x pos_y
+	        1,  // dir_x
 	7*8, 24*8,  // min_x max_x
 	        0,  // type (0-3)
 	        0,  // mDX (initialized to 0)

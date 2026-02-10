@@ -1,49 +1,48 @@
 extern unsigned char g_Screen23[];
 
-struct Platform plat_pipesandrobots[] = {
-   {6*8,  17*8,  // pos_x pos_y
+struct Platform platforms_map23[] = {
+   {13*8, 17*8,  // pos_x pos_y
        1,    0,  // dir_x dir_y
-     1*8,  17*8,  // min_x min_y
-    21*8,  17*8}, // max_x max_y
+    1*8, 17*8,  // min_x min_y
+    22*8, 17*8} // max_x max_y
 };
 
-struct Enemy enemies_pipesandrobots[] = {
-  {7*8, 6*8,  // pos_x pos_y
-			1,  // dir_x
-   6*8, 11*8,  // min_x max_x
-			1,  // type (0-3)
-			0,  // mDX (initialized to 0)
-			0,  // stunned_timer (initialized to 0)
+struct Enemy enemies_map23[] = {
+  {22*8, 6*8,  // pos_x pos_y
+	        1,  // dir_x  TODO: set direction (-1 or 1)
+	18*8, 24*8,  // min_x max_x  TODO: adjust patrol range
+	        1,  // type (0-3)
+	        0,  // mDX (initialized to 0)
+	        0,  // stunned_timer (initialized to 0)
 			0,  // field_state
 			0,  // field_timer
 			0,  // field_x
 			0,  // field_y
 			0}, // field_mDX
-
-  {20*8, 6*8,  // pos_x pos_y
-		   -1,  // dir_x
-   18*8, 23*8,  // min_x max_x
-	     	1,  // type (0-3)
-	     	0,  // mDX (initialized to 0)
-	     	0,  // stunned_timer (initialized to 0)
+  {9*8, 6*8,  // pos_x pos_y
+	        1,  // dir_x  TODO: set direction (-1 or 1)
+	6*8, 11*8,  // min_x max_x  TODO: adjust patrol range
+	        1,  // type (0-3)
+	        0,  // mDX (initialized to 0)
+	        0,  // stunned_timer (initialized to 0)
 			0,  // field_state
 			0,  // field_timer
 			0,  // field_x
 			0,  // field_y
-			0}, // field_mDX
+			0} // field_mDX
 };
 
 struct Level level_pipesandrobots = {
-	19, 11,       // start_x start_y
-	25, 15,       // end_x end_y
-	28,  9,      // key_x key_y
+	25, 15,       // start_x start_y
+	19, 11,       // end_x end_y
+	8, 11,      // key_x key_y
 	0, 0,        // crystal_x crystal_y
-	1,           // num_platforms
-	plat_pipesandrobots,       // platforms
+	numberof(platforms_map23),  // num_platforms
+	platforms_map23,       // platforms
 	0,           // num_mines
 	NULL,        // mines
-	2,           // num_enemies
-	enemies_pipesandrobots,        // enemies
+	numberof(enemies_map23),  // num_enemies
+	enemies_map23,  // enemies
 	g_Screen23,   // layout
-	"PIPES AND ROBOTS - O. CACCIOLA", // name
+	"PIPES AND ROBOTS - O. CACCIOLA",  // name
 };

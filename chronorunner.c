@@ -367,7 +367,7 @@ u8 g_EnergyFieldAnimCounter;
 //=============================================================================
 
 u8 g_CurrentLevelIdx;
-u8 g_NextLevelIdx = 2;
+u8 g_NextLevelIdx = 0;
 
 //=============================================================================
 // PHYSICS
@@ -647,7 +647,7 @@ WITH_SEGMENT(4) {
 
 	// Reset livelli
 	g_CurrentLevelIdx = 0;
-	g_NextLevelIdx = 2;
+	g_NextLevelIdx = 0;
 
 	// Initialize cutscene system
 	Cutscene_Initialize();

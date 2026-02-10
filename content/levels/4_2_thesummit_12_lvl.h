@@ -1,28 +1,41 @@
 extern unsigned char g_Screen12[];
 
-struct Platform plat7[] = {
-   {11*8, 8*8,  // pos_x pos_y
-      0,    1,  // dir_x dir_y
-    11*8, 8*8,  // min_x min_y
-    11*8, 17*8}, // max_x max_y
+struct Platform platforms_map12[] = {
+   {8*8, 12*8,  // pos_x pos_y
+       0,    1,  // dir_x dir_y
+    8*8, 8*8,  // min_x min_y
+    8*8, 21*8}, // max_x max_y
+   {22*8, 13*8,  // pos_x pos_y
+       0,    1,  // dir_x dir_y
+    22*8, 8*8,  // min_x min_y
+    22*8, 21*8} // max_x max_y
+};
 
-   {19*8,  20*8,  // pos_x pos_y
-       0,    -1,  // dir_x dir_y
-    19*8,  9*8,  // min_x min_y
-    19*8,  21*8}, // max_x max_y
+struct Enemy enemies_map12[] = {
+  {16*8, 6*8,  // pos_x pos_y
+	        1,  // dir_x  TODO: set direction (-1 or 1)
+	11*8, 19*8,  // min_x max_x  TODO: adjust patrol range
+	        2,  // type (0-3)
+	        0,  // mDX (initialized to 0)
+	        0,  // stunned_timer (initialized to 0)
+			0,  // field_state
+			0,  // field_timer
+			0,  // field_x
+			0,  // field_y
+			0} // field_mDX
 };
 
 struct Level level_thesummit = {
 	1, 10,       // start_x start_y
-	29, 10,      // end_x end_y
+	29, 10,       // end_x end_y
 	15, 21,      // key_x key_y
 	0, 0,        // crystal_x crystal_y
-	2,           // num_platforms
-	plat7,       // platforms
+	numberof(platforms_map12),  // num_platforms
+	platforms_map12,       // platforms
 	0,           // num_mines
 	NULL,        // mines
-	0,           // num_enemies
-	NULL,        // enemies
+	numberof(enemies_map12),  // num_enemies
+	enemies_map12,  // enemies
 	g_Screen12,   // layout
 	"THE SUMMIT - L.VETTORI", // name
 };
