@@ -396,7 +396,7 @@ void PlayerPhysicsEvent(u8 event, u8 tile)
 // Collision callback
 bool PlayerPhysicsCollision(u8 tile)
 {
-	return tile >= 200;
+	return tile >= 203;
 }
 
 //=============================================================================
@@ -472,7 +472,7 @@ bool isPlayerAtExit() {
 bool isPlayerOnSpikes() {
 	u8 tile = VDP_Peek_GM2((g_PlayerPawn.PositionX >> 3) + 1,
 							(g_PlayerPawn.PositionY >> 3) + 2);
-	if (tile >= 192 && tile <= 199) {
+	if (tile >= 196 && tile <= 202) {
 		return TRUE;
 	}
     return FALSE;
