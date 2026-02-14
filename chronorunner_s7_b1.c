@@ -75,6 +75,7 @@ void DrawRewindGauge() {
 //=============================================================================
 
 extern bool g_KeyEnabled;
+extern bool g_PlayerHasKey;
 extern bool g_CrystalEnabled;
 extern u8 g_KeyAnimFrame;
 extern u8 g_CrystalAnimFrame;
@@ -84,6 +85,7 @@ extern u8 g_MineSpritesBaseID;
 
 extern u8 g_EnemySpritesBaseID;
 extern u8 g_EnemyAnimCounter;
+extern u8 g_KeyHintCounter;
 
 extern u8 g_EnergyFieldSpritesBaseID;
 extern u8 g_EnergyFieldAnimCounter;
@@ -177,6 +179,12 @@ void DrawEnemies(struct Level *lvl, bool rewind) {
 		g_EnemyAnimCounter = 0;
 	}
 
+	// Key hint blink counter: 250 frames = 5 seconds at 50fps
+	g_KeyHintCounter++;
+	if (g_KeyHintCounter >= 250) {
+		g_KeyHintCounter = 0;
+	}
+
 	for (u8 e=0; e < lvl->num_enemies; e++) {
 		u8 index = g_EnemySpritesBaseID + e;
 
@@ -206,6 +214,9 @@ void DrawEnemies(struct Level *lvl, bool rewind) {
 		u8 color;
 		if (rewind) {
 			color = COLOR_WHITE;
+		} else if (!g_KeyEnabled && !g_PlayerHasKey && e == lvl->key_trigger_enemy && g_KeyHintCounter < 10) {
+			// Blink the trigger enemy in another color for 10 frames every 5 seconds
+			color = COLOR_DARK_RED;
 		} else {
 			color = COLOR_BLACK;
 		}
@@ -408,7 +419,7 @@ void UpdateEnemies(struct Level *lvl) {
 		// Muovi i proiettili indipendentemente dallo stato del nemico
 		if (enemy->field_state == 2) {
 
-			enemy->field_mDX += 12 * enemy->dir_x;
+			enemy->field_mDX += 12 * enemy->field_dir;
 			i8 dx = GetDPos(&enemy->field_mDX);
 			enemy->field_x += dx;
 
@@ -451,9 +462,10 @@ void UpdateEnemies(struct Level *lvl) {
 
 					enemy->field_state = 1;
 					enemy->field_timer = 100;
+					enemy->field_dir = enemy->dir_x;
 
 					// Il campo di forza appare davanti al nemico
-					enemy->field_x = enemy->pos_x + (enemy->dir_x * 16);
+					enemy->field_x = enemy->pos_x + (enemy->field_dir * 16);
 					enemy->field_y = enemy->pos_y;
 				}
 			}
@@ -472,9 +484,10 @@ void UpdateEnemies(struct Level *lvl) {
 					FxPlay(FX_FORCE_FIELD);
 
 					enemy->field_state = 2;
+					enemy->field_dir = enemy->dir_x;
 
-					enemy->field_x = enemy->pos_x + (enemy->dir_x * 16);
-					enemy->field_y = enemy->pos_y;
+					enemy->field_x = enemy->pos_x + (enemy->field_dir * 16);
+					enemy->field_y = enemy->pos_y + 8;
 					enemy->field_mDX = 0;
 				}
 			}

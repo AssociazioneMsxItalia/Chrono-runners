@@ -139,35 +139,35 @@ u8 g_seg_guard = 1;
 // LEVELS
 //=============================================================================
 
-#include "content/levels/1_0_corridor_25_lvl.h"
-#include "content/levels/1_1_intro_04_lvl.h"
-#include "content/levels/1_2_ronin_16_lvl.h"
-#include "content/levels/1_3_theclimb_34_lvl.h"
-#include "content/levels/1_4_thefactory_07_lvl.h"
-#include "content/levels/1_5_theprison_06_lvl.h"
-#include "content/levels/1_6_suicidepit_19_lvl.h"
-#include "content/levels/2_0_corridor_26_lvl.h"
-#include "content/levels/2_1_thetower_09_lvl.h"
-#include "content/levels/2_2_thechasm_08_lvl.h"
-#include "content/levels/2_3_sf_17_lvl.h"
-#include "content/levels/2_4_whatliesbeneath_22_lvl.h"
-#include "content/levels/2_5_pipesandrobots_23_lvl.h"
-#include "content/levels/2_6_crystalchem_31_lvl.h"
-#include "content/levels/3_0_corridor_27_lvl.h"
-#include "content/levels/3_1_punisher_18_lvl.h"
-#include "content/levels/3_2_thefortress_11_lvl.h"
-#include "content/levels/3_3_level_33_lvl.h"
-#include "content/levels/3_4_theabyss_10_lvl.h"
-#include "content/levels/3_5_level_35_lvl.h"
-#include "content/levels/3_6_challenge_20_lvl.h"
-#include "content/levels/4_0_corridor_28_lvl.h"
-#include "content/levels/4_1_easypeasy_30_lvl.h"
-#include "content/levels/4_2_thesummit_12_lvl.h"
-#include "content/levels/4_3_darkdescent_24_lvl.h"
-#include "content/levels/4_4_twister_29_lvl.h"
-#include "content/levels/4_5_fielddescent_21_lvl.h"
-#include "content/levels/4_6_level_32_lvl.h"
-#include "content/levels/4_7_theescape_13_lvl.h"
+#include "content/levels/map25_lvl.h"
+#include "content/levels/map04_lvl.h"
+#include "content/levels/map16_lvl.h"
+#include "content/levels/map34_lvl.h"
+#include "content/levels/map07_lvl.h"
+#include "content/levels/map06_lvl.h"
+#include "content/levels/map19_lvl.h"
+#include "content/levels/map26_lvl.h"
+#include "content/levels/map09_lvl.h"
+#include "content/levels/map08_lvl.h"
+#include "content/levels/map17_lvl.h"
+#include "content/levels/map22_lvl.h"
+#include "content/levels/map23_lvl.h"
+#include "content/levels/map31_lvl.h"
+#include "content/levels/map27_lvl.h"
+#include "content/levels/map18_lvl.h"
+#include "content/levels/map11_lvl.h"
+#include "content/levels/map33_lvl.h"
+#include "content/levels/map10_lvl.h"
+#include "content/levels/map35_lvl.h"
+#include "content/levels/map20_lvl.h"
+#include "content/levels/map28_lvl.h"
+#include "content/levels/map30_lvl.h"
+#include "content/levels/map12_lvl.h"
+#include "content/levels/map24_lvl.h"
+#include "content/levels/map29_lvl.h"
+#include "content/levels/map21_lvl.h"
+#include "content/levels/map32_lvl.h"
+#include "content/levels/map13_lvl.h"
 
 u8 g_NumLevels = 29;
 
@@ -187,35 +187,36 @@ u8 SegmentForLevel(u8 lvlidx) {
 
 void InitLevels() {
 	u8 i = 0;
-	g_LevelOrder[i++] = &level_corridor1;
-	g_LevelOrder[i++] = &level_intro;
-	g_LevelOrder[i++] = &level_ronin;
-	g_LevelOrder[i++] = &level_theclimb;
-	g_LevelOrder[i++] = &level_thefactory;
-	g_LevelOrder[i++] = &level_theprison;
-	g_LevelOrder[i++] = &level_suicidepit;
-	g_LevelOrder[i++] = &level_corridor2;
-	g_LevelOrder[i++] = &level_thetower;
-	g_LevelOrder[i++] = &level_thechasm;
-	g_LevelOrder[i++] = &level_sf;
-	g_LevelOrder[i++] = &level_whatliesbeneath;
-	g_LevelOrder[i++] = &level_pipesandrobots;
-	g_LevelOrder[i++] = &level_crystalchem;
-	g_LevelOrder[i++] = &level_corridor3;
-	g_LevelOrder[i++] = &level_punisher;
-	g_LevelOrder[i++] = &level_thefortress;
-	g_LevelOrder[i++] = &level_level33;
-	g_LevelOrder[i++] = &level_theabyss;
-	g_LevelOrder[i++] = &level_level35;
-	g_LevelOrder[i++] = &level_challenge;
-	g_LevelOrder[i++] = &level_corridor4;
-	g_LevelOrder[i++] = &level_easypeasy;
-	g_LevelOrder[i++] = &level_thesummit;
-	g_LevelOrder[i++] = &level_darkdescent;
-	g_LevelOrder[i++] = &level_twister;
-	g_LevelOrder[i++] = &level_fielddescent;
-	g_LevelOrder[i++] = &level_level32;
-	g_LevelOrder[i++] = &level_theescape;
+
+	g_LevelOrder[i++] = &level_map25;
+	g_LevelOrder[i++] = &level_map4;
+	g_LevelOrder[i++] = &level_map16;
+	g_LevelOrder[i++] = &level_map34;
+	g_LevelOrder[i++] = &level_map7;
+	g_LevelOrder[i++] = &level_map6;
+	g_LevelOrder[i++] = &level_map19;
+	g_LevelOrder[i++] = &level_map26;
+	g_LevelOrder[i++] = &level_map9;
+	g_LevelOrder[i++] = &level_map8;
+	g_LevelOrder[i++] = &level_map17;
+	g_LevelOrder[i++] = &level_map22;
+	g_LevelOrder[i++] = &level_map23;
+	g_LevelOrder[i++] = &level_map31;
+	g_LevelOrder[i++] = &level_map27;
+	g_LevelOrder[i++] = &level_map18;
+	g_LevelOrder[i++] = &level_map11;
+	g_LevelOrder[i++] = &level_map33;
+	g_LevelOrder[i++] = &level_map10;
+	g_LevelOrder[i++] = &level_map35;
+	g_LevelOrder[i++] = &level_map20;
+	g_LevelOrder[i++] = &level_map28;
+	g_LevelOrder[i++] = &level_map30;
+	g_LevelOrder[i++] = &level_map12;
+	g_LevelOrder[i++] = &level_map24;
+	g_LevelOrder[i++] = &level_map29;
+	g_LevelOrder[i++] = &level_map21;
+	g_LevelOrder[i++] = &level_map32;
+	g_LevelOrder[i++] = &level_map13;
 }
 
 //=============================================================================
@@ -359,6 +360,7 @@ u8 g_PlatformSpritesBaseID;
 u8 g_MineSpritesBaseID;
 u8 g_EnemySpritesBaseID;
 u8 g_EnemyAnimCounter;
+u8 g_KeyHintCounter;
 u8 g_EnergyFieldSpritesBaseID;
 u8 g_EnergyFieldAnimCounter;
 
@@ -506,9 +508,6 @@ bool isPlayerHitByEnemies(struct Level *lvl) {
 	struct Enemy *enemies = lvl->enemies;
 
 	for (u8 e=0; e < lvl->num_enemies; e++) {
-		if (enemies[e].stunned_timer > 0)
-			continue;
-
 		if (bboxCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY,
 		                enemies[e].pos_x, enemies[e].pos_y)) {
 
@@ -529,8 +528,14 @@ bool isPlayerHitByEnemies(struct Level *lvl) {
 
 				FxPlay(FX_STOMP_ROBOT);
 
+				// Reveal hidden key if this is the trigger enemy
+				if (!g_KeyEnabled && !g_PlayerHasKey && (i8)e == lvl->key_trigger_enemy) {
+					g_KeyEnabled = TRUE;
+					FxPlay(FX_SHOW_KEY);
+				}
+
 				return FALSE;
-			} else {
+			} else if (enemies[e].stunned_timer == 0) {
 				return TRUE;
 			}
 		}
@@ -671,7 +676,12 @@ void PlayerRestart()
 	g_KeyPosX = g_ActiveLevel.key_x * 8;
 	g_KeyPosY = g_ActiveLevel.key_y * 8;
 	g_KeyAnimFrame = 0;
-	g_KeyEnabled = TRUE;
+	g_KeyEnabled = (g_ActiveLevel.key_trigger_enemy == -1);
+	// Quando il giocatore viene ucciso dopo aver già recuperato la chiave,
+	// questa va di nuovo nascosta
+	if (!g_KeyEnabled) {
+		VDP_HideSprite(KEY_SPRITE_ID);
+	}
 	g_PlayerHasKey = FALSE;
 
 	// Reset crystal state

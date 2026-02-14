@@ -34,6 +34,7 @@ struct Enemy {
     u8 field_x;
     u8 field_y;
     i8 field_mDX;  // Accumulated movement for Type 3 projectiles (in eighths of pixel)
+    i8 field_dir;  // Direction the field was fired in (-1 or 1), locked at spawn time
 };
 
 // Runtime storage for mutable arrays (max sizes across all levels)
@@ -57,6 +58,7 @@ struct Level
     struct Mine *mines;
     u8 num_enemies;
     struct Enemy *enemies;
+    i8 key_trigger_enemy; // -1 = key visible from start, 0-3 = enemy index that must be stomped to reveal key
     u8 *layout;
     const c8 *name;
 };

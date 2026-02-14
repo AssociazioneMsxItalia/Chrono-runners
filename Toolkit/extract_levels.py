@@ -15,6 +15,12 @@ existing level files with Magellan sprite placements):
     34, 37   -> Enemy type 1
     41, 42   -> Enemy type 2
     46       -> Enemy type 3
+    32, 33   -> Enemy type 0 (key holder)
+    38, 39   -> Enemy type 1 (key holder)
+    44, 45   -> Enemy type 2 (key holder)
+    50, 51   -> Enemy type 3 (key holder)
+    22, 23   -> Key
+    24, 25   -> Crystal
     63       -> Mine
     27, 35   -> Platform
 """
@@ -30,16 +36,31 @@ import re
 ENEMY_SPRITES = {
     28: 0,   # Enemy type 0
     30: 0,   # Enemy type 0
+    32: 0,   # Enemy type 0 (key holder)
+    33: 0,   # Enemy type 0 (key holder)
     34: 1,   # Enemy type 1
     35: 1,   # Enemy type 1
     37: 1,   # Enemy type 1 (variant)
+    38: 1,   # Enemy type 1 (key holder)
+    39: 1,   # Enemy type 1 (key holder)
     40: 2,   # Enemy type 2
     41: 2,   # Enemy type 2
     42: 2,   # Enemy type 2 (variant)
+    44: 2,   # Enemy type 2 (key holder)
+    45: 2,   # Enemy type 2 (key holder)
     46: 3,   # Enemy type 3
     47: 3,
     49: 3,
+    50: 3,   # Enemy type 3 (key holder)
+    51: 3,   # Enemy type 3 (key holder)
 }
+
+# Sprite IDs that mark the enemy as the key holder for the level
+KEY_HOLDER_SPRITES = {32, 33, 38, 39, 44, 45, 50, 51}
+
+KEY_SPRITES = {22, 23}
+
+CRYSTAL_SPRITES = {24, 25}
 
 MINE_SPRITES = {63}
 
@@ -52,12 +73,6 @@ PLATFORM_HORIZONTAL_TILES = {73, 74, 75}
 # Start/End position tiles (2x2 grids)
 START_TILE = 56
 END_TILE = 57
-
-# Key tile pattern: 94|95 on one row, 102|103 on the next
-KEY_TOP_LEFT = 94
-KEY_TOP_RIGHT = 95
-KEY_BOT_LEFT = 102
-KEY_BOT_RIGHT = 103
 
 # ---------------------------------------------------------------------------
 # Parsing
@@ -138,6 +153,22 @@ def is_on_map(x, y, width, height):
 # Entity extraction
 # ---------------------------------------------------------------------------
 
+# Reverse of CharToTile from chronorunner_s7_b1.c
+_TILE_TO_CHAR = {
+    0: ' ',
+    **{i: chr(48 + i - 1) for i in range(1, 11)},   # 1-10 -> '0'-'9'
+    **{i: chr(65 + i - 11) for i in range(11, 37)},  # 11-36 -> 'A'-'Z'
+    37: '.', 38: "'", 39: ',', 40: '"', 41: ':',
+    42: '-', 43: '!', 44: '?', 45: '(', 46: ')',
+    47: ' ',  # empty tile
+}
+
+
+def decode_name(tile_row):
+    """Decode a level name from the first row of tile indices."""
+    return ''.join(_TILE_TO_CHAR.get(t, ' ') for t in tile_row).strip()
+
+
 def find_2x2_tile(tiles, tile_id):
     """Find the position of a 2x2 grid of the given tile ID.
 
@@ -156,21 +187,6 @@ def find_2x2_tile(tiles, tile_id):
                 row[col_idx + 1] == tile_id and
                 next_row[col_idx] == tile_id and
                 next_row[col_idx + 1] == tile_id):
-                return {'x': col_idx, 'y': row_idx}
-    return None
-
-
-def find_key(tiles):
-    """Find the key position from tile data (94|95 top, 102|103 bottom)."""
-    num_rows = len(tiles)
-    for row_idx in range(num_rows - 1):
-        row = tiles[row_idx]
-        next_row = tiles[row_idx + 1]
-        for col_idx in range(len(row) - 1):
-            if (row[col_idx] == KEY_TOP_LEFT and
-                row[col_idx + 1] == KEY_TOP_RIGHT and
-                next_row[col_idx] == KEY_BOT_LEFT and
-                next_row[col_idx + 1] == KEY_BOT_RIGHT):
                 return {'x': col_idx, 'y': row_idx}
     return None
 
@@ -272,6 +288,8 @@ def extract_entities(map_data):
     enemies = []
     mines = []
     platforms = []
+    key = None
+    crystal = None
     unknown = []
 
     for x, y, sprite_id in map_data['sprites']:
@@ -288,7 +306,12 @@ def extract_entities(map_data):
                 'sprite_id': sprite_id,
                 'min_x': patrol_min,
                 'max_x': patrol_max,
+                'has_key': sprite_id in KEY_HOLDER_SPRITES,
             })
+        elif sprite_id in KEY_SPRITES:
+            key = {'x': x // 8, 'y': y // 8}
+        elif sprite_id in CRYSTAL_SPRITES:
+            crystal = {'x': x // 8, 'y': y // 8}
         elif sprite_id in MINE_SPRITES:
             mines.append({'x': x, 'y': y})
         elif sprite_id in PLATFORM_SPRITES:
@@ -310,7 +333,14 @@ def extract_entities(map_data):
 
     start = find_2x2_tile(map_data['tiles'], START_TILE)
     end = find_2x2_tile(map_data['tiles'], END_TILE)
-    key = find_key(map_data['tiles'])
+    name = decode_name(tiles[0]) if tiles else ''
+
+    # Find which enemy (by index) holds the key, if any
+    key_trigger_enemy = None
+    for i, e in enumerate(enemies):
+        if e['has_key']:
+            key_trigger_enemy = i
+            break
 
     return {
         'enemies': enemies,
@@ -319,6 +349,9 @@ def extract_entities(map_data):
         'start': start,
         'end': end,
         'key': key,
+        'crystal': crystal,
+        'key_trigger_enemy': key_trigger_enemy,
+        'name': name,
         'unknown': unknown,
     }
 
@@ -335,6 +368,7 @@ def generate_level_h(map_num, entities):
     start = entities['start']
     end = entities['end']
     key = entities['key']
+    key_trigger_enemy = entities['key_trigger_enemy']
     unknown = entities['unknown']
 
     lines = []
@@ -383,21 +417,24 @@ def generate_level_h(map_num, entities):
             lines.append(f'\t\t\t0,  // field_timer')
             lines.append(f'\t\t\t0,  // field_x')
             lines.append(f'\t\t\t0,  // field_y')
-            lines.append(f'\t\t\t0}}{comma} // field_mDX')
+            lines.append(f'\t\t\t0,  // field_mDX')
+            lines.append(f'\t\t\t0}}{comma} // field_dir')
         lines.append('};')
         lines.append('')
 
-    # --- Start / End / Key positions ---
+    # --- Positions from tiles and sprites ---
     start_x, start_y = (start['x'], start['y']) if start else (0, 0)
     end_x, end_y = (end['x'], end['y']) if end else (0, 0)
     key_x, key_y = (key['x'], key['y']) if key else (0, 0)
+    crystal = entities['crystal']
+    crystal_x, crystal_y = (crystal['x'], crystal['y']) if crystal else (0, 0)
 
     # --- Level struct ---
     lines.append(f'struct Level level_{suffix} = {{')
     lines.append(f'\t{start_x}, {start_y},       // start_x start_y')
     lines.append(f'\t{end_x}, {end_y},       // end_x end_y')
     lines.append(f'\t{key_x}, {key_y},      // key_x key_y')
-    lines.append(f'\t0, 0,        // crystal_x crystal_y')
+    lines.append(f'\t{crystal_x}, {crystal_y},        // crystal_x crystal_y')
 
     if platforms:
         lines.append(f'\tnumberof(platforms_{suffix}),  // num_platforms')
@@ -420,8 +457,14 @@ def generate_level_h(map_num, entities):
         lines.append(f'\t0,           // num_enemies')
         lines.append(f'\tNULL,        // enemies')
 
+    if key_trigger_enemy is not None:
+        lines.append(f'\t{key_trigger_enemy},           // key_trigger_enemy (enemy {key_trigger_enemy} reveals key)')
+    else:
+        lines.append(f'\t-1,        // key_trigger_enemy (-1 = visible from start)')
+
+    name = entities['name']
     lines.append(f'\tg_Screen{map_num},   // layout')
-    lines.append(f'\t"TODO: LEVEL NAME",  // name')
+    lines.append(f'\t"{name}",  // name')
     lines.append('};')
     lines.append('')
 
@@ -443,10 +486,10 @@ def main():
     if len(sys.argv) < 3:
         print(f'Usage: {sys.argv[0]} <magellan_file> <output_dir>')
         print()
-        print('Extracts level entity data (enemies, mines, platforms) from a')
+        print('Extracts level entity data (enemies, mines, platforms, doors) from a')
         print('Magellan .mag project file and generates _lvl.h template files.')
         print()
-        print('Only MAPs with at least one sprite in pixel coordinates are processed.')
+        print('Processes MAPs that have sprites or start/end doors.')
         print('MAP #1 is always skipped (it is the master collage).')
         sys.exit(1)
 
@@ -473,12 +516,10 @@ def main():
 
         entities = extract_entities(map_data)
 
-        # Only process maps that have at least one sprite entity
-        total_entities = (len(entities['enemies']) +
-                          len(entities['mines']) +
-                          len(entities['platforms']) +
-                          len(entities['unknown']))
-        if total_entities == 0:
+        # Skip maps with no entities and no doors
+        if not (entities['enemies'] or entities['mines'] or
+                entities['platforms'] or entities['unknown'] or
+                entities['start'] or entities['end']):
             continue
 
         content = generate_level_h(map_num, entities)
@@ -489,26 +530,22 @@ def main():
 
         # Summary line
         parts = []
-        if entities['enemies']:
-            parts.append(f"{len(entities['enemies'])} enemies")
-        if entities['mines']:
-            parts.append(f"{len(entities['mines'])} mines")
-        if entities['platforms']:
-            parts.append(f"{len(entities['platforms'])} platforms")
-        if entities['unknown']:
-            parts.append(f"{len(entities['unknown'])} unknown")
-        start_info = ", start found" if entities['start'] else ""
-        end_info = ", end found" if entities['end'] else ""
-        key_info = ", key found" if entities['key'] else ""
+        for label in ('enemies', 'mines', 'platforms', 'unknown'):
+            if entities[label]:
+                parts.append(f"{len(entities[label])} {label}")
+        for label in ('start', 'end', 'key', 'crystal'):
+            if entities[label]:
+                parts.append(f"{label} found")
+        if entities['key_trigger_enemy'] is not None:
+            parts.append(f"key held by enemy {entities['key_trigger_enemy']}")
 
-        print(f'  MAP #{map_num:2d} -> {out_file}  ({", ".join(parts)}{start_info}{end_info}{key_info})')
+        print(f'  MAP #{map_num:2d} -> {out_file}  ({", ".join(parts)})')
         generated += 1
 
     print(f'\nGenerated {generated} level files in {os.path.abspath(output_dir)}')
     if generated > 0:
         print('NOTE: Generated files contain TODO markers for values that need')
         print('      manual adjustment (dir_x, min/max ranges, start/end, names).')
-
 
 if __name__ == '__main__':
     main()
