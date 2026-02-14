@@ -133,12 +133,7 @@ void DrawPlatforms(struct Level *lvl, bool rewind) {
 
 	for (u8 p=0; p < lvl->num_platforms; p++) {
 		u8 index = g_PlatformSpritesBaseID + p;
-		u8 shape;
-		if (lvl->platforms[p].dir_x != 0) {
-			shape = PLATFORMH_PATTERN_OFFSET;
-		} else {
-			shape = PLATFORMV_PATTERN_OFFSET;
-		}
+		u8 shape = PLATFORM_PATTERN_OFFSET;
 		u8 color;
 		if (rewind) {
 			color = COLOR_WHITE;
@@ -210,7 +205,7 @@ void DrawEnemies(struct Level *lvl, bool rewind) {
 		u8 color;
 		if (rewind) {
 			color = COLOR_WHITE;
-		} else if (!g_KeyEnabled && !g_PlayerHasKey && e == lvl->key_trigger_enemy && g_KeyHintCounter < 10) {
+		} else if (!g_KeyEnabled && !g_PlayerHasKey && (i8)e == lvl->key_trigger_enemy && g_KeyHintCounter < 10) {
 			// Blink the trigger enemy in another color for 10 frames every 5 seconds
 			color = COLOR_DARK_RED;
 		} else {

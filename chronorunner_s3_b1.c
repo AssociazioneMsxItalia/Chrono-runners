@@ -18,8 +18,7 @@
 #include "content/sprite/crystal_sprt_layer.h"
 #include "content/sprite/doc_sprt_layer.h"
 
-#include "content/sprite/platformv_sprt_layer.h"
-#include "content/sprite/platformh_sprt_layer.h"
+#include "content/sprite/platform_sprt_layer.h"
 #include "content/sprite/mine_sprt_layer.h"
 
 #include "content/sprite/enemy0_sprt_layer.h"  // Enemy type 0
@@ -100,8 +99,7 @@ void InitializeSprite() {
 	VDP_LoadSpritePattern(g_DocSprtLayer, DOC_PATTERN_OFFSET, DOC_PATTERN_TOTAL);
 
 	// Load Platform / Mine sprites
-	VDP_LoadSpritePattern(g_PlatformVSprtLayer, PLATFORMV_PATTERN_OFFSET, PLATFORMV_PATTERN_TOTAL);
-	VDP_LoadSpritePattern(g_PlatformHSprtLayer, PLATFORMH_PATTERN_OFFSET, PLATFORMH_PATTERN_TOTAL);
+	VDP_LoadSpritePattern(g_PlatformSprtLayer, PLATFORM_PATTERN_OFFSET, PLATFORM_PATTERN_TOTAL);
 	VDP_LoadSpritePattern(g_MineSprtLayer, MINE_PATTERN_OFFSET, MINE_PATTERN_TOTAL);
 
 	// Load all 4 enemy types (each type has 6 frames)
