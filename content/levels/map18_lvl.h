@@ -8,8 +8,8 @@ struct Platform platforms_map18[] = {
 };
 
 struct Mine mines_map18[] = {
-	{4*8, 17*8, TRUE}, // pos_x pos_y
-	{26*8, 17*8, TRUE} // pos_x pos_y
+	{4*8, 17*8}, // pos_x pos_y
+	{26*8, 17*8} // pos_x pos_y
 };
 
 struct Enemy enemies_map18[] = {

@@ -162,11 +162,7 @@ void DrawMines(struct Level *lvl) {
 			color = COLOR_LIGHT_RED;
 		}
 
-        if (mines[m].enabled) {
-			VDP_SetSpriteSM1(index, mines[m].pos_x, mines[m].pos_y, MINE_PATTERN_OFFSET, color);
-        } else {
-			VDP_HideSprite(index);
-		}
+		VDP_SetSpriteSM1(index, mines[m].pos_x, mines[m].pos_y, MINE_PATTERN_OFFSET, color);
     }
 }
 

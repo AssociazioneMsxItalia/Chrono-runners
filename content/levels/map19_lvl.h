@@ -1,10 +1,10 @@
 extern unsigned char g_Screen19[];
 
 struct Mine mines_map19[] = {
-	{7*8, 11*8, TRUE}, // pos_x pos_y
-	{15*8, 10*8, TRUE}, // pos_x pos_y
-	{23*8, 9*8, TRUE}, // pos_x pos_y
-	{15*8, 17*8, TRUE} // pos_x pos_y
+	{7*8, 11*8}, // pos_x pos_y
+	{15*8, 10*8}, // pos_x pos_y
+	{23*8, 9*8}, // pos_x pos_y
+	{15*8, 17*8} // pos_x pos_y
 };
 
 struct Enemy enemies_map19[] = {

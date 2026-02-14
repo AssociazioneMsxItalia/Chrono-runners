@@ -12,7 +12,7 @@ struct Platform platforms_map32[] = {
 };
 
 struct Mine mines_map32[] = {
-	{11*8, 10*8, TRUE} // pos_x pos_y
+	{11*8, 10*8} // pos_x pos_y
 };
 
 struct Enemy enemies_map32[] = {

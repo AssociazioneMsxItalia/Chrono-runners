@@ -1,7 +1,7 @@
 extern unsigned char g_Screen16[];
 
 struct Mine mines_map16[] = {
-	{14*8, 21*8, TRUE} // pos_x pos_y
+	{14*8, 21*8} // pos_x pos_y
 };
 
 struct Enemy enemies_map16[] = {

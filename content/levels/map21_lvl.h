@@ -8,7 +8,7 @@ struct Platform platforms_map21[] = {
 };
 
 struct Mine mines_map21[] = {
-	{1*8, 17*8, TRUE} // pos_x pos_y
+	{1*8, 17*8} // pos_x pos_y
 };
 
 struct Enemy enemies_map21[] = {

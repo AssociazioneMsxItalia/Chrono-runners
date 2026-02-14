@@ -396,7 +396,7 @@ def generate_level_h(map_num, entities):
         for i, m in enumerate(mines):
             comma = ',' if i < len(mines) - 1 else ''
             mx, my = m["x"] // 8, m["y"] // 8
-            lines.append(f'\t{{{mx}*8, {my}*8, TRUE}}{comma} // pos_x pos_y')
+            lines.append(f'\t{{{mx}*8, {my}*8}}{comma} // pos_x pos_y')
         lines.append('};')
         lines.append('')
 
