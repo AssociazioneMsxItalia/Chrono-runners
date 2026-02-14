@@ -21,6 +21,8 @@
 #include "content/sprite/platform_sprt_layer.h"
 #include "content/sprite/mine_sprt_layer.h"
 
+#include "content/sprite/vortex_sprt_layer.h"
+
 #include "content/sprite/enemy0_sprt_layer.h"  // Enemy type 0
 #include "content/sprite/enemy1_sprt_layer.h"  // Enemy type 1
 #include "content/sprite/enemy2_sprt_layer.h"  // Enemy type 2
@@ -98,6 +100,9 @@ void InitializeSprite() {
 	// Load evil doctor sprite
 	VDP_LoadSpritePattern(g_DocSprtLayer, DOC_PATTERN_OFFSET, DOC_PATTERN_TOTAL);
 
+	// Vortex sprites
+	VDP_LoadSpritePattern(g_VortexSprtLayer, VORTEX_PATTERN_OFFSET, VORTEX_PATTERN_TOTAL);
+
 	// Load Platform / Mine sprites
 	VDP_LoadSpritePattern(g_PlatformSprtLayer, PLATFORM_PATTERN_OFFSET, PLATFORM_PATTERN_TOTAL);
 	VDP_LoadSpritePattern(g_MineSprtLayer, MINE_PATTERN_OFFSET, MINE_PATTERN_TOTAL);
@@ -128,9 +133,10 @@ void AllocateSpriteIDs(struct Level *lvl) {
 	// 2: Key
 	// 3: Crystal
 	// 4: Evil doctor
-	// 5+: Platforms, Mines, Enemies, Energy Fields
+	// 5: Time vortex
+	// 6+: Platforms, Mines, Enemies, Energy Fields
 
-	g_PlatformSpritesBaseID = 5;
+	g_PlatformSpritesBaseID = 6;
 
 	// Imposta gli sprite piattaforma da usare nel livello corrente
 	u8 np = lvl->num_platforms;
