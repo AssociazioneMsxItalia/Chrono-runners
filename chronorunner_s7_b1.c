@@ -85,7 +85,7 @@ extern u8 g_MineSpritesBaseID;
 
 extern u8 g_EnemySpritesBaseID;
 extern u8 g_EnemyAnimCounter;
-extern u8 g_KeyHintCounter;
+extern u8 g_EnemyKeyHintCounter;
 
 extern u8 g_EnergyFieldSpritesBaseID;
 extern u8 g_EnergyFieldAnimCounter;
@@ -133,14 +133,13 @@ void DrawPlatforms(struct Level *lvl, bool rewind) {
 
 	for (u8 p=0; p < lvl->num_platforms; p++) {
 		u8 index = g_PlatformSpritesBaseID + p;
-		u8 shape = PLATFORM_PATTERN_OFFSET;
 		u8 color;
 		if (rewind) {
 			color = COLOR_WHITE;
 		} else {
 			color = COLOR_BLACK;
 		}
-		VDP_SetSpriteSM1(index, platforms[p].pos_x, platforms[p].pos_y, shape, color);
+		VDP_SetSpriteSM1(index, platforms[p].pos_x, platforms[p].pos_y, PLATFORM_PATTERN_OFFSET, color);
 	}
 }
 
@@ -171,9 +170,9 @@ void DrawEnemies(struct Level *lvl, bool rewind) {
 	}
 
 	// Key hint blink counter: 250 frames = 5 seconds at 50fps
-	g_KeyHintCounter++;
-	if (g_KeyHintCounter >= 250) {
-		g_KeyHintCounter = 0;
+	g_EnemyKeyHintCounter++;
+	if (g_EnemyKeyHintCounter >= 250) {
+		g_EnemyKeyHintCounter = 0;
 	}
 
 	for (u8 e=0; e < lvl->num_enemies; e++) {
@@ -205,7 +204,10 @@ void DrawEnemies(struct Level *lvl, bool rewind) {
 		u8 color;
 		if (rewind) {
 			color = COLOR_WHITE;
-		} else if (!g_KeyEnabled && !g_PlayerHasKey && (i8)e == lvl->key_trigger_enemy && g_KeyHintCounter < 10) {
+		} else if (!g_KeyEnabled
+			&& !g_PlayerHasKey
+			&& (i8)e == lvl->key_trigger_enemy
+			&& g_EnemyKeyHintCounter < 10) {
 			// Blink the trigger enemy in another color for 10 frames every 5 seconds
 			color = COLOR_DARK_RED;
 		} else {

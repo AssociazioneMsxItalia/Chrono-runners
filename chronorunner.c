@@ -360,7 +360,7 @@ u8 g_PlatformSpritesBaseID;
 u8 g_MineSpritesBaseID;
 u8 g_EnemySpritesBaseID;
 u8 g_EnemyAnimCounter;
-u8 g_KeyHintCounter;
+u8 g_EnemyKeyHintCounter;
 u8 g_EnergyFieldSpritesBaseID;
 u8 g_EnergyFieldAnimCounter;
 

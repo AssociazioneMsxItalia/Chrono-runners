@@ -122,6 +122,7 @@ extern u8 g_MineSpritesBaseID;
 
 extern u8 g_EnemySpritesBaseID;
 extern u8 g_EnemyAnimCounter;
+extern u8 g_EnemyKeyHintCounter;
 
 extern u8 g_EnergyFieldSpritesBaseID;
 extern u8 g_EnergyFieldAnimCounter;
@@ -148,6 +149,7 @@ void AllocateSpriteIDs(struct Level *lvl) {
 
 	g_EnemySpritesBaseID = g_MineSpritesBaseID + nm;
 	g_EnemyAnimCounter = 0;
+	g_EnemyKeyHintCounter = 0;
 
 	// Imposta sprite per i nemici
 	u8 ne = lvl->num_enemies;
