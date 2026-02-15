@@ -8,12 +8,14 @@
 
 #include "content/pt3/chronorunner.h"
 #include "content/pt3/gameover.h"
+#include "content/pt3/menu.h"
 
 #include "content/ayfx/fx_chronorunner.h"
 
 void SoundInit();
 void SoundPlay();
 void SoundSetSong(u8 songId);
+u8 SoundGetSong();
 void SoundStop();
 void SoundLoop(bool enable);
 void SoundMute(u8 chan, bool bMute);
@@ -22,7 +24,7 @@ void SoundUpdate();
 void S4_FxPlay(u8 id);
 
 // Songs data table
-const unsigned char* g_SongData[2];
+const unsigned char* g_SongData[3];
 
 u8   g_CurrentSong = 0;
 
@@ -53,6 +55,10 @@ void SoundSetSong(u8 songId)
 {
 	g_CurrentSong = songId;
 	PT3_InitSong(g_SongData[g_CurrentSong]);
+}
+
+u8 SoundGetSong() {
+	return g_CurrentSong;
 }
 
 //-----------------------------------------------------------------------------

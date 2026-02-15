@@ -257,14 +257,17 @@ extern void AllocateSpriteIDs(struct Level *lvl);
 //=============================================================================
 // Intermission screen
 extern const u8 g_Screen15[];
-extern unsigned char g_chronorunner[];
-extern unsigned char g_gameover[];
 
-extern const unsigned char* g_SongData[2];
+extern const u8 g_chronorunner[];
+extern const u8 g_gameover[];
+extern const u8 g_menu[];
+
+extern const u8* g_SongData[3];
 
 extern void SoundInit();
 extern void SoundPlay();
 extern void SoundSetSong(u8 songId);
+extern u8 SoundGetSong();
 extern void SoundStop();
 extern void SoundLoop(bool enable);
 extern void SoundMute(u8 chan, bool bMute);
@@ -650,10 +653,8 @@ WITH_SEGMENT(3) {
 WITH_SEGMENT(4) {
 	g_SongData[0] = g_chronorunner;
 	g_SongData[1] = g_gameover;
+	g_SongData[2] = g_menu;
 	SoundStop();
-	SoundSetSong(0);
-	SoundLoop(TRUE);
-	SoundPlay();
 }
 
 	// Imposta tempo iniziale
@@ -674,6 +675,12 @@ WITH_SEGMENT(4) {
 
 	// Start at main menu
 	if (g_NextLevelIdx == 0) {
+WITH_SEGMENT(4) {
+		// Start menu music
+		SoundSetSong(2);
+		SoundLoop(TRUE);
+		SoundPlay();
+}
 		Game_SetState(State_Menu);
 	} else {
 		Game_SetState(State_Intermission);
@@ -745,6 +752,11 @@ bool State_Intermission()
 		VDP_HideAllSprites();
 
 WITH_SEGMENT(4) {
+		if (SoundGetSong() != 0) {
+			SoundSetSong(0);
+			SoundLoop(TRUE);
+			SoundPlay();
+		}
 		VDP_WriteLayout_GM2(g_Screen15, 0, 0, 32, 24);
 }
 
