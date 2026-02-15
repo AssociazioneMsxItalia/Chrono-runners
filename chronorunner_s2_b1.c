@@ -21,3 +21,7 @@
 #include "content/screens/screen_21.h"
 #include "content/screens/screen_32.h"
 #include "content/screens/screen_13.h"
+
+// Secret levels
+#include "content/screens/screen_47.h"
+#include "content/screens/screen_50.h"

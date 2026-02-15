@@ -74,6 +74,8 @@ void DrawRewindGauge() {
 // DRAW FUNCTIONS
 //=============================================================================
 
+extern Pawn g_PlayerPawn;
+
 extern bool g_KeyEnabled;
 extern bool g_PlayerHasKey;
 extern bool g_CrystalEnabled;
@@ -89,6 +91,8 @@ extern u8 g_EnemyKeyHintCounter;
 
 extern u8 g_EnergyFieldSpritesBaseID;
 extern u8 g_EnergyFieldAnimCounter;
+
+extern u8 g_VortexAnimFrame;
 
 extern u8 g_RemainingFS;
 
@@ -126,6 +130,21 @@ void DrawCrystal(struct Level *lvl) {
 	}
 
 	VDP_SetSpriteSM1(CRYSTAL_SPRITE_ID, lvl->crystal_x * 8, lvl->crystal_y * 8, pattern, COLOR_MEDIUM_RED);
+}
+
+void DrawVortex() {
+	if (g_PlayerPawn.PositionY < 8) {
+
+		g_VortexAnimFrame++;
+		if (g_VortexAnimFrame >= 30) {
+			g_VortexAnimFrame = 0;
+		}
+
+		u8 frame = g_VortexAnimFrame / 10;
+		u8 pattern = VORTEX_FRAME(frame);
+
+		VDP_SetSpriteSM1(VORTEX_SPRITE_ID, 0, 0, pattern, COLOR_WHITE);
+	}
 }
 
 void DrawPlatforms(struct Level *lvl, bool rewind) {
@@ -265,7 +284,6 @@ extern bool g_PlayerInputRight;
 extern bool g_PlayerInputLeft;
 extern bool g_PlayerInputUp;
 
-extern Pawn g_PlayerPawn;
 extern u8   g_PlayerAction;
 extern bool g_PlayerMovingRight;
 extern bool g_PlayerMovingLeft;

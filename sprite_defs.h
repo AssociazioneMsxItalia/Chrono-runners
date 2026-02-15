@@ -11,6 +11,8 @@
 #define PLAYER_SPRITE_ID 0
 #define KEY_SPRITE_ID 2
 #define CRYSTAL_SPRITE_ID 3
+#define DOC_SPRITE_ID 4
+#define VORTEX_SPRITE_ID 5
 // Platforms, mines, enemies and energy fields use dynamic IDs allocated at runtime
 
 // Player patterns

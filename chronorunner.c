@@ -139,6 +139,7 @@ u8 g_seg_guard = 1;
 // LEVELS
 //=============================================================================
 
+// Normal levels
 #include "content/levels/map25_lvl.h"
 #include "content/levels/map04_lvl.h"
 #include "content/levels/map16_lvl.h"
@@ -169,10 +170,17 @@ u8 g_seg_guard = 1;
 #include "content/levels/map32_lvl.h"
 #include "content/levels/map13_lvl.h"
 
-u8 g_NumLevels = 29;
+// Secret levels
+#include "content/levels/map48_lvl.h"
+#include "content/levels/map49_lvl.h"
+#include "content/levels/map47_lvl.h"
+#include "content/levels/map50_lvl.h"
+
+#define NUM_LEVELS 29
+#define SECRET_LEVELS 4
 
 // Array con l'ordine dei livelli
-const struct Level* g_LevelOrder[29];
+const struct Level* g_LevelOrder[NUM_LEVELS + SECRET_LEVELS];
 
 // Copia locale del livello attuale
 struct Level g_ActiveLevel;
@@ -217,6 +225,12 @@ void InitLevels() {
 	g_LevelOrder[i++] = &level_map21;
 	g_LevelOrder[i++] = &level_map32;
 	g_LevelOrder[i++] = &level_map13;
+
+	// Secret levels
+	g_LevelOrder[i++] = &level_map48;
+	g_LevelOrder[i++] = &level_map49;
+	g_LevelOrder[i++] = &level_map47;
+	g_LevelOrder[i++] = &level_map50;
 }
 
 //=============================================================================
@@ -279,6 +293,7 @@ extern void DrawPlatforms(struct Level *lvl, bool rewind);
 extern void DrawMines(struct Level *lvl);
 extern void DrawEnemies(struct Level *lvl, bool rewind);
 extern void DrawEnergyFields(struct Level *lvl, bool rewind);
+extern void DrawVortex();
 
 extern void UpdatePlayerInput();
 extern void UpdatePlayerGravity();
@@ -355,6 +370,9 @@ u8 g_CrystalPosX;
 u8 g_CrystalPosY;
 u8 g_CrystalAnimFrame;
 
+// Vortex sprite (easter egg)
+u8 g_VortexAnimFrame;
+
 // Allocazione sprite
 u8 g_PlatformSpritesBaseID;
 u8 g_MineSpritesBaseID;
@@ -370,6 +388,7 @@ u8 g_EnergyFieldAnimCounter;
 
 u8 g_CurrentLevelIdx;
 u8 g_NextLevelIdx = 0;
+i8 g_SecretlNextLevelIdx = -1;
 
 //=============================================================================
 // PHYSICS
@@ -689,6 +708,10 @@ void PlayerRestart()
 	else
 		g_CrystalEnabled = TRUE;
 
+	// Reset vortex state
+	g_VortexAnimFrame = 0;
+	VDP_HideSprite(VORTEX_SPRITE_ID);
+
 	// Init player pawn
 	u8 start_x = g_ActiveLevel.start_x;
 	u8 start_y = g_ActiveLevel.start_y;
@@ -729,7 +752,7 @@ WITH_SEGMENT(4) {
 		const c8 *level_name = g_LevelOrder[g_NextLevelIdx]->name;
 
 		// Progresso
-		u16 prog = (g_NextLevelIdx * 30) / g_NumLevels;
+		u16 prog = (g_NextLevelIdx * 30) / NUM_LEVELS;
 
 		// Barra verde
 		if (prog != 0)
@@ -771,9 +794,21 @@ WITH_SEGMENT(4) {
 
 bool State_ChangeLevel()
 {
-	// Passa al livello successivo
-	g_CurrentLevelIdx = g_NextLevelIdx;
-	g_NextLevelIdx += 1;
+	// Nasconde tutti gli sprite, verranno riabilitati quelli che servono
+	// in ciascun livello
+	VDP_HideAllSprites();
+
+	if (g_SecretlNextLevelIdx != -1) {
+		// Passa al livello segreto. Lascia il livello successivo
+		// impostato, così ci salta automaticamente al termine del
+		// livello segreto
+		g_CurrentLevelIdx = g_SecretlNextLevelIdx;
+		g_SecretlNextLevelIdx = -1;
+	} else {
+		// Passa al livello successivo
+		g_CurrentLevelIdx = g_NextLevelIdx;
+		g_NextLevelIdx += 1;
+	}
 
 	// Cancella lo schermo
 	VDP_FillScreen_GM2(TILE_EMPTY);
@@ -837,6 +872,15 @@ bool State_Game()
 	DrawMines(lvl);
 	DrawEnemies(lvl, FALSE);
 	DrawEnergyFields(lvl, FALSE);
+	DrawVortex();
+
+	// Easter egg: vortex teleportation
+	if (bboxCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY, 0, 0)) {
+		FxPlay(FX_EXIT_DOOR);
+		g_SecretlNextLevelIdx = NUM_LEVELS + 2;
+		Game_SetState(State_ChangeLevel);
+		return TRUE;
+	}
 
 	// Controlla la collisione tra giocatore e chiave
 	if (g_KeyEnabled && bboxCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY, g_KeyPosX, g_KeyPosY)) {
@@ -865,7 +909,7 @@ bool State_Game()
 		FxPlay(FX_EXIT_DOOR);
 
 		// Se era l'ultimo livello, mostra uno schermo di vittoria e reinizializza
-		if (g_CurrentLevelIdx == g_NumLevels - 1) {
+		if (g_CurrentLevelIdx == NUM_LEVELS - 1) {
 			SetMessageScreen("YOU WON!", -1, 500);
 			Game_SetState(State_MessageScreen);
 		} else {
