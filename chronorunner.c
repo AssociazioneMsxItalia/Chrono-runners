@@ -486,11 +486,11 @@ bool isPlayerOnMines(struct Level *lvl) {
 	struct Mine *mines = lvl->mines;
 
 	for (u8 m=0; m < nm; m++) {
-		// Confronta un bbox parziale (12x16) del giocatore con un bbox 2x1 della mina
-		if (rectCollide(g_PlayerPawn.PositionX +  2, g_PlayerPawn.PositionY,
-					    g_PlayerPawn.PositionX + 13, g_PlayerPawn.PositionY + 15,
+		// Confronta un bbox parziale (8x16) del giocatore con un bbox 2x1 della mina
+		if (rectCollide(g_PlayerPawn.PositionX +  4, g_PlayerPawn.PositionY,
+					    g_PlayerPawn.PositionX + 11, g_PlayerPawn.PositionY + 15,
 				        mines[m].pos_x + 7, mines[m].pos_y - 1,
-				        mines[m].pos_x + 7 + 1, mines[m].pos_y)) {
+				        mines[m].pos_x + 7 + 2, mines[m].pos_y)) {
 			return TRUE;
 		}
 	}
@@ -501,8 +501,11 @@ bool isPlayerHitByEnemies(struct Level *lvl) {
 	struct Enemy *enemies = lvl->enemies;
 
 	for (u8 e=0; e < lvl->num_enemies; e++) {
-		if (bboxCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY,
-		                enemies[e].pos_x, enemies[e].pos_y)) {
+
+		if (rectCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY,
+					    g_PlayerPawn.PositionX + 15, g_PlayerPawn.PositionY + 15,
+				        enemies[e].pos_x + 4, enemies[e].pos_y,
+				        enemies[e].pos_x + 11, enemies[e].pos_y + 15)) {
 
 			// Se siamo sopra il nemico e stiamo scendendo
 			if (g_PlayerPawn.PositionY < enemies[e].pos_y && g_VelocityY < 0) {
