@@ -1147,6 +1147,8 @@ WITH_SEGMENT(6) {
 	}
 }
 
+	Bios_SetKeyClick(FALSE);
+
 	Game_SetState(State_Initialize);
 	Game_SetVSyncCallback(InterruptHook);
 	Game_Start(VDP_MODE_GRAPHIC2, FALSE);
