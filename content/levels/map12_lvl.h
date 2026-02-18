@@ -30,7 +30,7 @@ struct Level level_map12 = {
 	1, 10,       // start_x start_y
 	29, 10,       // end_x end_y
 	15, 21,      // key_x key_y
-	0, 0,        // crystal_x crystal_y
+	28, 18,        // crystal_x crystal_y
 	numberof(platforms_map12),  // num_platforms
 	platforms_map12,       // platforms
 	0,           // num_mines

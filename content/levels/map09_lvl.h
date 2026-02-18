@@ -40,16 +40,16 @@ struct Enemy enemies_map9[] = {
 
 struct Level level_map9 = {
 	2, 21,       // start_x start_y
-	23, 5,       // end_x end_y
+	23, 7,       // end_x end_y
 	15, 12,      // key_x key_y
-	0, 0,        // crystal_x crystal_y
+	20, 21,        // crystal_x crystal_y
 	numberof(platforms_map9),  // num_platforms
 	platforms_map9,       // platforms
 	0,           // num_mines
 	NULL,        // mines
 	numberof(enemies_map9),  // num_enemies
 	enemies_map9,  // enemies
-	1,           // key_trigger_enemy (enemy 1 reveals key)
+	0,           // key_trigger_enemy (enemy 0 reveals key)
 	g_Screen9,   // layout
 	"THE TOWER - LEONARDO VETTORI",  // name
 };

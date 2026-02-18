@@ -8,9 +8,9 @@ struct Platform platforms_map33[] = {
 };
 
 struct Enemy enemies_map33[] = {
-  {17*8, 20*8,  // pos_x pos_y
+  {21*8, 7*8,  // pos_x pos_y
 	        1,  // dir_x  TODO: set direction (-1 or 1)
-	10*8, 17*8,  // min_x max_x  TODO: adjust patrol range
+	20*8, 26*8,  // min_x max_x  TODO: adjust patrol range
 	        2,  // type (0-3)
 	        0,  // mDX (initialized to 0)
 	        0,  // stunned_timer (initialized to 0)
@@ -20,9 +20,9 @@ struct Enemy enemies_map33[] = {
 			0,  // field_y
 			0,  // field_mDX
 			0}, // field_dir
-  {21*8, 7*8,  // pos_x pos_y
+  {17*8, 20*8,  // pos_x pos_y
 	        1,  // dir_x  TODO: set direction (-1 or 1)
-	20*8, 26*8,  // min_x max_x  TODO: adjust patrol range
+	10*8, 17*8,  // min_x max_x  TODO: adjust patrol range
 	        2,  // type (0-3)
 	        0,  // mDX (initialized to 0)
 	        0,  // stunned_timer (initialized to 0)
@@ -38,14 +38,14 @@ struct Level level_map33 = {
 	2, 9,       // start_x start_y
 	23, 13,       // end_x end_y
 	28, 18,      // key_x key_y
-	0, 0,        // crystal_x crystal_y
+	26, 6,        // crystal_x crystal_y
 	numberof(platforms_map33),  // num_platforms
 	platforms_map33,       // platforms
 	0,           // num_mines
 	NULL,        // mines
 	numberof(enemies_map33),  // num_enemies
 	enemies_map33,  // enemies
-	0,           // key_trigger_enemy (enemy 0 reveals key)
+	1,           // key_trigger_enemy (enemy 1 reveals key)
 	g_Screen33,   // layout
 	"LEVEL 33 - FABRIZIO LUGLIO",  // name
 };

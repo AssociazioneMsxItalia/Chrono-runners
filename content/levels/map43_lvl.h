@@ -1,8 +1,8 @@
 extern unsigned char g_Screen43[];
 
 struct Level level_map43 = {
-	2, 21,       // start_x start_y
-	0, 0,       // end_x end_y
+	2, 17,       // start_x start_y
+	28, 17,       // end_x end_y
 	0, 0,      // key_x key_y
 	0, 0,        // crystal_x crystal_y
 	0,           // num_platforms
@@ -15,3 +15,6 @@ struct Level level_map43 = {
 	g_Screen43,   // layout
 	"",  // name
 };
+
+// Unknown sprite placements:
+//   sprite 60 at pixel (120, 80)

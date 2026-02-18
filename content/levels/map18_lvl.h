@@ -8,7 +8,6 @@ struct Platform platforms_map18[] = {
 };
 
 struct Mine mines_map18[] = {
-	{4*8, 17*8}, // pos_x pos_y
 	{26*8, 17*8} // pos_x pos_y
 };
 
@@ -43,7 +42,7 @@ struct Level level_map18 = {
 	2, 4,       // start_x start_y
 	15, 19,       // end_x end_y
 	29, 19,      // key_x key_y
-	0, 0,        // crystal_x crystal_y
+	1, 20,        // crystal_x crystal_y
 	numberof(platforms_map18),  // num_platforms
 	platforms_map18,       // platforms
 	numberof(mines_map18),  // num_mines

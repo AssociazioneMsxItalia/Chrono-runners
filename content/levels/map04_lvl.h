@@ -19,7 +19,7 @@ struct Level level_map4 = {
 	1, 18,       // start_x start_y
 	29, 18,       // end_x end_y
 	21, 18,      // key_x key_y
-	0, 0,        // crystal_x crystal_y
+	19, 14,        // crystal_x crystal_y
 	0,           // num_platforms
 	NULL,       // platforms
 	0,           // num_mines

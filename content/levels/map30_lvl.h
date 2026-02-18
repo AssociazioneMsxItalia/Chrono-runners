@@ -69,14 +69,14 @@ struct Level level_map30 = {
 	9, 6,       // start_x start_y
 	4, 6,       // end_x end_y
 	5, 9,      // key_x key_y
-	0, 0,        // crystal_x crystal_y
+	15, 19,        // crystal_x crystal_y
 	numberof(platforms_map30),  // num_platforms
 	platforms_map30,       // platforms
 	numberof(mines_map30),  // num_mines
 	mines_map30,        // mines
 	numberof(enemies_map30),  // num_enemies
 	enemies_map30,  // enemies
-	3,           // key_trigger_enemy (enemy 3 reveals key)
+	2,           // key_trigger_enemy (enemy 2 reveals key)
 	g_Screen30,   // layout
 	"EASY PEASY - LORENZO MIRETTI",  // name
 };

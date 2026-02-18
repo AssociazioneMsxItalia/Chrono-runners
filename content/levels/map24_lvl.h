@@ -1,10 +1,6 @@
 extern unsigned char g_Screen24[];
 
 struct Platform platforms_map24[] = {
-   {7*8, 22*8,  // pos_x pos_y
-       1,    0,  // dir_x dir_y
-    1*8, 22*8,  // min_x min_y
-    11*8, 22*8}, // max_x max_y
    {29*8, 12*8,  // pos_x pos_y
        0,    1,  // dir_x dir_y
     29*8, 6*8,  // min_x min_y
@@ -12,7 +8,7 @@ struct Platform platforms_map24[] = {
    {1*8, 12*8,  // pos_x pos_y
        0,    1,  // dir_x dir_y
     1*8, 8*8,  // min_x min_y
-    1*8, 21*8} // max_x max_y
+    1*8, 22*8} // max_x max_y
 };
 
 struct Enemy enemies_map24[] = {
@@ -45,8 +41,8 @@ struct Enemy enemies_map24[] = {
 struct Level level_map24 = {
 	2, 4,       // start_x start_y
 	13, 6,       // end_x end_y
-	4, 8,      // key_x key_y
-	0, 0,        // crystal_x crystal_y
+	16, 10,      // key_x key_y
+	4, 8,        // crystal_x crystal_y
 	numberof(platforms_map24),  // num_platforms
 	platforms_map24,       // platforms
 	0,           // num_mines

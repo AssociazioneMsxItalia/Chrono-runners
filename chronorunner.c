@@ -358,7 +358,6 @@ i8	 g_mDY = 0;
 i8   g_DX;
 i8   g_DY;
 bool g_PlayerHasKey = FALSE;
-u8 g_PlayerMaxRewindEnergy;
 u8 g_PlayerRewindEnergy;
 
 // Key sprite
@@ -478,9 +477,9 @@ void TakeKey() {
 }
 
 void TakeCrystal() {
-	g_PlayerMaxRewindEnergy += (SNAPSHOT_BUFFER_SIZE / 4);
-	if (g_PlayerMaxRewindEnergy > SNAPSHOT_BUFFER_SIZE)
-		g_PlayerMaxRewindEnergy = SNAPSHOT_BUFFER_SIZE;
+	g_PlayerRewindEnergy += (SNAPSHOT_BUFFER_SIZE / 4);
+	if (g_PlayerRewindEnergy > SNAPSHOT_BUFFER_SIZE)
+		g_PlayerRewindEnergy = SNAPSHOT_BUFFER_SIZE;
 }
 
 bool isPlayerAtExit() {
@@ -496,7 +495,7 @@ bool isPlayerAtExit() {
 bool isPlayerOnSpikes() {
 	u8 tile = VDP_Peek_GM2((g_PlayerPawn.PositionX >> 3) + 1,
 							(g_PlayerPawn.PositionY >> 3) + 2);
-	if (tile >= 196 && tile <= 202) {
+	if (tile >= 198 && tile <= 202) {
 		return TRUE;
 	}
     return FALSE;
@@ -662,8 +661,7 @@ WITH_SEGMENT(4) {
 	g_RemainingSeconds = 0;
 	g_RemainingFS = 0;
 
-	// Reset cristalli e rewind energy
-	g_PlayerMaxRewindEnergy = 0;
+	// Reset rewind energy
 	g_PlayerRewindEnergy = 0;
 
 	// Reset livelli
@@ -729,11 +727,9 @@ void PlayerRestart()
 	g_PlayerDying = FALSE;
 	g_CountDownTicks = 50 - 1;
 
-	// Resetta il contatore dei rewind, altrimenti il giocatore può riusare
-	// dopo la morte o dopo un livello delle coordinate spurie
-	g_PlayerRewindEnergy = 0;
-
-	// Initialize snapshot system for player and object rewind
+	// Initialize snapshot system for player and object rewind.
+	// Il buffer va sempre resettato perché le coordinate del livello
+	// precedente non sono valide.
 	Snapshot_Initialize();
 
 	// Redraw level layout (resets door appearance if key was taken)
@@ -789,13 +785,12 @@ WITH_SEGMENT(4) {
 		// Nome del livello (centrato)
 		PrintGFXText(level_name, 16 - (String_Length(level_name) / 2), 20);
 
-		PrintGFXText("PRESS SPACE KEY", 8, 23);
-
-		g_IntermissionState = 1;
+		PrintGFXText("GET READY!", 11, 23);
 	}
 
-	u8 row8 = Keyboard_Read(8);
-	if (IS_KEY_PRESSED(row8, KEY_SPACE)) {
+	g_IntermissionState++;
+
+	if (g_IntermissionState > 100) {
 		g_IntermissionState = 0;
 		Game_SetState(State_ChangeLevel);
 		return FALSE;
@@ -935,7 +930,7 @@ bool State_Game()
 
 	u8 row8 = Keyboard_Read(8);
 	if (IS_KEY_PRESSED(row8, KEY_SPACE)) {
-		if (g_PlayerRewindEnergy > 1) {
+		if (g_PlayerRewindEnergy > 1 && Snapshot_GetRewindCount() >= g_PlayerRewindEnergy) {
 
 			// Sostituisce i colori dello sprite principale
 			ReinitPlayer(&g_PlayerPawn,
@@ -946,10 +941,6 @@ bool State_Game()
 			Game_SetState(State_Rewind);
 			FxPlay(FX_REWIND);
 			return TRUE;
-		}
-	} else {
-		if (g_PlayerRewindEnergy < g_PlayerMaxRewindEnergy) {
-			g_PlayerRewindEnergy++;
 		}
 	}
 

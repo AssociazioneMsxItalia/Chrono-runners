@@ -42,14 +42,14 @@ struct Level level_map21 = {
 	8, 4,       // start_x start_y
 	2, 21,       // end_x end_y
 	1, 13,      // key_x key_y
-	0, 0,        // crystal_x crystal_y
+	5, 15,        // crystal_x crystal_y
 	numberof(platforms_map21),  // num_platforms
 	platforms_map21,       // platforms
 	numberof(mines_map21),  // num_mines
 	mines_map21,        // mines
 	numberof(enemies_map21),  // num_enemies
 	enemies_map21,  // enemies
-	0,           // key_trigger_enemy (enemy 0 reveals key)
+	1,           // key_trigger_enemy (enemy 1 reveals key)
 	g_Screen21,   // layout
 	"FIELD DESCENT - E. DEL CUCINA",  // name
 };
