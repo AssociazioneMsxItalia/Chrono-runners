@@ -392,9 +392,12 @@ u8 g_EnergyFieldAnimCounter;
 // LEVELS
 //=============================================================================
 
+// Per partire velocemnete da un livello per il debug
+#define START_LEVEL 0
+
 u8 g_CurrentLevelIdx;
-u8 g_NextLevelIdx = 0;
-i8 g_SecretlNextLevelIdx = -1;
+u8 g_NextLevelIdx = START_LEVEL;
+i8 g_SecretNextLevelIdx = -1;
 
 //=============================================================================
 // PHYSICS
@@ -579,7 +582,7 @@ WITH_SEGMENT(4) {
 
 	// Reset livelli
 	g_CurrentLevelIdx = 0;
-	g_NextLevelIdx = 0;
+	g_NextLevelIdx = START_LEVEL;
 
 	// Initialize cutscene system
 	Cutscene_Initialize();
@@ -719,12 +722,12 @@ bool State_ChangeLevel()
 	// in ciascun livello
 	VDP_HideAllSprites();
 
-	if (g_SecretlNextLevelIdx != -1) {
+	if (g_SecretNextLevelIdx != -1) {
 		// Passa al livello segreto. Lascia il livello successivo
 		// impostato, così ci salta automaticamente al termine del
 		// livello segreto
-		g_CurrentLevelIdx = g_SecretlNextLevelIdx;
-		g_SecretlNextLevelIdx = -1;
+		g_CurrentLevelIdx = g_SecretNextLevelIdx;
+		g_SecretNextLevelIdx = -1;
 	} else {
 		// Passa al livello successivo
 		g_CurrentLevelIdx = g_NextLevelIdx;
@@ -798,7 +801,7 @@ bool State_Game()
 	// Easter egg: vortex teleportation
 	if (bboxCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY, 0, 0)) {
 		FxPlay(FX_EXIT_DOOR);
-		g_SecretlNextLevelIdx = NUM_LEVELS + 2;
+		g_SecretNextLevelIdx = NUM_LEVELS;
 		Game_SetState(State_ChangeLevel);
 		return TRUE;
 	}

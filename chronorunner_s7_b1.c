@@ -114,7 +114,6 @@ bool isPlayerHitByEnemies(struct Level *lvl) {
 
 	for (u8 e=0; e < lvl->num_enemies; e++) {
 
-		// XXX: proviamo col robot pulitore a spostare il centro del robot
 		if (rectCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY,
 					    g_PlayerPawn.PositionX + 15, g_PlayerPawn.PositionY + 15,
 				        enemies[e].pos_x + 4, enemies[e].pos_y,
