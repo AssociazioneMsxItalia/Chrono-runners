@@ -288,8 +288,12 @@ extern void ShowSplashScreen();
 extern void PrintGFXText(const c8 *text, u8 x, u8 y);
 extern void PrintGFXNumber(u8 number, u8 x, u8 y);
 extern void PrintTime();
-
 extern void DrawRewindGauge();
+
+extern bool isPlayerHitByEnergyFields(struct Level *lvl);
+extern bool isPlayerHitByEnemies(struct Level *lvl);
+extern struct Platform* isPlayerOnPlatform(struct Level *lvl);
+
 extern void DrawKey(struct Level *lvl);
 extern void DrawCrystal(struct Level *lvl);
 extern void DrawPlatforms(struct Level *lvl, bool rewind);
@@ -518,71 +522,6 @@ struct Mine* isPlayerOnMines(struct Level *lvl) {
 	return NULL;
 }
 
-bool isPlayerHitByEnemies(struct Level *lvl) {
-	struct Enemy *enemies = lvl->enemies;
-
-	for (u8 e=0; e < lvl->num_enemies; e++) {
-
-		if (rectCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY,
-					    g_PlayerPawn.PositionX + 15, g_PlayerPawn.PositionY + 15,
-				        enemies[e].pos_x + 4, enemies[e].pos_y,
-				        enemies[e].pos_x + 11, enemies[e].pos_y + 15)) {
-
-			// Se siamo sopra il nemico e stiamo scendendo
-			if (g_PlayerPawn.PositionY < enemies[e].pos_y && g_VelocityY < 0) {
-				// Stordiamo il nemico
-				enemies[e].stunned_timer = 100;
-
-				// Disattiva solo l'eventuale campo di forza locale, non i
-				// proiettili
-				if (enemies[e].field_state == 1) {
-					enemies[e].field_state = 0;
-				}
-
-				// Piccolo salto verso l'alto
-				g_VelocityY = FORCE;
-				g_PlayerJumping = TRUE;
-
-				FxPlay(FX_STOMP_ROBOT);
-
-				// Reveal hidden key if this is the trigger enemy
-				if (!g_KeyEnabled && !g_PlayerHasKey && (i8)e == lvl->key_trigger_enemy) {
-					g_KeyEnabled = TRUE;
-					FxPlay(FX_SHOW_KEY);
-				}
-
-				return FALSE;
-			} else if (enemies[e].stunned_timer == 0) {
-				return TRUE;
-			}
-		}
-	}
-	return FALSE;
-}
-
-bool isPlayerHitByEnergyFields(struct Level *lvl) {
-	struct Enemy *enemies = lvl->enemies;
-
-	// Controlla i campi di forza di ciascun nemico
-	for (u8 e=0; e < lvl->num_enemies; e++) {
-
-		if (enemies[e].field_state != 0) {
-			if (bboxCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY,
-			                enemies[e].field_x, enemies[e].field_y)) {
-
-				// Se il proiettile colpisce il personaggio, lo consuma
-				if (enemies[e].field_state == 2) {
-					enemies[e].field_state = 0;
-				}
-
-				return TRUE;
-			}
-		}
-	}
-
-	return FALSE;
-}
-
 bool isPlayerInPit() {
 	return g_PlayerPawn.PositionY > 192;
 }
@@ -601,32 +540,6 @@ i8 GetDPos(i8* m) {
 		(*m) += 8;
 
 	return rv;
-}
-
-struct Platform* isPlayerOnPlatform(struct Level *lvl) {
-	struct Platform *platforms = lvl->platforms;
-
-	for (u8 p=0; p < lvl->num_platforms; p++) {
-		// -16 / +16 per permettere al giocatore di sfruttare lo spazio in
-		// orizzontale della piattaforma fino all'ultimo pixel
-		bool in_x = g_PlayerPawn.PositionX > platforms[p].pos_x - 16
-		         && g_PlayerPawn.PositionX < platforms[p].pos_x + 16;
-
-		// Perché -4? Serve per considerare anche l'area immediatamente sopra
-		// la piattaforma come parte della piattaforma stessa. Senza questo
-		// buffer, su una piattaforma che va verso il basso si vedrebbe
-		// "saltare" il giocatore, perché ad ogni fotogramma gli manca la
-		// terra sotto i piedi
-		bool in_y = g_PlayerPawn.PositionY > platforms[p].pos_y - 16 - 4
-		         && g_PlayerPawn.PositionY < platforms[p].pos_y;
-
-		if (in_x && in_y)
-		{
-			return &platforms[p];
-		}
-	}
-
-	return NULL;
 }
 
 void SetMessageScreen(const c8* text, i8 songId, u16 duration) {

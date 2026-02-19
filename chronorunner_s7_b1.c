@@ -13,6 +13,13 @@ extern u8 g_RemainingMinutes;
 extern u8 g_RemainingSeconds;
 extern u8 g_PlayerRewindEnergy;
 
+extern Pawn g_PlayerPawn;
+extern i8   g_VelocityY;
+extern i8   g_mDY;
+extern bool g_PlayerJumping;
+extern bool g_KeyEnabled;
+extern bool g_PlayerHasKey;
+
 //-----------------------------------------------------------------------------
 // Character to tile conversion
 //-----------------------------------------------------------------------------
@@ -71,13 +78,110 @@ void DrawRewindGauge() {
 }
 
 //=============================================================================
+// FIELD COLLISION FUNCTIONS
+//=============================================================================
+
+extern bool bboxCollide(u8 x1, u8 y1, u8 x2, u8 y2);
+extern bool rectCollide(u8 ax1, u8 ay1, u8 ax2, u8 ay2,
+				        u8 bx1, u8 by1, u8 bx2, u8 by2);
+extern void FxPlay(u8 id);
+
+bool isPlayerHitByEnergyFields(struct Level *lvl) {
+	struct Enemy *enemies = lvl->enemies;
+
+	// Controlla i campi di forza di ciascun nemico
+	for (u8 e=0; e < lvl->num_enemies; e++) {
+
+		if (enemies[e].field_state != 0) {
+			if (bboxCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY,
+			                enemies[e].field_x, enemies[e].field_y)) {
+
+				// Se il proiettile colpisce il personaggio, lo consuma
+				if (enemies[e].field_state == 2) {
+					enemies[e].field_state = 0;
+				}
+
+				return TRUE;
+			}
+		}
+	}
+
+	return FALSE;
+}
+
+bool isPlayerHitByEnemies(struct Level *lvl) {
+	struct Enemy *enemies = lvl->enemies;
+
+	for (u8 e=0; e < lvl->num_enemies; e++) {
+
+		// XXX: proviamo col robot pulitore a spostare il centro del robot
+		if (rectCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY,
+					    g_PlayerPawn.PositionX + 15, g_PlayerPawn.PositionY + 15,
+				        enemies[e].pos_x + 4, enemies[e].pos_y,
+				        enemies[e].pos_x + 11, enemies[e].pos_y + 15)) {
+
+			// Se siamo sopra il nemico e stiamo scendendo
+			if (g_PlayerPawn.PositionY < enemies[e].pos_y && g_VelocityY < 0) {
+				// Stordiamo il nemico
+				enemies[e].stunned_timer = 100;
+
+				// Disattiva solo l'eventuale campo di forza locale, non i
+				// proiettili
+				if (enemies[e].field_state == 1) {
+					enemies[e].field_state = 0;
+				}
+
+				// Piccolo salto verso l'alto
+				g_VelocityY = FORCE;
+				g_PlayerJumping = TRUE;
+
+				FxPlay(FX_STOMP_ROBOT);
+
+				// Reveal hidden key if this is the trigger enemy
+				if (!g_KeyEnabled && !g_PlayerHasKey && (i8)e == lvl->key_trigger_enemy) {
+					g_KeyEnabled = TRUE;
+					FxPlay(FX_SHOW_KEY);
+				}
+
+				return FALSE;
+			} else if (enemies[e].stunned_timer == 0) {
+				return TRUE;
+			}
+		}
+	}
+	return FALSE;
+}
+
+struct Platform* isPlayerOnPlatform(struct Level *lvl) {
+	struct Platform *platforms = lvl->platforms;
+
+	for (u8 p=0; p < lvl->num_platforms; p++) {
+		// -16 / +16 per permettere al giocatore di sfruttare lo spazio in
+		// orizzontale della piattaforma fino all'ultimo pixel
+		bool in_x = g_PlayerPawn.PositionX > platforms[p].pos_x - 16
+		         && g_PlayerPawn.PositionX < platforms[p].pos_x + 16;
+
+		// Perché -4? Serve per considerare anche l'area immediatamente sopra
+		// la piattaforma come parte della piattaforma stessa. Senza questo
+		// buffer, su una piattaforma che va verso il basso si vedrebbe
+		// "saltare" il giocatore, perché ad ogni fotogramma gli manca la
+		// terra sotto i piedi
+		bool in_y = g_PlayerPawn.PositionY > platforms[p].pos_y - 16 - 4
+		         && g_PlayerPawn.PositionY < platforms[p].pos_y;
+
+		if (in_x && in_y)
+		{
+			return &platforms[p];
+		}
+	}
+
+	return NULL;
+}
+
+//=============================================================================
 // DRAW FUNCTIONS
 //=============================================================================
 
-extern Pawn g_PlayerPawn;
-
-extern bool g_KeyEnabled;
-extern bool g_PlayerHasKey;
 extern bool g_CrystalEnabled;
 extern u8 g_KeyAnimFrame;
 extern u8 g_CrystalAnimFrame;
@@ -296,7 +400,7 @@ extern bool g_PlayerInputUp;
 extern u8   g_PlayerAction;
 extern bool g_PlayerMovingRight;
 extern bool g_PlayerMovingLeft;
-extern bool g_PlayerJumping;
+
 extern bool g_PlayerDying;
 extern i8   g_mDX;
 extern i8   g_DX;
@@ -326,9 +430,6 @@ void UpdatePlayerInput() {
 		g_PlayerInputUp = TRUE;
 	}
 }
-
-extern i8 g_VelocityY;
-extern i8 g_mDY;
 
 void UpdatePlayerGravity() {
 	g_mDY -= g_VelocityY;
