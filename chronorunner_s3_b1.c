@@ -20,6 +20,7 @@
 
 #include "content/sprite/platform_sprt_layer.h"
 #include "content/sprite/mine_sprt_layer.h"
+#include "content/sprite/boom_sprt_layer.h"
 
 #include "content/sprite/vortex_sprt_layer.h"
 
@@ -103,9 +104,10 @@ void InitializeSprite() {
 	// Vortex sprites
 	VDP_LoadSpritePattern(g_VortexSprtLayer, VORTEX_PATTERN_OFFSET, VORTEX_PATTERN_TOTAL);
 
-	// Load Platform / Mine sprites
+	// Load Platform / Mine / Boom sprites
 	VDP_LoadSpritePattern(g_PlatformSprtLayer, PLATFORM_PATTERN_OFFSET, PLATFORM_PATTERN_TOTAL);
 	VDP_LoadSpritePattern(g_MineSprtLayer, MINE_PATTERN_OFFSET, MINE_PATTERN_TOTAL);
+	VDP_LoadSpritePattern(g_BoomSprtLayer, BOOM_PATTERN_OFFSET, BOOM_PATTERN_TOTAL);
 
 	// Load all 4 enemy types (each type has 6 frames)
 	VDP_LoadSpritePattern(g_Enemy0SprtLayer, ENEMY_FRAME(0, 0), ENEMY_TYPE_PATTERN_TOTAL);
@@ -135,9 +137,10 @@ void AllocateSpriteIDs(struct Level *lvl) {
 	// 3: Crystal
 	// 4: Evil doctor
 	// 5: Time vortex
-	// 6+: Platforms, Mines, Enemies, Energy Fields
+	// 6: Boom
+	// 7+: Platforms, Mines, Enemies, Energy Fields
 
-	g_PlatformSpritesBaseID = 6;
+	g_PlatformSpritesBaseID = 7;
 
 	// Imposta gli sprite piattaforma da usare nel livello corrente
 	u8 np = lvl->num_platforms;

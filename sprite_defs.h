@@ -13,6 +13,8 @@
 #define CRYSTAL_SPRITE_ID 3
 #define DOC_SPRITE_ID 4
 #define VORTEX_SPRITE_ID 5
+#define BOOM_SPRITE_ID 6
+
 // Platforms, mines, enemies and energy fields use dynamic IDs allocated at runtime
 
 // Player patterns
@@ -71,10 +73,18 @@
 #define MINE_PATTERN_END MINE_PATTERN_OFFSET + MINE_PATTERN_TOTAL
 #define MINE_FRAME(x) x * MINE_PATTERN_SIZE + MINE_PATTERN_OFFSET
 
+// Boom pattern
+#define BOOM_PATTERN_OFFSET MINE_PATTERN_END
+#define BOOM_PATTERN_SIZE laySize
+#define BOOM_PATTERN_NUM 1
+#define BOOM_PATTERN_TOTAL BOOM_PATTERN_SIZE * BOOM_PATTERN_NUM
+#define BOOM_PATTERN_END BOOM_PATTERN_OFFSET + BOOM_PATTERN_TOTAL
+#define BOOM_FRAME(x) x * BOOM_PATTERN_SIZE + BOOM_PATTERN_OFFSET
+
 // Enemy patterns
 // Each enemy type has 6 frames: 0-1 (walk left), 3-4 (walk right), 5-6 (stunned)
 // There are 4 different enemy types in total
-#define ENEMY_PATTERN_OFFSET MINE_PATTERN_END
+#define ENEMY_PATTERN_OFFSET BOOM_PATTERN_END
 #define ENEMY_PATTERN_SIZE laySize
 #define ENEMY_FRAMES_PER_TYPE 6
 #define ENEMY_TYPE_PATTERN_TOTAL ENEMY_PATTERN_SIZE * ENEMY_FRAMES_PER_TYPE

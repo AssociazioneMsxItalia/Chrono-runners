@@ -501,7 +501,7 @@ bool isPlayerOnSpikes() {
     return FALSE;
 }
 
-bool isPlayerOnMines(struct Level *lvl) {
+struct Mine* isPlayerOnMines(struct Level *lvl) {
 
 	u8 nm = lvl->num_mines;
 	struct Mine *mines = lvl->mines;
@@ -512,10 +512,10 @@ bool isPlayerOnMines(struct Level *lvl) {
 					    g_PlayerPawn.PositionX + 11, g_PlayerPawn.PositionY + 15,
 				        mines[m].pos_x + 7, mines[m].pos_y - 1,
 				        mines[m].pos_x + 7 + 2, mines[m].pos_y)) {
-			return TRUE;
+			return &mines[m];
 		}
 	}
-	return FALSE;
+	return NULL;
 }
 
 bool isPlayerHitByEnemies(struct Level *lvl) {
@@ -713,9 +713,10 @@ void PlayerRestart()
 	else
 		g_CrystalEnabled = TRUE;
 
-	// Reset vortex state
+	// Reset vortex and boom state
 	g_VortexAnimFrame = 0;
 	VDP_HideSprite(VORTEX_SPRITE_ID);
+	VDP_HideSprite(BOOM_SPRITE_ID);
 
 	// Init player pawn
 	u8 start_x = g_ActiveLevel.start_x;
@@ -904,7 +905,15 @@ bool State_Game()
 	}
 
     // Controlla la collisione tra giocatore e spine / mine / nemici / energy fields / baratro
-    if (isPlayerOnSpikes() || isPlayerOnMines(lvl) || isPlayerHitByEnemies(lvl)
+    struct Mine *hitMine = isPlayerOnMines(lvl);
+    if (hitMine)
+        VDP_SetSpriteSM1(BOOM_SPRITE_ID,
+			hitMine->pos_x,
+			hitMine->pos_y - 16,
+			BOOM_PATTERN_OFFSET,
+			COLOR_WHITE);
+
+	if (isPlayerOnSpikes() || hitMine || isPlayerHitByEnemies(lvl)
      || isPlayerHitByEnergyFields(lvl) || isPlayerInPit()) {
         // Effetto "morte" del giocatore.
         Game_SetState(State_Death);
