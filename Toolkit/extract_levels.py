@@ -34,37 +34,45 @@ import re
 # ---------------------------------------------------------------------------
 
 ENEMY_SPRITES = {
-    28: 0,   # Enemy type 0
-    30: 0,   # Enemy type 0
-    32: 0,   # Enemy type 0 (key holder)
-    33: 0,   # Enemy type 0 (key holder)
-    34: 1,   # Enemy type 1
-    35: 1,   # Enemy type 1
-    37: 1,   # Enemy type 1 (variant)
-    38: 1,   # Enemy type 1 (key holder)
-    39: 1,   # Enemy type 1 (key holder)
-    40: 2,   # Enemy type 2
-    41: 2,   # Enemy type 2
-    42: 2,   # Enemy type 2 (variant)
-    44: 2,   # Enemy type 2 (key holder)
-    45: 2,   # Enemy type 2 (key holder)
-    46: 3,   # Enemy type 3
-    47: 3,
-    49: 3,
-    50: 3,   # Enemy type 3 (key holder)
-    51: 3,   # Enemy type 3 (key holder)
+    35: 0,   # Enemy type 0
+    36: 0,   # Enemy type 0
+    37: 0,
+    38: 0,
+    39: 0,   # Enemy type 0 (key holder)
+    40: 0,   # Enemy type 0 (key holder)
+
+    41: 1,   # Enemy type 1
+    42: 1,
+    43: 1,
+    44: 1,
+    45: 1,
+    46: 1,   # Enemy type 1 (key holder)
+
+    47: 2,   # Enemy type 2
+    48: 2,
+    49: 2,
+    50: 2,
+    51: 2,
+    52: 2,   # Enemy type 2 (key holder)
+
+    53: 3,   # Enemy type 3
+    54: 3,
+    55: 3,
+    56: 3,
+    57: 3,
+    58: 3,   # Enemy type 3 (key holder)
 }
 
 # Sprite IDs that mark the enemy as the key holder for the level
-KEY_HOLDER_SPRITES = {32, 33, 38, 39, 44, 45, 50, 51}
+KEY_HOLDER_SPRITES = {39, 40, 45, 46, 51, 52, 57, 58}
 
 KEY_SPRITES = {22, 23}
 
 CRYSTAL_SPRITES = {24, 25}
 
-MINE_SPRITES = {63}
+MINE_SPRITES = {34}
 
-PLATFORM_SPRITES = {26, 27, 35, 75}
+PLATFORM_SPRITES = {33, 71, 74, 75}
 
 # Tiles that indicate platform movement direction
 PLATFORM_VERTICAL_TILES = {80, 81, 82, 83}

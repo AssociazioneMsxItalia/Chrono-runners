@@ -1,11 +1,11 @@
 extern unsigned char g_Screen16[];
 
 struct Mine mines_map16[] = {
-	{18*8, 21*8} // pos_x pos_y
+	{18*8, 20*8} // pos_x pos_y
 };
 
 struct Enemy enemies_map16[] = {
-  {12*8, 13*8,  // pos_x pos_y
+  {12*8, 12*8,  // pos_x pos_y
 	        1,  // dir_x  TODO: set direction (-1 or 1)
 	11*8, 24*8,  // min_x max_x  TODO: adjust patrol range
 	        0,  // type (0-3)
@@ -17,7 +17,7 @@ struct Enemy enemies_map16[] = {
 			0,  // field_y
 			0,  // field_mDX
 			0}, // field_dir
-  {10*8, 7*8,  // pos_x pos_y
+  {10*8, 6*8,  // pos_x pos_y
 	        1,  // dir_x  TODO: set direction (-1 or 1)
 	8*8, 22*8,  // min_x max_x  TODO: adjust patrol range
 	        0,  // type (0-3)
@@ -34,7 +34,7 @@ struct Enemy enemies_map16[] = {
 struct Level level_map16 = {
 	2, 4,       // start_x start_y
 	28, 21,       // end_x end_y
-	28, 15,      // key_x key_y
+	28, 14,      // key_x key_y
 	1, 21,        // crystal_x crystal_y
 	0,           // num_platforms
 	NULL,       // platforms
@@ -46,3 +46,6 @@ struct Level level_map16 = {
 	g_Screen16,   // layout
 	"RONIN - GIANLUCA GAGGI",  // name
 };
+
+// Unknown sprite placements:
+//   sprite 61 at pixel (144, 144)

@@ -11,7 +11,8 @@ struct Mine mines_map30[] = {
 	{29*8, 23*8}, // pos_x pos_y
 	{29*8, 14*8}, // pos_x pos_y
 	{4*8, 17*8}, // pos_x pos_y
-	{1*8, 23*8} // pos_x pos_y
+	{1*8, 23*8}, // pos_x pos_y
+	{6*8, 17*8} // pos_x pos_y
 };
 
 struct Enemy enemies_map30[] = {
@@ -41,7 +42,7 @@ struct Enemy enemies_map30[] = {
 			0}, // field_dir
   {10*8, 15*8,  // pos_x pos_y
 	        1,  // dir_x  TODO: set direction (-1 or 1)
-	6*8, 24*8,  // min_x max_x  TODO: adjust patrol range
+	8*8, 24*8,  // min_x max_x  TODO: adjust patrol range
 	        2,  // type (0-3)
 	        0,  // mDX (initialized to 0)
 	        0,  // stunned_timer (initialized to 0)

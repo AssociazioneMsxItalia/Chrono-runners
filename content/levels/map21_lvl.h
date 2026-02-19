@@ -53,3 +53,6 @@ struct Level level_map21 = {
 	g_Screen21,   // layout
 	"FIELD DESCENT - E. DEL CUCINA",  // name
 };
+
+// Unknown sprite placements:
+//   sprite 62 at pixel (64, 136)

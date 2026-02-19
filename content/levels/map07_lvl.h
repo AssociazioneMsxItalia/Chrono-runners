@@ -13,6 +13,18 @@ struct Mine mines_map7[] = {
 };
 
 struct Enemy enemies_map7[] = {
+  {12*8, 21*8,  // pos_x pos_y
+	        1,  // dir_x  TODO: set direction (-1 or 1)
+	8*8, 22*8,  // min_x max_x  TODO: adjust patrol range
+	        0,  // type (0-3)
+	        0,  // mDX (initialized to 0)
+	        0,  // stunned_timer (initialized to 0)
+			0,  // field_state
+			0,  // field_timer
+			0,  // field_x
+			0,  // field_y
+			0,  // field_mDX
+			0}, // field_dir
   {19*8, 14*8,  // pos_x pos_y
 	        1,  // dir_x  TODO: set direction (-1 or 1)
 	12*8, 22*8,  // min_x max_x  TODO: adjust patrol range
@@ -50,10 +62,7 @@ struct Level level_map7 = {
 	mines_map7,        // mines
 	numberof(enemies_map7),  // num_enemies
 	enemies_map7,  // enemies
-	1,           // key_trigger_enemy (enemy 1 reveals key)
+	2,           // key_trigger_enemy (enemy 2 reveals key)
 	g_Screen7,   // layout
 	"THE FACTORY - LEONARDO VETTORI",  // name
 };
-
-// Unknown sprite placements:
-//   sprite 31 at pixel (96, 168)
