@@ -29,6 +29,7 @@
 #include "content/sprite/enemy2_sprt_layer.h"  // Enemy type 2
 #include "content/sprite/enemy3_sprt_layer.h"  // Enemy type 3
 #include "content/sprite/energyfield_sprt_layer.h"  // Energy field sprite
+#include "content/sprite/bullet_sprt_layer.h"       // Bullet sprite (Type 3 projectile)
 
 #include "content/tile/data_tile_gm2.h"
 
@@ -117,6 +118,9 @@ void InitializeSprite() {
 
 	// Load energy field sprite (2 frames for animation)
 	VDP_LoadSpritePattern(g_EnergyFieldSprtLayer, ENERGYFIELD_PATTERN_OFFSET, ENERGYFIELD_PATTERN_TOTAL);
+
+	// Load bullet sprite (Type 3 projectile, 1 frame)
+	VDP_LoadSpritePattern(g_BulletSprtLayer, BULLET_PATTERN_OFFSET, BULLET_PATTERN_TOTAL);
 }
 
 extern u8 g_PlatformSpritesBaseID;

@@ -256,7 +256,17 @@ void DrawEnergyFields(struct Level *lvl, bool rewind) {
 	for (u8 e=0; e < lvl->num_enemies; e++) {
 		u8 sprite_id = g_EnergyFieldSpritesBaseID + e;
 
-		if (enemies[e].field_state != 0) {
+		if (enemies[e].field_state == 2) {
+			// Type 3 projectile: use bullet sprite
+			u8 color;
+			if (rewind) {
+				color = COLOR_WHITE;
+			} else {
+				color = COLOR_CYAN;
+			}
+			VDP_SetSpriteSM1(sprite_id, enemies[e].field_x, enemies[e].field_y, BULLET_PATTERN_OFFSET, color);
+		} else if (enemies[e].field_state == 1) {
+			// Type 2 stationary field: use animated energy field sprite
 			u8 color;
 			if (rewind) {
 				color = COLOR_WHITE;
@@ -267,7 +277,6 @@ void DrawEnergyFields(struct Level *lvl, bool rewind) {
 					color = COLOR_MAGENTA;
 				}
 			}
-			// Field is active (either Type 2 stationary or Type 3 projectile)
 			VDP_SetSpriteSM1(sprite_id, enemies[e].field_x, enemies[e].field_y, pattern, color);
 		} else {
 			// No active field - hide the sprite
