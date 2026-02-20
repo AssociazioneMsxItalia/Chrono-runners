@@ -801,7 +801,18 @@ bool State_Game()
 	// Easter egg: vortex teleportation
 	if (bboxCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY, 0, 0)) {
 		FxPlay(FX_EXIT_DOOR);
-		g_SecretNextLevelIdx = NUM_LEVELS;
+
+		// Seleziona la giusta stanza segreta in base al livello in cui ci troviamo
+		if (g_CurrentLevelIdx < 7) {
+			g_SecretNextLevelIdx = NUM_LEVELS;
+		} else if (g_CurrentLevelIdx < 14) {
+			g_SecretNextLevelIdx = NUM_LEVELS + 1;
+		} else if (g_CurrentLevelIdx < 21) {
+			g_SecretNextLevelIdx = NUM_LEVELS + 2;
+		} else {
+			g_SecretNextLevelIdx = NUM_LEVELS + 3;
+		}
+
 		Game_SetState(State_ChangeLevel);
 		return TRUE;
 	}
