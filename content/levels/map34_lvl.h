@@ -3,7 +3,7 @@ extern unsigned char g_Screen34[];
 struct Platform platforms_map34[] = {
    {14*8, 7*8,  // pos_x pos_y
        0,    1,  // dir_x dir_y
-    14*8, 4*8,  // min_x min_y
+    14*8, 6*8,  // min_x min_y
     14*8, 10*8}, // max_x max_y
    {5*8, 16*8,  // pos_x pos_y
        0,    1,  // dir_x dir_y

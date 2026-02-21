@@ -17,7 +17,7 @@ struct Level level_map72 = {
 };
 
 // Unknown sprite placements:
+//   sprite 26 at pixel (96, 112)
+//   sprite 63 at pixel (144, 80)
 //   sprite 0 at pixel (48, 112)
 //   sprite 1 at pixel (48, 112)
-//   sprite 63 at pixel (208, 112)
-//   sprite 78 at pixel (192, 112)

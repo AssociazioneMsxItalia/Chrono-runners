@@ -7,7 +7,7 @@ struct Platform platforms_map20[] = {
     30*8, 22*8}, // max_x max_y
    {8*8, 14*8,  // pos_x pos_y
        0,    1,  // dir_x dir_y
-    8*8, 5*8,  // min_x min_y
+    8*8, 3*8,  // min_x min_y
     8*8, 17*8} // max_x max_y
 };
 
