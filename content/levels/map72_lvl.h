@@ -1,0 +1,23 @@
+extern unsigned char g_Screen72[];
+
+struct Level level_map72 = {
+	0, 0,       // start_x start_y
+	2, 12,       // end_x end_y
+	0, 0,      // key_x key_y
+	0, 0,        // crystal_x crystal_y
+	0,           // num_platforms
+	NULL,       // platforms
+	0,           // num_mines
+	NULL,        // mines
+	0,           // num_enemies
+	NULL,        // enemies
+	-1,        // key_trigger_enemy (-1 = visible from start)
+	g_Screen72,   // layout
+	"CUTSCENE - LEONARDO VETTORI",  // name
+};
+
+// Unknown sprite placements:
+//   sprite 0 at pixel (48, 112)
+//   sprite 1 at pixel (48, 112)
+//   sprite 63 at pixel (208, 112)
+//   sprite 78 at pixel (192, 112)
