@@ -20,6 +20,8 @@ extern bool g_PlayerJumping;
 extern bool g_KeyEnabled;
 extern bool g_PlayerHasKey;
 
+extern struct Level g_ActiveLevel;
+
 //-----------------------------------------------------------------------------
 // Character to tile conversion
 //-----------------------------------------------------------------------------
@@ -78,7 +80,7 @@ void DrawRewindGauge() {
 }
 
 //=============================================================================
-// FIELD COLLISION FUNCTIONS
+// COLLISION FUNCTIONS
 //=============================================================================
 
 extern bool bboxCollide(u8 x1, u8 y1, u8 x2, u8 y2);
@@ -175,6 +177,46 @@ struct Platform* isPlayerOnPlatform(struct Level *lvl) {
 	}
 
 	return NULL;
+}
+
+bool isPlayerAtExit() {
+	if (!g_PlayerHasKey)
+		return FALSE;
+
+	u8 door_x = g_ActiveLevel.end_x;
+	u8 door_y = g_ActiveLevel.end_y;
+
+	return bboxCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY, door_x * 8, door_y * 8);
+}
+
+bool isPlayerOnSpikes() {
+	u8 tile = VDP_Peek_GM2((g_PlayerPawn.PositionX >> 3) + 1,
+						   (g_PlayerPawn.PositionY >> 3) + 2);
+	if (tile >= 198 && tile <= 202) {
+		return TRUE;
+	}
+    return FALSE;
+}
+
+struct Mine* isPlayerOnMines(struct Level *lvl) {
+
+	u8 nm = lvl->num_mines;
+	struct Mine *mines = lvl->mines;
+
+	for (u8 m=0; m < nm; m++) {
+		// Confronta un bbox parziale (8x16) del giocatore con un bbox 2x1 della mina
+		if (rectCollide(g_PlayerPawn.PositionX +  4, g_PlayerPawn.PositionY,
+					    g_PlayerPawn.PositionX + 11, g_PlayerPawn.PositionY + 15,
+				        mines[m].pos_x + 7, mines[m].pos_y - 1,
+				        mines[m].pos_x + 7 + 2, mines[m].pos_y)) {
+			return &mines[m];
+		}
+	}
+	return NULL;
+}
+
+bool isPlayerInPit() {
+	return g_PlayerPawn.PositionY > 192;
 }
 
 //=============================================================================
@@ -638,44 +680,6 @@ void UpdateEnemies(struct Level *lvl) {
 }
 
 //=============================================================================
-// LEVEL LOADING
-//=============================================================================
-
-extern const struct Level* g_LevelOrder[];
-extern struct Level g_ActiveLevel;
-
-struct Platform g_RuntimePlatforms[MAX_PLATFORMS];
-struct Mine     g_RuntimeMines[MAX_MINES];
-struct Enemy    g_RuntimeEnemies[MAX_ENEMIES];
-
-void LoadLevel(u8 levelIndex) {
-	const struct Level* src = g_LevelOrder[levelIndex];
-
-	// Copy scalar fields (this overwrites pointers too)
-	g_ActiveLevel = *src;
-
-	// Set pointers to runtime arrays
-	g_ActiveLevel.platforms = g_RuntimePlatforms;
-	g_ActiveLevel.mines = g_RuntimeMines;
-	g_ActiveLevel.enemies = g_RuntimeEnemies;
-
-	// Deep copy platforms
-	for (u8 i = 0; i < src->num_platforms; i++) {
-		g_RuntimePlatforms[i] = src->platforms[i];
-	}
-
-	// Deep copy mines
-	for (u8 i = 0; i < src->num_mines; i++) {
-		g_RuntimeMines[i] = src->mines[i];
-	}
-
-	// Deep copy enemies
-	for (u8 i = 0; i < src->num_enemies; i++) {
-		g_RuntimeEnemies[i] = src->enemies[i];
-	}
-}
-
-//=============================================================================
 // SNAPSHOT BUFFER STORAGE
 //=============================================================================
 
@@ -815,218 +819,4 @@ u8 Snapshot_RewindStep() {
 // CUTSCENE FUNCTIONS
 //=============================================================================
 
-#include "cutscene.c"
-
-// Player character walk definition (2 layers, 3 animation frames)
-// Adjust frame values to match your player sprite frames
-static const CutSpriteAnimDef g_PlayerWalkRight = {
-    .baseId = 0,  // First sprite ID (uses 0 and 1 for 2 layers)
-    .numLayers = 2,                 // Player has 2 sprite layers
-    .numFrames = 3,                 // 3-frame walk cycle
-    .frames = { PLAYER_FRAME(1), PLAYER_FRAME(2), PLAYER_FRAME(3) },
-    .idleFrame = PLAYER_FRAME(0),   // Idle frame when walk completes
-    .animSpeed = 6,                 // Frames between animation changes
-    .layerOffset = laySize,         // Pattern offset between layers
-    .colors = { COLOR_BLACK, COLOR_DARK_YELLOW }  // Layer colors
-};
-
-static const CutSpriteAnimDef g_PlayerWalkLeft = {
-    .baseId = 0,
-    .numLayers = 2,
-    .numFrames = 3,                 // 3-frame walk cycle
-    .frames = { PLAYER_FRAME(4), PLAYER_FRAME(5), PLAYER_FRAME(6) },
-    .idleFrame = PLAYER_FRAME(0),   // Idle frame when walk completes
-    .animSpeed = 6,
-    .layerOffset = laySize,
-    .colors = { COLOR_BLACK, COLOR_DARK_YELLOW }
-};
-
-static const CutSpriteAnimDef g_DocWalkLeft = {
-    .baseId = 2,
-    .numLayers = 1,
-    .numFrames = 2,
-    .frames = { DOC_FRAME(0), DOC_FRAME(1), NULL },
-    .idleFrame = DOC_FRAME(0),   // Idle frame when walk completes
-    .animSpeed = 6,
-    .layerOffset = laySize,
-    .colors = { COLOR_BLACK, 0 }
-};
-
-static const CutSpriteAnimDef g_DocWalkRight = {
-    .baseId = 2,
-    .numLayers = 1,
-    .numFrames = 2,
-    .frames = { DOC_FRAME(2), DOC_FRAME(3), NULL },
-    .idleFrame = DOC_FRAME(0),   // Idle frame when walk completes
-    .animSpeed = 6,
-    .layerOffset = laySize,
-    .colors = { COLOR_BLACK, 0 }
-};
-
-static const CutSpriteAnimDef g_PlayerFreaked = {
-    .baseId = 0,
-    .numLayers = 2,
-    .numFrames = 2,
-    .frames = { PLAYER_FRAME(7), PLAYER_FRAME(8), NULL },
-    .idleFrame = PLAYER_FRAME(0),   // Idle frame when walk completes
-    .animSpeed = 12,
-    .layerOffset = laySize,
-    .colors = { COLOR_BLACK, COLOR_LIGHT_YELLOW }
-};
-
-#include "content/screens/screen_5.h"
-
-//-----------------------------------------------------------------------------
-// Intro cutscene
-//-----------------------------------------------------------------------------
-const CutCmd g_IntroCutscene[] = {
-	CUT_WAIT(25),
-
-	CUT_TEXT("PRESS SPACE KEY", 23),
-
-    CUT_WAIT_KEY(),
-    CUT_WAIT(10),
-
-    // Clear and show new text
-    CUT_CLEAR_TEXT(),
-
-    CUT_LOAD_LAYOUT(g_Screen5, 0, CUTSCENE_GFX_Y, CUTSCENE_SCREEN_W, 24),
-
-    CUT_TEXT_TYPE("(...ALARM BELLS RINGING...)", 20),
-    CUT_WAIT_KEY(),
-    CUT_CLEAR_TEXT(),
-
-    CUT_SPRITE_WALK(&g_DocWalkLeft, 29*8, 11*8, 20*8, 11*8, 1),
-
-    CUT_TEXT_TYPE("TIME IS RUNNING OUT...", 19),
-	CUT_TEXT_TYPE("...WHERE IS CHRONO RUNNER?", 21),
-	CUT_WAIT_KEY(),
-	CUT_CLEAR_TEXT(),
-
-	// Entra Chrono
-    CUT_SPRITE_WALK(&g_PlayerWalkRight, 0*8, 11*8, 14*8, 11*8, 2),
-
-	CUT_TEXT_TYPE("AT LAST. AGENT, THIS WILL BE", 19),
-	CUT_TEXT_TYPE("YOUR HARDEST MISSION SO FAR.", 21),
-	CUT_WAIT_KEY(),
-	CUT_CLEAR_TEXT(),
-
-	CUT_TEXT_TYPE("DOCTOR CRAZY IS BUILDING A TIME", 19),
-	CUT_TEXT_TYPE("MACHINE. HE WANTS TO BRING BACK", 21),
-	CUT_TEXT_TYPE("THE NAZI REGIME!", 23),
-	CUT_WAIT_KEY(),
-	CUT_CLEAR_TEXT(),
-
-	CUT_SPRITE_ANIM(&g_PlayerFreaked, 14*8, 11*8, 100),
-
-	CUT_TEXT_TYPE("YOU ONLY HAVE ONE HOUR TO", 19),
-	CUT_TEXT_TYPE("RECOVER ALL FOUR TIME CRYSTALS.", 21),
-	CUT_WAIT_KEY(),
-	CUT_CLEAR_TEXT(),
-
-	CUT_TEXT_TYPE("THEY GRANT YOU THE POWER TO", 19),
-	CUT_TEXT_TYPE("REWIND TIME. USE IT WISELY!", 21),
-	CUT_WAIT_KEY(),
-	CUT_CLEAR_TEXT(),
-
-	CUT_TEXT_TYPE("CRYSTALS ALSO PROTECT YOU FROM", 19),
-	CUT_TEXT_TYPE("DEATH, BUT BE CAREFUL!", 21),
-	CUT_WAIT_KEY(),
-	CUT_CLEAR_TEXT(),
-
-	CUT_TEXT_TYPE("EACH TIME YOU ARE REVIVED, YOU", 19),
-	CUT_TEXT_TYPE("WILL LOSE 5 MINUTES!", 21),
-	CUT_WAIT_KEY(),
-	CUT_CLEAR_TEXT(),
-
-	CUT_SPRITE_ANIM(&g_PlayerFreaked, 14*8, 11*8, 100),
-
-	CUT_TEXT_TYPE("BRING ALL FOUR CRYSTALS TO ME", 19),
-	CUT_TEXT_TYPE("AND WE WILL SAVE THE WORLD!", 21),
-	CUT_TEXT_TYPE("GO!", 23),
-	CUT_WAIT_KEY(),
-	CUT_CLEAR_TEXT(),
-
-    // Chrono esce
-    CUT_SPRITE_WALK(&g_PlayerWalkLeft, 14*8, 11*8, 0*8, 11*8, 2),
-	CUT_SPRITE_HIDE(0),
-	CUT_SPRITE_HIDE(1),
-
-	CUT_TEXT_TYPE("...THIS WILL BE OUR TRIUMPH...", 19),
-	CUT_TEXT_TYPE("FINALLY.", 21),
-	CUT_WAIT_KEY(),
-	CUT_CLEAR_TEXT(),
-
-	CUT_SPRITE_WALK(&g_DocWalkRight, 20*8, 11*8, 29*8, 11*8, 1),
-
-    CUT_TEXT("PRESS SPACE KEY", 23),
-
-    CUT_WAIT_KEY(),
-	CUT_WAIT(10),
-
-    CUT_END(),
-};
-
-//=============================================================================
-// MENU STATE
-//=============================================================================
-
-#include "content/screens/screen_2.h"
-
-u8 g_MenuState = 0;
-u8 g_MenuSelection = 0;
-u8 g_MenuWait = 0;
-
-// Menu option Y positions (rows 11, 13, 15, 17)
-#define MENU_NUM_OPTIONS    4
-#define MENU_HIGHLIGHT_TILE 49
-#define MENU_EMPTY_TILE     47
-
-static const u8 g_MenuRows[MENU_NUM_OPTIONS] = { 11, 13, 15, 17 };
-static const u8 g_MenuColumns[MENU_NUM_OPTIONS] = { 14, 12, 10, 8 };
-
-extern bool State_Intermission();
-
-bool State_Menu()
-{
-    if (g_MenuState == 0) {
-        VDP_HideAllSprites();
-        VDP_WriteLayout_GM2(g_Screen2, 0, 0, 32, 24);
-        g_MenuSelection = 0;
-        VDP_Poke_GM2(g_MenuColumns[0], g_MenuRows[0], MENU_HIGHLIGHT_TILE);
-        g_MenuWait = 0;
-        g_MenuState = 1;
-    }
-
-    u8 row8 = Keyboard_Read(8);
-
-    // Wait for all keys to be released before accepting new input
-    if (g_MenuWait && IS_KEY_RELEASED(row8, KEY_UP) && IS_KEY_RELEASED(row8, KEY_DOWN) && IS_KEY_RELEASED(row8, KEY_SPACE)) {
-        g_MenuWait = 0;
-    }
-
-    if (g_MenuWait) return TRUE;
-
-    u8 prev = g_MenuSelection;
-
-    if (IS_KEY_PRESSED(row8, KEY_UP) && g_MenuSelection > 0) {
-        g_MenuSelection--;
-        g_MenuWait = 1;
-    } else if (IS_KEY_PRESSED(row8, KEY_DOWN) && g_MenuSelection < MENU_NUM_OPTIONS - 1) {
-        g_MenuSelection++;
-        g_MenuWait = 1;
-    } else if (IS_KEY_PRESSED(row8, KEY_SPACE)) {
-        if (g_MenuSelection == 0) {
-			g_MenuState = 0;
-            Cutscene_Start(g_IntroCutscene, State_Intermission, NULL);
-        }
-        return TRUE;
-    }
-
-    if (prev != g_MenuSelection) {
-        VDP_Poke_GM2(g_MenuColumns[prev], g_MenuRows[prev], MENU_EMPTY_TILE);
-        VDP_Poke_GM2(g_MenuColumns[g_MenuSelection], g_MenuRows[g_MenuSelection], MENU_HIGHLIGHT_TILE);
-    }
-
-    return TRUE;
-}
+#include "cutscene_s7.c"

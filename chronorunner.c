@@ -20,6 +20,14 @@
 
 #define TILE_EMPTY 47
 
+// Sequence system: interleave levels and cutscenes
+#define SEQ_LEVEL    0
+#define SEQ_CUTSCENE 1
+#define MAX_CUTSCENES 9
+#define MAX_SEQUENCE  (NUM_LEVELS + MAX_CUTSCENES)
+
+typedef struct { u8 type; u8 idx; } SequenceEntry;
+
 // Function prototypes
 bool State_Initialize();
 bool State_Menu();
@@ -29,7 +37,8 @@ bool State_Rewind();
 bool State_ChangeLevel();
 bool State_Intermission();
 bool State_MessageScreen();
-bool State_Cutscene();  // Cutscene system state
+bool State_Cutscene();
+void AdvanceSequence();
 
 void tick();
 
@@ -136,110 +145,63 @@ u8 g_seg_guard = 1;
 
 
 //=============================================================================
-// LEVELS
-//=============================================================================
-
-// Normal levels
-#include "content/levels/map25_lvl.h"
-#include "content/levels/map04_lvl.h"
-#include "content/levels/map16_lvl.h"
-#include "content/levels/map34_lvl.h"
-#include "content/levels/map07_lvl.h"
-#include "content/levels/map06_lvl.h"
-#include "content/levels/map19_lvl.h"
-#include "content/levels/map26_lvl.h"
-#include "content/levels/map09_lvl.h"
-#include "content/levels/map08_lvl.h"
-#include "content/levels/map17_lvl.h"
-#include "content/levels/map22_lvl.h"
-#include "content/levels/map23_lvl.h"
-#include "content/levels/map31_lvl.h"
-#include "content/levels/map27_lvl.h"
-#include "content/levels/map18_lvl.h"
-#include "content/levels/map11_lvl.h"
-#include "content/levels/map33_lvl.h"
-#include "content/levels/map10_lvl.h"
-#include "content/levels/map35_lvl.h"
-#include "content/levels/map20_lvl.h"
-#include "content/levels/map28_lvl.h"
-#include "content/levels/map30_lvl.h"
-#include "content/levels/map12_lvl.h"
-#include "content/levels/map24_lvl.h"
-#include "content/levels/map29_lvl.h"
-#include "content/levels/map21_lvl.h"
-#include "content/levels/map32_lvl.h"
-#include "content/levels/map13_lvl.h"
-
-// Secret levels
-#include "content/levels/map48_lvl.h"
-#include "content/levels/map49_lvl.h"
-#include "content/levels/map47_lvl.h"
-#include "content/levels/map50_lvl.h"
-
-#define NUM_LEVELS 29
-#define SECRET_LEVELS 4
-
-// Array con l'ordine dei livelli
-const struct Level* g_LevelOrder[NUM_LEVELS + SECRET_LEVELS];
-
-// Copia locale del livello attuale
-struct Level g_ActiveLevel;
-
-u8 SegmentForLevel(u8 lvlidx) {
-	if (lvlidx < 14) {
-		return 1;
-	} else {
-		return 2;
-	}
-}
-
-void InitLevels() {
-	u8 i = 0;
-
-	g_LevelOrder[i++] = &level_map25;
-	g_LevelOrder[i++] = &level_map4;
-	g_LevelOrder[i++] = &level_map16;
-	g_LevelOrder[i++] = &level_map34;
-	g_LevelOrder[i++] = &level_map7;
-	g_LevelOrder[i++] = &level_map6;
-	g_LevelOrder[i++] = &level_map19;
-	g_LevelOrder[i++] = &level_map26;
-	g_LevelOrder[i++] = &level_map9;
-	g_LevelOrder[i++] = &level_map8;
-	g_LevelOrder[i++] = &level_map17;
-	g_LevelOrder[i++] = &level_map22;
-	g_LevelOrder[i++] = &level_map23;
-	g_LevelOrder[i++] = &level_map31;
-	g_LevelOrder[i++] = &level_map27;
-	g_LevelOrder[i++] = &level_map18;
-	g_LevelOrder[i++] = &level_map11;
-	g_LevelOrder[i++] = &level_map33;
-	g_LevelOrder[i++] = &level_map10;
-	g_LevelOrder[i++] = &level_map35;
-	g_LevelOrder[i++] = &level_map20;
-	g_LevelOrder[i++] = &level_map28;
-	g_LevelOrder[i++] = &level_map30;
-	g_LevelOrder[i++] = &level_map12;
-	g_LevelOrder[i++] = &level_map24;
-	g_LevelOrder[i++] = &level_map29;
-	g_LevelOrder[i++] = &level_map21;
-	g_LevelOrder[i++] = &level_map32;
-	g_LevelOrder[i++] = &level_map13;
-
-	// Secret levels
-	g_LevelOrder[i++] = &level_map48;
-	g_LevelOrder[i++] = &level_map49;
-	g_LevelOrder[i++] = &level_map47;
-	g_LevelOrder[i++] = &level_map50;
-}
-
-//=============================================================================
 // SEGMENT 1, BANK 1
 //=============================================================================
+
+// Menu screen
+extern const u8 g_Screen2[];
+
+// Intermission screen
+extern const u8 g_Screen15[];
+
+// World 1
+extern struct Level level_map25;
+extern struct Level level_map4;
+extern struct Level level_map16;
+extern struct Level level_map34;
+extern struct Level level_map7;
+extern struct Level level_map6;
+extern struct Level level_map19;
+
+// World 2
+extern struct Level level_map26;
+extern struct Level level_map9;
+extern struct Level level_map8;
+extern struct Level level_map17;
+extern struct Level level_map22;
+extern struct Level level_map23;
+extern struct Level level_map31;
 
 //=============================================================================
 // SEGMENT 2, BANK 1
 //=============================================================================
+
+// World 3
+extern struct Level level_map27;
+extern struct Level level_map18;
+extern struct Level level_map11;
+extern struct Level level_map33;
+extern struct Level level_map10;
+extern struct Level level_map35;
+extern struct Level level_map20;
+
+// World 4
+extern struct Level level_map28;
+extern struct Level level_map30;
+extern struct Level level_map12;
+extern struct Level level_map24;
+extern struct Level level_map29;
+extern struct Level level_map21;
+extern struct Level level_map32;
+
+// Final
+extern struct Level level_map13;
+
+// Secret
+extern struct Level level_map48;
+extern struct Level level_map49;
+extern struct Level level_map47;
+extern struct Level level_map50;
 
 //=============================================================================
 // SEGMENT 3, BANK 1
@@ -255,8 +217,6 @@ extern void AllocateSpriteIDs(struct Level *lvl);
 //=============================================================================
 // SEGMENT 4, BANK 1
 //=============================================================================
-// Intermission screen
-extern const u8 g_Screen15[];
 
 extern const u8 g_chronorunner[];
 extern const u8 g_gameover[];
@@ -276,6 +236,20 @@ extern void SoundUpdate();
 extern void S4_FxPlay(u8 id);
 
 //=============================================================================
+// SEGMENT 5, BANK 1
+//=============================================================================
+
+extern const CutCmd g_IntroCutscene[];
+extern const CutCmd g_World1MidCutscene[];
+extern const CutCmd g_World2MidCutscene[];
+extern const CutCmd g_World3MidCutscene[];
+extern const CutCmd g_World4MidCutscene[];
+extern const CutCmd g_World1EndCutscene[];
+extern const CutCmd g_World2EndCutscene[];
+extern const CutCmd g_World3EndCutscene[];
+extern const CutCmd g_World4EndCutscene[];
+
+//=============================================================================
 // SEGMENT 6, BANK 1
 //=============================================================================
 
@@ -293,6 +267,10 @@ extern void DrawRewindGauge();
 extern bool isPlayerHitByEnergyFields(struct Level *lvl);
 extern bool isPlayerHitByEnemies(struct Level *lvl);
 extern struct Platform* isPlayerOnPlatform(struct Level *lvl);
+extern bool isPlayerAtExit();
+extern bool isPlayerOnSpikes();
+extern struct Mine* isPlayerOnMines(struct Level *lvl);
+extern bool isPlayerInPit();
 
 extern void DrawKey(struct Level *lvl);
 extern void DrawCrystal(struct Level *lvl);
@@ -309,9 +287,173 @@ extern void UpdatePlayerAction();
 extern void UpdatePlatforms(struct Level *lvl);
 extern void UpdateEnemies(struct Level *lvl);
 
-extern void LoadLevel(u8 levelIndex);
+//=============================================================================
+// LEVELS
+//=============================================================================
 
-extern const CutCmd g_IntroCutscene[];
+// Per partire velocemente da un punto della sequenza per il debug
+// 0 = dall'inizio (mostra il menu), >0 = salta direttamente a quel punto
+#define START_SEQUENCE_IDX 0
+
+u8 g_CurrentLevelIdx;
+u8 g_NextLevelIdx;
+i8 g_SecretNextLevelIdx = -1;
+
+#define NUM_LEVELS 29
+#define SECRET_LEVELS 4
+
+// Array con l'ordine dei livelli
+const struct Level* g_LevelOrder[NUM_LEVELS + SECRET_LEVELS];
+
+// Sequence system: unified level/cutscene order
+SequenceEntry g_Sequence[MAX_SEQUENCE];
+u8 g_SequenceLength;
+u8 g_SequenceIdx;
+const CutCmd* g_CutsceneScripts[MAX_CUTSCENES];
+
+// Copia locale del livello attuale
+struct Level g_ActiveLevel;
+
+u8 SegmentForLevel(u8 lvlidx) {
+	if (lvlidx < 14) {
+		return 1;
+	} else {
+		return 2;
+	}
+}
+
+// Helper macros for building the sequence
+#define ADD_LEVEL(lvl) do { \
+	g_LevelOrder[l] = &lvl; \
+	g_Sequence[s].type = SEQ_LEVEL; g_Sequence[s].idx = l; \
+	s++; l++; \
+} while(0)
+
+#define ADD_CUTSCENE(cs) do { \
+	g_CutsceneScripts[c] = cs; \
+	g_Sequence[s].type = SEQ_CUTSCENE; g_Sequence[s].idx = c; \
+	s++; c++; \
+} while(0)
+
+void InitLevels() {
+	u8 s = 0, l = 0, c = 0;
+
+	// Intro cutscene
+	ADD_CUTSCENE(g_IntroCutscene);
+
+	// Levels
+	// World 1
+	ADD_LEVEL(level_map25);
+	ADD_LEVEL(level_map4);
+	ADD_LEVEL(level_map16);
+	ADD_LEVEL(level_map34);
+	ADD_CUTSCENE(g_World1MidCutscene);
+	ADD_LEVEL(level_map7);
+	ADD_LEVEL(level_map6);
+	ADD_LEVEL(level_map19);
+	ADD_CUTSCENE(g_World1EndCutscene);
+
+	// World 2
+	ADD_LEVEL(level_map26);
+	ADD_LEVEL(level_map9);
+	ADD_LEVEL(level_map8);
+	ADD_LEVEL(level_map17);
+	ADD_CUTSCENE(g_World2MidCutscene);
+	ADD_LEVEL(level_map22);
+	ADD_LEVEL(level_map23);
+	ADD_LEVEL(level_map31);
+	ADD_CUTSCENE(g_World2EndCutscene);
+
+	// World 3
+	ADD_LEVEL(level_map27);
+	ADD_LEVEL(level_map18);
+	ADD_LEVEL(level_map11);
+	ADD_LEVEL(level_map33);
+	ADD_CUTSCENE(g_World3MidCutscene);
+	ADD_LEVEL(level_map10);
+	ADD_LEVEL(level_map35);
+	ADD_LEVEL(level_map20);
+	ADD_CUTSCENE(g_World3EndCutscene);
+
+	// World 4
+	ADD_LEVEL(level_map28);
+	ADD_LEVEL(level_map30);
+	ADD_LEVEL(level_map12);
+	ADD_LEVEL(level_map24);
+	ADD_CUTSCENE(g_World4MidCutscene);
+	ADD_LEVEL(level_map29);
+	ADD_LEVEL(level_map21);
+	ADD_LEVEL(level_map32);
+	ADD_CUTSCENE(g_World4EndCutscene);
+
+	// Final
+	ADD_LEVEL(level_map13);
+
+	g_SequenceLength = s;
+
+	// Secret levels (not part of the sequence, accessed via vortex detour)
+	g_LevelOrder[l++] = &level_map48;
+	g_LevelOrder[l++] = &level_map49;
+	g_LevelOrder[l++] = &level_map47;
+	g_LevelOrder[l++] = &level_map50;
+}
+
+void SetMessageScreen(const c8* text, i8 songId, u16 duration);
+
+void AdvanceSequence()
+{
+	if (g_SequenceIdx >= g_SequenceLength) {
+		SetMessageScreen("YOU WON!", -1, 500);
+		Game_SetState(State_MessageScreen);
+		return;
+	}
+
+	SequenceEntry* entry = &g_Sequence[g_SequenceIdx];
+
+	if (entry->type == SEQ_CUTSCENE) {
+		g_SequenceIdx++;
+		Cutscene_Start(g_CutsceneScripts[entry->idx]);
+	} else {
+		// Level: don't advance g_SequenceIdx yet, State_ChangeLevel will
+		g_NextLevelIdx = entry->idx;
+		Game_SetState(State_Intermission);
+	}
+}
+
+//=============================================================================
+// LEVEL LOADING
+//=============================================================================
+
+struct Platform g_RuntimePlatforms[MAX_PLATFORMS];
+struct Mine     g_RuntimeMines[MAX_MINES];
+struct Enemy    g_RuntimeEnemies[MAX_ENEMIES];
+
+void LoadLevel(u8 levelIndex) {
+	const struct Level* src = g_LevelOrder[levelIndex];
+
+	// Copy scalar fields (this overwrites pointers too)
+	g_ActiveLevel = *src;
+
+	// Set pointers to runtime arrays
+	g_ActiveLevel.platforms = g_RuntimePlatforms;
+	g_ActiveLevel.mines = g_RuntimeMines;
+	g_ActiveLevel.enemies = g_RuntimeEnemies;
+
+	// Deep copy platforms
+	for (u8 i = 0; i < src->num_platforms; i++) {
+		g_RuntimePlatforms[i] = src->platforms[i];
+	}
+
+	// Deep copy mines
+	for (u8 i = 0; i < src->num_mines; i++) {
+		g_RuntimeMines[i] = src->mines[i];
+	}
+
+	// Deep copy enemies
+	for (u8 i = 0; i < src->num_enemies; i++) {
+		g_RuntimeEnemies[i] = src->enemies[i];
+	}
+}
 
 //=============================================================================
 // TRAMPOLINE FUNCTIONS FOR OTHER SEGMENTS
@@ -387,17 +529,6 @@ u8 g_EnemyAnimCounter;
 u8 g_EnemyKeyHintCounter;
 u8 g_EnergyFieldSpritesBaseID;
 u8 g_EnergyFieldAnimCounter;
-
-//=============================================================================
-// LEVELS
-//=============================================================================
-
-// Per partire velocemnete da un livello per il debug
-#define START_LEVEL 0
-
-u8 g_CurrentLevelIdx;
-u8 g_NextLevelIdx = START_LEVEL;
-i8 g_SecretNextLevelIdx = -1;
 
 //=============================================================================
 // PHYSICS
@@ -489,46 +620,6 @@ void TakeCrystal() {
 		g_PlayerRewindEnergy = SNAPSHOT_BUFFER_SIZE;
 }
 
-bool isPlayerAtExit() {
-	if (!g_PlayerHasKey)
-		return FALSE;
-
-	u8 door_x = g_ActiveLevel.end_x;
-	u8 door_y = g_ActiveLevel.end_y;
-
-	return bboxCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY, door_x * 8, door_y * 8);
-}
-
-bool isPlayerOnSpikes() {
-	u8 tile = VDP_Peek_GM2((g_PlayerPawn.PositionX >> 3) + 1,
-							(g_PlayerPawn.PositionY >> 3) + 2);
-	if (tile >= 198 && tile <= 202) {
-		return TRUE;
-	}
-    return FALSE;
-}
-
-struct Mine* isPlayerOnMines(struct Level *lvl) {
-
-	u8 nm = lvl->num_mines;
-	struct Mine *mines = lvl->mines;
-
-	for (u8 m=0; m < nm; m++) {
-		// Confronta un bbox parziale (8x16) del giocatore con un bbox 2x1 della mina
-		if (rectCollide(g_PlayerPawn.PositionX +  4, g_PlayerPawn.PositionY,
-					    g_PlayerPawn.PositionX + 11, g_PlayerPawn.PositionY + 15,
-				        mines[m].pos_x + 7, mines[m].pos_y - 1,
-				        mines[m].pos_x + 7 + 2, mines[m].pos_y)) {
-			return &mines[m];
-		}
-	}
-	return NULL;
-}
-
-bool isPlayerInPit() {
-	return g_PlayerPawn.PositionY > 192;
-}
-
 //=============================================================================
 // FUNCTION
 //=============================================================================
@@ -543,12 +634,6 @@ i8 GetDPos(i8* m) {
 		(*m) += 8;
 
 	return rv;
-}
-
-void SetMessageScreen(const c8* text, i8 songId, u16 duration) {
-	g_MessageScreenText = text;
-	g_MessageScreenSongId = songId;
-	g_MessageScreenDuration = duration;
 }
 
 //=============================================================================
@@ -582,13 +667,13 @@ WITH_SEGMENT(4) {
 
 	// Reset livelli
 	g_CurrentLevelIdx = 0;
-	g_NextLevelIdx = START_LEVEL;
+	g_SequenceIdx = START_SEQUENCE_IDX;
 
 	// Initialize cutscene system
 	Cutscene_Initialize();
 
-	// Start at main menu
-	if (g_NextLevelIdx == 0) {
+	// Start at main menu or skip directly to sequence point
+	if (g_SequenceIdx == 0) {
 WITH_SEGMENT(4) {
 		// Start menu music
 		SoundSetSong(2);
@@ -597,7 +682,7 @@ WITH_SEGMENT(4) {
 }
 		Game_SetState(State_Menu);
 	} else {
-		Game_SetState(State_Intermission);
+		AdvanceSequence();
 	}
 
 	return TRUE;
@@ -605,8 +690,12 @@ WITH_SEGMENT(4) {
 
 void PlayerRestart()
 {
+	u8 seg = SegmentForLevel(g_CurrentLevelIdx);
+
 	// Reset level state (mines, enemies, platforms) from source data
+WITH_SEGMENT(seg) {
 	LoadLevel(g_CurrentLevelIdx);
+}
 
 	// Reset key state
 	g_KeyPosX = g_ActiveLevel.key_x * 8;
@@ -650,7 +739,6 @@ void PlayerRestart()
 	Snapshot_Initialize();
 
 	// Redraw level layout (resets door appearance if key was taken)
-	u8 seg = SegmentForLevel(g_CurrentLevelIdx);
 WITH_SEGMENT(seg) {
 	VDP_WriteLayout_GM2(g_ActiveLevel.layout, 0, 2, 32, 24);
 }
@@ -670,11 +758,11 @@ WITH_SEGMENT(4) {
 			SoundLoop(TRUE);
 			SoundPlay();
 		}
-		VDP_WriteLayout_GM2(g_Screen15, 0, 0, 32, 24);
 }
 
-		// Prende il nome del prossimo livello
-		const c8 *level_name = g_LevelOrder[g_NextLevelIdx]->name;
+WITH_SEGMENT(1) {
+		VDP_WriteLayout_GM2(g_Screen15, 0, 0, 32, 24);
+}
 
 		// Progresso
 		u16 prog = (g_NextLevelIdx * 30) / NUM_LEVELS;
@@ -698,6 +786,14 @@ WITH_SEGMENT(4) {
 		PrintGFXText("'", 25, 18);
 		PrintGFXNumber(g_RemainingSeconds, 26, 18);
 		PrintGFXText("\"", 28, 18);
+
+		u8 next_lvl_seg = SegmentForLevel(g_NextLevelIdx);
+
+		c8 level_name[32];
+WITH_SEGMENT(next_lvl_seg) {
+		// Prende il nome del prossimo livello
+		String_Copy(level_name, g_LevelOrder[g_NextLevelIdx]->name);
+}
 
 		// Nome del livello (centrato)
 		PrintGFXText(level_name, 16 - (String_Length(level_name) / 2), 20);
@@ -723,15 +819,14 @@ bool State_ChangeLevel()
 	VDP_HideAllSprites();
 
 	if (g_SecretNextLevelIdx != -1) {
-		// Passa al livello segreto. Lascia il livello successivo
-		// impostato, così ci salta automaticamente al termine del
-		// livello segreto
+		// Passa al livello segreto. Non avanza g_SequenceIdx perché è
+		// una deviazione: al termine si torna alla sequenza normale.
 		g_CurrentLevelIdx = g_SecretNextLevelIdx;
 		g_SecretNextLevelIdx = -1;
 	} else {
-		// Passa al livello successivo
+		// Passa al livello successivo e avanza nella sequenza
 		g_CurrentLevelIdx = g_NextLevelIdx;
-		g_NextLevelIdx += 1;
+		g_SequenceIdx++;
 	}
 
 	// Cancella lo schermo
@@ -850,14 +945,7 @@ bool State_Game()
 	// Controlla se il giocatore ha raggiunto l'uscita
 	if (isPlayerAtExit() || Keyboard_IsKeyPressed(KEY_F1)) {
 		FxPlay(FX_EXIT_DOOR);
-
-		// Se era l'ultimo livello, mostra uno schermo di vittoria e reinizializza
-		if (g_CurrentLevelIdx == NUM_LEVELS - 1) {
-			SetMessageScreen("YOU WON!", -1, 500);
-			Game_SetState(State_MessageScreen);
-		} else {
-			Game_SetState(State_Intermission);
-		}
+		AdvanceSequence();
 		return TRUE;
 	}
 
@@ -936,6 +1024,12 @@ bool State_Death()
 		}
 	}
 	return TRUE;
+}
+
+void SetMessageScreen(const c8* text, i8 songId, u16 duration) {
+	g_MessageScreenText = text;
+	g_MessageScreenSongId = songId;
+	g_MessageScreenDuration = duration;
 }
 
 bool State_MessageScreen()
@@ -1019,6 +1113,75 @@ bool State_Rewind()
 }
 
 //=============================================================================
+// MENU STATE
+//=============================================================================
+
+u8 g_MenuState = 0;
+u8 g_MenuSelection = 0;
+u8 g_MenuWait = 0;
+
+// Menu option Y positions (rows 11, 13, 15, 17)
+#define MENU_NUM_OPTIONS    4
+#define MENU_HIGHLIGHT_TILE 49
+#define MENU_EMPTY_TILE     47
+
+static const u8 g_MenuRows[MENU_NUM_OPTIONS] = { 11, 13, 15, 17 };
+static const u8 g_MenuColumns[MENU_NUM_OPTIONS] = { 14, 12, 10, 8 };
+
+bool State_Menu()
+{
+    if (g_MenuState == 0) {
+        VDP_HideAllSprites();
+WITH_SEGMENT(1) {
+        VDP_WriteLayout_GM2(g_Screen2, 0, 0, 32, 24);
+}
+        g_MenuSelection = 0;
+        VDP_Poke_GM2(g_MenuColumns[0], g_MenuRows[0], MENU_HIGHLIGHT_TILE);
+        g_MenuWait = 0;
+        g_MenuState = 1;
+    }
+
+    u8 row8 = Keyboard_Read(8);
+
+    // Wait for all keys to be released before accepting new input
+    if (g_MenuWait && IS_KEY_RELEASED(row8, KEY_UP) && IS_KEY_RELEASED(row8, KEY_DOWN) && IS_KEY_RELEASED(row8, KEY_SPACE)) {
+        g_MenuWait = 0;
+    }
+
+    if (g_MenuWait) return TRUE;
+
+    u8 prev = g_MenuSelection;
+
+    if (IS_KEY_PRESSED(row8, KEY_UP) && g_MenuSelection > 0) {
+        g_MenuSelection--;
+        g_MenuWait = 1;
+    } else if (IS_KEY_PRESSED(row8, KEY_DOWN) && g_MenuSelection < MENU_NUM_OPTIONS - 1) {
+        g_MenuSelection++;
+        g_MenuWait = 1;
+    } else if (IS_KEY_PRESSED(row8, KEY_SPACE)) {
+        if (g_MenuSelection == 0) {
+			g_MenuState = 0;
+            g_SequenceIdx = 0;
+            AdvanceSequence();
+        }
+        return TRUE;
+    }
+
+    if (prev != g_MenuSelection) {
+        VDP_Poke_GM2(g_MenuColumns[prev], g_MenuRows[prev], MENU_EMPTY_TILE);
+        VDP_Poke_GM2(g_MenuColumns[g_MenuSelection], g_MenuRows[g_MenuSelection], MENU_HIGHLIGHT_TILE);
+    }
+
+    return TRUE;
+}
+
+//=============================================================================
+// CUTSCENE FUNCTIONS
+//=============================================================================
+
+#include "cutscene_s0.c"
+
+//=============================================================================
 // MAIN LOOP
 //=============================================================================
 
@@ -1066,7 +1229,7 @@ WITH_SEGMENT(4) {
 }
 
 WITH_SEGMENT(6) {
-	if (g_NextLevelIdx == 0) {
+	if (START_SEQUENCE_IDX == 0) {
 		ShowAmi();
 		ShowSplashScreen();
 	}

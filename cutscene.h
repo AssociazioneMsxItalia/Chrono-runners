@@ -6,7 +6,7 @@
 // Usage:
 //   1. Define a cutscene as an array of CutCmd using helper macros
 //   2. Call Cutscene_Start() to begin playback
-//   3. The system transitions to nextState when script ends
+//   3. When the script ends (or is skipped), AdvanceSequence() is called
 //
 // Example:
 //   static const CutCmd g_MyCutscene[] = {
@@ -14,7 +14,7 @@
 //       CUT_WAIT_KEY(),
 //       CUT_END()
 //   };
-//   Cutscene_Start(g_MyCutscene, State_Game, NULL);
+//   Cutscene_Start(g_MyCutscene);
 //=============================================================================
 #pragma once
 
@@ -25,14 +25,12 @@
 // SCREEN LAYOUT CONSTANTS
 //=============================================================================
 
-// Screen layout: Rows 0-1 black, Rows 2-18 graphics, Rows 19-23 text
-
 #define CUTSCENE_TOP_Y          0       // Top black area start
 #define CUTSCENE_TOP_ROWS       2       // Rows for top black area
 #define CUTSCENE_GFX_Y          0       // Graphics area start
 #define CUTSCENE_GFX_ROWS       18      // Rows for graphics
-#define CUTSCENE_TEXT_Y         19      // Text area start
-#define CUTSCENE_TEXT_ROWS      5       // Rows for text
+#define CUTSCENE_TEXT_Y         20      // Text area start
+#define CUTSCENE_TEXT_ROWS      4       // Rows for text
 #define CUTSCENE_SCREEN_W       32      // Screen width in tiles
 #define CUTSCENE_SCREEN_H       24      // Screen height in tiles
 #define CUTSCENE_TILE_EMPTY     47      // Empty/black tile
@@ -166,24 +164,12 @@ typedef struct CutCmd {
         struct {
             u8 id;            // Music/SFX ID
         } sound;
-
-        // CUTCMD_CALLBACK
-        struct {
-            callback func;    // Function pointer (void (*)(void))
-        } cb;
     } p;  // Short name 'p' for less verbose access (cmd->p.text.x)
 } CutCmd;
 
 //=============================================================================
 // CUTSCENE CONTEXT
 //=============================================================================
-
-// Cutscene event types for callback
-#define CUTSCENE_EVENT_END      0
-#define CUTSCENE_EVENT_SKIP     1
-
-// Callback type for cutscene events
-typedef void (*CutsceneEventCB)(u8 event);
 
 // Cutscene playback context
 typedef struct CutsceneContext {
@@ -195,13 +181,13 @@ typedef struct CutsceneContext {
     // Sprite movement interpolation state
     u8  moveStartX;
     u8  moveStartY;
-    i8  moveDeltaX;             // Delta X (can be negative)
-    i8  moveDeltaY;             // Delta Y (can be negative)
+    i16 moveDeltaX;             // Delta X (can be negative)
+    i16 moveDeltaY;             // Delta Y (can be negative)
     u8  moveTotalFrames;
     u8  moveSpriteId;
 
     // Current text command (for typewriter)
-    const c8* currentText;
+    c8 currentText[32];
     u8  textX;
     u8  textY;
 
@@ -218,11 +204,6 @@ typedef struct CutsceneContext {
     u8  canSkip     : 1;        // Allow skip with ESC key
     u8  reserved    : 3;
 
-    // Callback for cutscene events
-    CutsceneEventCB eventCB;
-
-    // Next state to transition to when cutscene ends
-    GameState nextState;
 } CutsceneContext;
 
 
@@ -235,9 +216,8 @@ void Cutscene_Initialize(void);
 
 // Start a cutscene with the given script
 // script: Pointer to command array (must end with CUTCMD_END)
-// nextState: State to transition to when cutscene ends
-// eventCB: Optional callback for cutscene events (can be NULL)
-void Cutscene_Start(const CutCmd* script, GameState nextState, CutsceneEventCB eventCB);
+// When the cutscene ends or is skipped, AdvanceSequence() is called automatically
+void Cutscene_Start(const CutCmd* script);
 
 // Skip current cutscene (if skippable)
 void Cutscene_Skip(void);
@@ -320,7 +300,3 @@ bool State_Cutscene(void);
 // Play sound effect
 #define CUT_SFX(sid) \
     { CUTCMD_PLAY_SFX, { .sound = { (sid) } } }
-
-// Call custom callback function
-#define CUT_CALL(fn) \
-    { CUTCMD_CALLBACK, { .cb = { (fn) } } }

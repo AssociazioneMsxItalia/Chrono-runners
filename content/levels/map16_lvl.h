@@ -1,4 +1,6 @@
-extern unsigned char g_Screen16[];
+#pragma once
+
+#include "content/screens/screen_16.h"
 
 struct Mine mines_map16[] = {
 	{18*8, 20*8} // pos_x pos_y

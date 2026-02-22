@@ -380,7 +380,9 @@ def generate_level_h(map_num, entities):
     unknown = entities['unknown']
 
     lines = []
-    lines.append(f'extern unsigned char g_Screen{map_num}[];')
+    lines.append('#pragma once')
+    lines.append('')
+    lines.append(f'#include "content/screens/screen_{map_num}.h"')
     lines.append('')
 
     suffix = f'map{map_num}'

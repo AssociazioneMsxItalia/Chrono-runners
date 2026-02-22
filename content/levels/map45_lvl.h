@@ -1,4 +1,6 @@
-extern unsigned char g_Screen45[];
+#pragma once
+
+#include "content/screens/screen_45.h"
 
 struct Level level_map45 = {
 	2, 17,       // start_x start_y

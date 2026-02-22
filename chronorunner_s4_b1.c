@@ -3,9 +3,6 @@
 #include "ayfx/ayfx_player.h"
 #include "pt3/pt3_notetable2.h"
 
-// Intermission screen (XXX: why in S4?)
-#include "content/screens/screen_15.h"
-
 #include "content/pt3/chronorunner.h"
 #include "content/pt3/gameover.h"
 #include "content/pt3/menu.h"

@@ -105,6 +105,8 @@ def write_screen_header(map_num: int, data: list[str], output_dir: str,
         data = data[64:]
 
     with open(output_path, 'w') as f:
+        f.write(f'#pragma once\n\n')
+
         f.write(f"const unsigned char {var_name}[] = {{\n")
 
         bytes_per_line = 32

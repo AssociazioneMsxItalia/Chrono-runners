@@ -1,4 +1,6 @@
-extern unsigned char g_Screen17[];
+#pragma once
+
+#include "content/screens/screen_17.h"
 
 struct Platform platforms_map17[] = {
    {8*8, 18*8,  // pos_x pos_y

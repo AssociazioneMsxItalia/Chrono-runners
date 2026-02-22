@@ -1,4 +1,6 @@
-extern unsigned char g_Screen29[];
+#pragma once
+
+#include "content/screens/screen_29.h"
 
 struct Enemy enemies_map29[] = {
   {11*8, 15*8,  // pos_x pos_y
