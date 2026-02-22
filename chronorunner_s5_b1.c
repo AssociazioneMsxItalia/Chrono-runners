@@ -96,7 +96,7 @@ static const CutSpriteAnimDef g_VortexAnim = {
 // World end cutscenes
 //-----------------------------------------------------------------------------
 const CutCmd g_World1EndCutscene[] = {
-    CUT_LOAD_LAYOUT(g_Screen42, 0, 0, 32, 24),
+    CUT_LOAD_LAYOUT(g_Screen42, 0, 2, 32, 22),
     CUT_WAIT(10),
 	CUT_SPRITE_WALK(&g_PlayerWalkRight, 0, 17*8, 15*8, 17*8, 2),
     CUT_SPRITE_ANIM(&g_VortexAnim, 15*8, 10*8, 60),
@@ -115,7 +115,7 @@ const CutCmd g_World1EndCutscene[] = {
 };
 
 const CutCmd g_World2EndCutscene[] = {
-    CUT_LOAD_LAYOUT(g_Screen43, 0, 0, 32, 24),
+    CUT_LOAD_LAYOUT(g_Screen43, 0, 2, 32, 22),
     CUT_WAIT(10),
 	CUT_SPRITE_WALK(&g_PlayerWalkRight, 0, 17*8, 15*8, 17*8, 2),
     CUT_SPRITE_ANIM(&g_VortexAnim, 15*8, 10*8, 60),
@@ -134,7 +134,7 @@ const CutCmd g_World2EndCutscene[] = {
 };
 
 const CutCmd g_World3EndCutscene[] = {
-    CUT_LOAD_LAYOUT(g_Screen44, 0, 0, 32, 24),
+    CUT_LOAD_LAYOUT(g_Screen44, 0, 2, 32, 22),
     CUT_WAIT(10),
 	CUT_SPRITE_WALK(&g_PlayerWalkRight, 0, 17*8, 15*8, 17*8, 2),
     CUT_SPRITE_ANIM(&g_VortexAnim, 15*8, 10*8, 60),
@@ -153,7 +153,7 @@ const CutCmd g_World3EndCutscene[] = {
 };
 
 const CutCmd g_World4EndCutscene[] = {
-    CUT_LOAD_LAYOUT(g_Screen45, 0, 0, 32, 24),
+    CUT_LOAD_LAYOUT(g_Screen45, 0, 2, 32, 22),
     CUT_WAIT(10),
 	CUT_SPRITE_WALK(&g_PlayerWalkRight, 0, 17*8, 15*8, 17*8, 2),
     CUT_SPRITE_ANIM(&g_VortexAnim, 15*8, 10*8, 60),
@@ -176,7 +176,7 @@ const CutCmd g_World4EndCutscene[] = {
 //-----------------------------------------------------------------------------
 
 const CutCmd g_World1MidCutscene[] = {
-    CUT_LOAD_LAYOUT(g_Screen78, 0, 0, 32, 24),
+    CUT_LOAD_LAYOUT(g_Screen78, 0, 2, 32, 22),
     CUT_CLEAR_TEXT(),
     CUT_WAIT(10),
 	CUT_SPRITE_WALK(&g_PlayerWalkRight, 0, 15*8, 15*8, 15*8, 2),
@@ -193,7 +193,7 @@ const CutCmd g_World1MidCutscene[] = {
 };
 
 const CutCmd g_World2MidCutscene[] = {
-    CUT_LOAD_LAYOUT(g_Screen78, 0, 0, 32, 24),
+    CUT_LOAD_LAYOUT(g_Screen78, 0, 2, 32, 22),
     CUT_CLEAR_TEXT(),
     CUT_WAIT(10),
 	CUT_SPRITE_WALK(&g_PlayerWalkRight, 0, 15*8, 15*8, 15*8, 2),
@@ -210,7 +210,7 @@ const CutCmd g_World2MidCutscene[] = {
 };
 
 const CutCmd g_World3MidCutscene[] = {
-    CUT_LOAD_LAYOUT(g_Screen78, 0, 0, 32, 24),
+    CUT_LOAD_LAYOUT(g_Screen78, 0, 2, 32, 22),
     CUT_CLEAR_TEXT(),
     CUT_WAIT(10),
 	CUT_SPRITE_WALK(&g_PlayerWalkRight, 0, 17*8, 15*8, 17*8, 2),
@@ -227,7 +227,7 @@ const CutCmd g_World3MidCutscene[] = {
 };
 
 const CutCmd g_World4MidCutscene[] = {
-    CUT_LOAD_LAYOUT(g_Screen78, 0, 0, 32, 24),
+    CUT_LOAD_LAYOUT(g_Screen78, 0, 2, 32, 22),
     CUT_CLEAR_TEXT(),
     CUT_WAIT(10),
 	CUT_SPRITE_WALK(&g_PlayerWalkRight, 0, 17*8, 15*8, 17*8, 2),
@@ -258,7 +258,7 @@ const CutCmd g_IntroCutscene[] = {
     // Clear and show new text
     CUT_CLEAR_TEXT(),
 
-    CUT_LOAD_LAYOUT(g_Screen5, 0, CUTSCENE_GFX_Y, CUTSCENE_SCREEN_W, 24),
+    CUT_LOAD_LAYOUT(g_Screen5, 0, CUTSCENE_GFX_Y, CUTSCENE_SCREEN_W, CUTSCENE_GFX_ROWS),
 
     CUT_TEXT_TYPE("(...ALARM BELLS RINGING...)", 20),
     CUT_WAIT_KEY(),

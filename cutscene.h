@@ -27,8 +27,8 @@
 
 #define CUTSCENE_TOP_Y          0       // Top black area start
 #define CUTSCENE_TOP_ROWS       2       // Rows for top black area
-#define CUTSCENE_GFX_Y          0       // Graphics area start
-#define CUTSCENE_GFX_ROWS       18      // Rows for graphics
+#define CUTSCENE_GFX_Y          2       // Graphics area start
+#define CUTSCENE_GFX_ROWS       22      // Rows for graphics
 #define CUTSCENE_TEXT_Y         20      // Text area start
 #define CUTSCENE_TEXT_ROWS      4       // Rows for text
 #define CUTSCENE_SCREEN_W       32      // Screen width in tiles
