@@ -193,7 +193,7 @@ const CutCmd g_World1MidCutscene[] = {
 };
 
 const CutCmd g_World2MidCutscene[] = {
-    CUT_LOAD_LAYOUT(g_Screen78, 0, 2, 32, 22),
+    CUT_LOAD_LAYOUT(g_Screen77, 0, 2, 32, 22),
     CUT_CLEAR_TEXT(),
     CUT_WAIT(10),
 	CUT_SPRITE_WALK(&g_PlayerWalkRight, 0, 15*8, 15*8, 15*8, 2),
@@ -210,7 +210,7 @@ const CutCmd g_World2MidCutscene[] = {
 };
 
 const CutCmd g_World3MidCutscene[] = {
-    CUT_LOAD_LAYOUT(g_Screen78, 0, 2, 32, 22),
+    CUT_LOAD_LAYOUT(g_Screen63, 0, 2, 32, 22),
     CUT_CLEAR_TEXT(),
     CUT_WAIT(10),
 	CUT_SPRITE_WALK(&g_PlayerWalkRight, 0, 17*8, 15*8, 17*8, 2),
@@ -227,7 +227,7 @@ const CutCmd g_World3MidCutscene[] = {
 };
 
 const CutCmd g_World4MidCutscene[] = {
-    CUT_LOAD_LAYOUT(g_Screen78, 0, 2, 32, 22),
+    CUT_LOAD_LAYOUT(g_Screen76, 0, 2, 32, 22),
     CUT_CLEAR_TEXT(),
     CUT_WAIT(10),
 	CUT_SPRITE_WALK(&g_PlayerWalkRight, 0, 17*8, 15*8, 17*8, 2),
