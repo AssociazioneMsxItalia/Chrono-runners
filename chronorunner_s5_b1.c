@@ -1,5 +1,7 @@
-#include "sprite_defs.h"
 #include "cutscene.h"
+
+#include "sprite_defs.h"
+#include "fx_sounds.h"
 
 //=============================================================================
 // CUTSCENES
@@ -93,6 +95,20 @@ static const CutSpriteAnimDef g_VortexAnim = {
 };
 
 //-----------------------------------------------------------------------------
+// Force field animation definitions (for electrician robots in World 4)
+//-----------------------------------------------------------------------------
+static const CutSpriteAnimDef g_ForceFieldAnim = {
+    5,                                                  // baseId (VORTEX_SPRITE_ID)
+    1,                                                  // numLayers
+    2,                                                  // numFrames
+    { ENERGYFIELD_FRAME(0), ENERGYFIELD_FRAME(1), NULL }, // frames
+    ENERGYFIELD_FRAME(0),                               // idleFrame
+    8,                                                  // animSpeed
+    laySize,                                            // layerOffset
+    { COLOR_MAGENTA, 0 }                                   // colors
+};
+
+//-----------------------------------------------------------------------------
 // World end cutscenes
 //-----------------------------------------------------------------------------
 const CutCmd g_World1EndCutscene[] = {
@@ -179,6 +195,8 @@ const CutCmd g_World1MidCutscene[] = {
     CUT_LOAD_LAYOUT(g_Screen78, 0, 2, 32, 22),
     CUT_CLEAR_TEXT(),
     CUT_WAIT(10),
+    CUT_SPRITE_SHOW(2, 27*8, 4*8, CRYSTAL_FRAME(0), COLOR_MEDIUM_RED),
+    CUT_SPRITE_SHOW(3, 5*8 - 4, 9*8 - 4, CRYSTAL_FRAME(0), COLOR_MEDIUM_RED),
 	CUT_SPRITE_WALK(&g_PlayerWalkRight, 0, 15*8, 15*8, 15*8, 2),
     CUT_TEXT_TYPE("YOU LOOK AT THE FORMULA ON THE", 21),
 	CUT_TEXT_TYPE("BLACKBOARD, THERE ARE NO DOUBTS", 23),
@@ -202,7 +220,7 @@ const CutCmd g_World2MidCutscene[] = {
     CUT_WAIT_KEY(),
     CUT_CLEAR_TEXT(),
 	CUT_TEXT_TYPE("FOUR SLOTS... YOU ARE SURE YOU", 21),
-	CUT_TEXT_TYPE("ALREADY SAW ONE OF THEM.", 23),
+	CUT_TEXT_TYPE("ALREADY SAW ONE LIKE THEM...", 23),
     CUT_WAIT_KEY(),
     CUT_CLEAR_TEXT(),
     CUT_SPRITE_WALK(&g_PlayerWalkRight, 15*8, 15*8, 31*8, 15*8, 2),
@@ -213,7 +231,7 @@ const CutCmd g_World3MidCutscene[] = {
     CUT_LOAD_LAYOUT(g_Screen63, 0, 2, 32, 22),
     CUT_CLEAR_TEXT(),
     CUT_WAIT(10),
-	CUT_SPRITE_WALK(&g_PlayerWalkRight, 0, 17*8, 15*8, 17*8, 2),
+	CUT_SPRITE_WALK(&g_PlayerWalkRight, 0, 15*8, 15*8, 15*8, 2),
     CUT_TEXT_TYPE("IT SAYS \"BEAUTIFUL MEMORIES\"", 21),
 	CUT_TEXT_TYPE("A PAINTING BY LEO VIKTOR", 23),
     CUT_WAIT_KEY(),
@@ -230,15 +248,33 @@ const CutCmd g_World4MidCutscene[] = {
     CUT_LOAD_LAYOUT(g_Screen76, 0, 2, 32, 22),
     CUT_CLEAR_TEXT(),
     CUT_WAIT(10),
-	CUT_SPRITE_WALK(&g_PlayerWalkRight, 0, 17*8, 15*8, 17*8, 2),
+    CUT_SPRITE_SHOW(2, 2*8, 4*8, ENEMY_FRAME(2, 3), COLOR_BLACK),
+    CUT_SPRITE_SHOW(3, 7*8, 11*8, ENEMY_FRAME(2, 3), COLOR_BLACK),
+    CUT_SPRITE_SHOW(4, 21*8, 7*8, ENEMY_FRAME(2, 1), COLOR_BLACK),
+    CUT_SFX(FX_FORCE_FIELD),
+    CUT_SPRITE_ANIM(&g_ForceFieldAnim, 4*8, 4*8, 0),
+    CUT_SFX(FX_FORCE_FIELD),
+    CUT_SPRITE_ANIM(&g_ForceFieldAnim, 9*8, 11*8, 0),
+    CUT_SFX(FX_FORCE_FIELD),
+    CUT_SPRITE_ANIM(&g_ForceFieldAnim, 19*8, 7*8, 0),
+    CUT_SPRITE_HIDE(5),
+    CUT_SPRITE_WALK(&g_PlayerWalkRight, 0, 15*8, 15*8, 15*8, 2),
     CUT_TEXT_TYPE("YOU STARE AT THE GIANT ROBOT", 21),
-	CUT_TEXT_TYPE("IN TERROR FOR A MOMENT.", 23),
+    CUT_TEXT_TYPE("IN TERROR FOR A MOMENT.", 23),
     CUT_WAIT_KEY(),
     CUT_CLEAR_TEXT(),
-	CUT_TEXT_TYPE("IT'S THE FINAL WEAPON BY DR", 21),
-	CUT_TEXT_TYPE("CRAZY! YOU NEED TO HURRY!", 23),
+    CUT_SFX(FX_FORCE_FIELD),
+    CUT_SPRITE_ANIM(&g_ForceFieldAnim, 9*8, 11*8, 0),
+    CUT_SFX(FX_FORCE_FIELD),
+    CUT_SPRITE_ANIM(&g_ForceFieldAnim, 19*8, 7*8, 0),
+    CUT_SPRITE_HIDE(5),
+    CUT_TEXT_TYPE("IT'S THE FINAL WEAPON BY DR", 21),
+    CUT_TEXT_TYPE("CRAZY! YOU NEED TO HURRY!", 23),
     CUT_WAIT_KEY(),
     CUT_CLEAR_TEXT(),
+    CUT_SFX(FX_FORCE_FIELD),
+    CUT_SPRITE_ANIM(&g_ForceFieldAnim, 4*8, 4*8, 0),
+    CUT_SPRITE_HIDE(5),
     CUT_SPRITE_WALK(&g_PlayerWalkRight, 15*8, 15*8, 31*8, 15*8, 2),
     CUT_END(),
 };
