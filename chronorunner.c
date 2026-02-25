@@ -805,7 +805,7 @@ WITH_SEGMENT(next_lvl_seg) {
 
 	g_IntermissionState++;
 
-	if (g_IntermissionState > 100) {
+	if (g_IntermissionState > 100 || Keyboard_IsKeyPressed(KEY_F1)) {
 		g_IntermissionState = 0;
 		Game_SetState(State_ChangeLevel);
 		return FALSE;
