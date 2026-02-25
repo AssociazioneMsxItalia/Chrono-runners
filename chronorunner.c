@@ -34,10 +34,11 @@ bool State_Menu();
 bool State_Game();
 bool State_Death();
 bool State_Rewind();
-bool State_ChangeLevel();
 bool State_Intermission();
 bool State_MessageScreen();
 bool State_Cutscene();
+
+void ChangeLevel();
 void AdvanceSequence();
 
 void tick();
@@ -807,14 +808,14 @@ WITH_SEGMENT(next_lvl_seg) {
 
 	if (g_IntermissionState > 100 || Keyboard_IsKeyPressed(KEY_F1)) {
 		g_IntermissionState = 0;
-		Game_SetState(State_ChangeLevel);
+		ChangeLevel();
 		return FALSE;
 	}
 
 	return TRUE;
 }
 
-bool State_ChangeLevel()
+void ChangeLevel()
 {
 	// Nasconde tutti gli sprite, verranno riabilitati quelli che servono
 	// in ciascun livello
@@ -845,8 +846,6 @@ WITH_SEGMENT(3) {
 	PrintTime();
 
 	Game_SetState(State_Game);
-
-	return TRUE;
 }
 
 bool State_Game()
@@ -910,7 +909,7 @@ bool State_Game()
 			g_SecretNextLevelIdx = NUM_LEVELS + 3;
 		}
 
-		Game_SetState(State_ChangeLevel);
+		ChangeLevel();
 		return TRUE;
 	}
 
