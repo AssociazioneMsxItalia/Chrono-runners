@@ -95,8 +95,10 @@ bool isPlayerHitByEnergyFields(struct Level *lvl) {
 	for (u8 e=0; e < lvl->num_enemies; e++) {
 
 		if (enemies[e].field_state != 0) {
-			if (bboxCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY,
-			                enemies[e].field_x, enemies[e].field_y)) {
+			if (rectCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY,
+					        g_PlayerPawn.PositionX + 15, g_PlayerPawn.PositionY + 15,
+				        enemies[e].field_x + 2, enemies[e].field_y + 6,
+				        enemies[e].field_x + 14, enemies[e].field_y + 9)) {
 
 				// Se il proiettile colpisce il personaggio, lo consuma
 				if (enemies[e].field_state == 2) {
@@ -651,7 +653,7 @@ void UpdateEnemies(struct Level *lvl) {
 					enemy->field_dir = enemy->dir_x;
 
 					enemy->field_x = enemy->pos_x + (enemy->field_dir * 16);
-					enemy->field_y = enemy->pos_y + 8;
+					enemy->field_y = enemy->pos_y;
 					enemy->field_mDX = 0;
 				}
 			}
