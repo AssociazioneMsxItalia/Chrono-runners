@@ -784,11 +784,9 @@ WITH_SEGMENT(1) {
 		PrintGFXNumber(g_NextLevelIdx + 1, 10, 18);
 
 		// Tempo rimanente
-		PrintGFXText("TIME", 18, 18);
+		PrintGFXText("TIME   '  \"", 18, 18);
 		PrintGFXNumber(g_RemainingMinutes, 23, 18);
-		PrintGFXText("'", 25, 18);
 		PrintGFXNumber(g_RemainingSeconds, 26, 18);
-		PrintGFXText("\"", 28, 18);
 
 		u8 next_lvl_seg = SegmentForLevel(g_NextLevelIdx);
 
