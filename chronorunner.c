@@ -31,6 +31,7 @@ typedef struct { u8 type; u8 idx; } SequenceEntry;
 // Function prototypes
 bool State_Initialize();
 bool State_Menu();
+bool State_Credits();
 bool State_Game();
 bool State_Death();
 bool State_Rewind();
@@ -151,6 +152,10 @@ u8 g_seg_guard = 1;
 
 // Menu screen
 extern const u8 g_Screen2[];
+
+// Credits screen
+extern const u8 g_Screen80[];
+extern const u8 g_Screen81[];
 
 // Intermission screen
 extern const u8 g_Screen15[];
@@ -1122,6 +1127,9 @@ u8 g_MenuState = 0;
 u8 g_MenuSelection = 0;
 u8 g_MenuWait = 0;
 
+u8 g_CreditsState = 0;
+u8 g_CreditsWait = 0;
+
 // Menu option Y positions (rows 11, 13, 15, 17)
 #define MENU_NUM_OPTIONS    4
 #define MENU_HIGHLIGHT_TILE 49
@@ -1139,7 +1147,7 @@ WITH_SEGMENT(1) {
 }
         g_MenuSelection = 0;
         VDP_Poke_GM2(g_MenuColumns[0], g_MenuRows[0], MENU_HIGHLIGHT_TILE);
-        g_MenuWait = 0;
+        g_MenuWait = 1;
         g_MenuState = 1;
     }
 
@@ -1165,6 +1173,9 @@ WITH_SEGMENT(1) {
 			g_MenuState = 0;
             g_SequenceIdx = 0;
             AdvanceSequence();
+        } else if (g_MenuSelection == 3) {
+            g_MenuState = 0;
+            Game_SetState(State_Credits);
         }
         return TRUE;
     }
@@ -1172,6 +1183,47 @@ WITH_SEGMENT(1) {
     if (prev != g_MenuSelection) {
         VDP_Poke_GM2(g_MenuColumns[prev], g_MenuRows[prev], MENU_EMPTY_TILE);
         VDP_Poke_GM2(g_MenuColumns[g_MenuSelection], g_MenuRows[g_MenuSelection], MENU_HIGHLIGHT_TILE);
+    }
+
+    return TRUE;
+}
+
+//=============================================================================
+// CREDITS STATE
+//=============================================================================
+
+bool State_Credits()
+{
+    if (g_CreditsState == 0) {
+        VDP_HideAllSprites();
+WITH_SEGMENT(1) {
+        VDP_WriteLayout_GM2(g_Screen80, 0, 0, 32, 24);
+}
+        g_CreditsState = 1;
+        g_CreditsWait = 1;  // Discard the SPACE that triggered credits from menu
+    }
+
+    u8 row8 = Keyboard_Read(8);
+
+    // Wait for SPACE to be released before accepting next press
+    if (g_CreditsWait) {
+        if (IS_KEY_RELEASED(row8, KEY_SPACE)) {
+            g_CreditsWait = 0;
+        }
+        return TRUE;
+    }
+
+    if (IS_KEY_PRESSED(row8, KEY_SPACE)) {
+        if (g_CreditsState == 1) {
+WITH_SEGMENT(1) {
+            VDP_WriteLayout_GM2(g_Screen81, 0, 0, 32, 24);
+}
+            g_CreditsState = 2;
+            g_CreditsWait = 1;
+        } else if (g_CreditsState == 2) {
+            g_CreditsState = 0;
+            Game_SetState(State_Menu);
+        }
     }
 
     return TRUE;

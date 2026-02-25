@@ -9,6 +9,10 @@
 // Menu
 #include "content/screens/screen_2.h"
 
+// Credits
+#include "content/screens/screen_80.h"
+#include "content/screens/screen_81.h"
+
 // Intermission screen
 #include "content/screens/screen_15.h"
 
