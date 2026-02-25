@@ -8,3 +8,4 @@
 #define FX_STOMP_ROBOT 7
 #define FX_GET_CRYSTAL 8
 #define FX_VORTEX 9
+#define FX_BULLET 10

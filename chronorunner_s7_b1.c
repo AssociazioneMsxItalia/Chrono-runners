@@ -647,7 +647,7 @@ void UpdateEnemies(struct Level *lvl) {
 
 				// 8-frame window out of 50
 				if (check_value < 8 && Math_GetRandom8() < 5) {
-					FxPlay(FX_FORCE_FIELD);
+					FxPlay(FX_BULLET);
 
 					enemy->field_state = 2;
 					enemy->field_dir = enemy->dir_x;
