@@ -1020,8 +1020,11 @@ bool State_Death()
 				SetMessageScreen("GAME OVER", 1, 500);
 				Game_SetState(State_MessageScreen);
 			} else {
+				// Flash su respawn personaggio
+				VDP_SetColor(COLOR_WHITE);
 				PlayerRestart();
 				Game_SetState(State_Game);
+				VDP_SetColor(COLOR_BLACK);
 			}
 		}
 	}
