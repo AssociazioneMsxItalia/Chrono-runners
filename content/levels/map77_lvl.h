@@ -3,8 +3,8 @@
 #include "content/screens/screen_77.h"
 
 struct Level level_map77 = {
-	2, 15,       // start_x start_y
-	28, 15,       // end_x end_y
+	2, 17,       // start_x start_y
+	28, 17,       // end_x end_y
 	0, 0,      // key_x key_y
 	0, 0,        // crystal_x crystal_y
 	0,           // num_platforms

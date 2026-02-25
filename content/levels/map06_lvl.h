@@ -31,7 +31,7 @@ struct Enemy enemies_map6[] = {
 struct Level level_map6 = {
 	1, 6,       // start_x start_y
 	1, 20,       // end_x end_y
-	27, 19,      // key_x key_y
+	27, 18,      // key_x key_y
 	1, 12,        // crystal_x crystal_y
 	numberof(platforms_map6),  // num_platforms
 	platforms_map6,       // platforms

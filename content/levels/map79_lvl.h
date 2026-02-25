@@ -15,5 +15,5 @@ struct Level level_map79 = {
 	NULL,        // enemies
 	-1,        // key_trigger_enemy (-1 = visible from start)
 	g_Screen79,   // layout
-	"VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV",  // name
+	"VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV",  // name
 };

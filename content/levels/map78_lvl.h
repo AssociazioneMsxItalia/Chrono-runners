@@ -3,8 +3,8 @@
 #include "content/screens/screen_78.h"
 
 struct Level level_map78 = {
-	1, 14,       // start_x start_y
-	29, 14,       // end_x end_y
+	1, 16,       // start_x start_y
+	29, 16,       // end_x end_y
 	0, 0,      // key_x key_y
 	27, 4,        // crystal_x crystal_y
 	0,           // num_platforms
@@ -19,5 +19,5 @@ struct Level level_map78 = {
 };
 
 // Unknown sprite placements:
-//   sprite 0 at pixel (48, 112)
-//   sprite 1 at pixel (48, 112)
+//   sprite 0 at pixel (48, 128)
+//   sprite 1 at pixel (48, 128)

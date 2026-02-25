@@ -19,21 +19,27 @@ Each MAP section has the structure:
     M-                  (map end marker)
 
 Usage:
-    python3 extract_screens.py <input.mag> [output_dir] [--screen N] [--no-skip-hud [N ...]]
+    python3 extract_screens.py <input.mag> [output_dir] [--screen N]
+                               [--full-extract [N ...]] [--cutscene-extract [N ...]]
 
 Arguments:
-    input.mag              - Magellan project file
-    output_dir             - Output directory for .h files (default: current directory)
-    --screen N             - Export only screen N (1-based MAP number, e.g. 2 = MAP #2)
-    --no-skip-hud [N ...]  - Keep the first 2 rows (normally skipped as HUD placeholders).
-                             Optionally specify MAP numbers to apply this to.
-                             If no numbers given, applies to all exported screens.
+    input.mag                  - Magellan project file
+    output_dir                 - Output directory for .h files (default: current directory)
+    --screen N                 - Export only screen N (1-based MAP number, e.g. 2 = MAP #2)
+    --full-extract [N ...]     - Export all rows (no HUD skip).
+                                 Optionally specify MAP numbers to apply this to.
+                                 If no numbers given, applies to all exported screens.
+    --cutscene-extract [N ...] - Export only rows 2-19 (zero-based, cutscene area).
+                                 Optionally specify MAP numbers to apply this to.
+                                 If no numbers given, applies to all exported screens.
 
 Examples:
     python3 extract_screens.py "Chrono Runner.mag" ./output
     python3 extract_screens.py "Chrono Runner.mag" ./output --screen 5
-    python3 extract_screens.py "Chrono Runner.mag" ./output --no-skip-hud
-    python3 extract_screens.py "Chrono Runner.mag" ./output --no-skip-hud 2 3
+    python3 extract_screens.py "Chrono Runner.mag" ./output --full-extract
+    python3 extract_screens.py "Chrono Runner.mag" ./output --full-extract 2 3
+    python3 extract_screens.py "Chrono Runner.mag" ./output --cutscene-extract
+    python3 extract_screens.py "Chrono Runner.mag" ./output --cutscene-extract 4 5
 """
 
 import sys
@@ -90,19 +96,27 @@ def parse_screens_mag(input_file: str) -> dict[int, list[str]]:
 
 
 def write_screen_header(map_num: int, data: list[str], output_dir: str,
-                        skip_hud: bool = True) -> tuple[str, int]:
+                        extract_mode: str = 'default') -> tuple[str, int]:
     """
     Writes a single screen to a C header file.
     Output filename: screen_{map_num}.h (MAP #2 -> screen_2.h)
-    By default skips the first 64 bytes (2 rows of 32 tiles) which are HUD placeholders.
+
+    extract_mode:
+        'default'   - Skip the first 2 rows (HUD placeholders); export rows 2 onward.
+        'full'      - Export all rows with no trimming.
+        'cutscene'  - Export only rows 2-19 (zero-based, inclusive).
     """
     output_filename = f"screen_{map_num}.h"
     output_path = os.path.join(output_dir, output_filename)
 
     var_name = f"g_Screen{map_num}"
 
-    if skip_hud:
-        data = data[64:]
+    if extract_mode == 'full':
+        pass                        # keep all data
+    elif extract_mode == 'cutscene':
+        data = data[64:640]         # rows 2-19 (zero-based), 18 rows × 32 bytes
+    else:                           # 'default'
+        data = data[64:]            # skip first 2 rows (HUD placeholders)
 
     with open(output_path, 'w') as f:
         f.write(f'#pragma once\n\n')
@@ -129,19 +143,29 @@ def main():
                         help='Output directory (default: current directory)')
     parser.add_argument('--screen', type=int, default=None,
                         help='Export only this MAP number (e.g. 2 = MAP #2)')
-    parser.add_argument('--no-skip-hud', nargs='*', type=int, default=None,
-                        help='Keep the first 2 rows (normally skipped as HUD placeholders). '
+    parser.add_argument('--full-extract', nargs='*', type=int, default=None,
+                        metavar='N',
+                        help='Export all rows with no trimming. '
+                             'Optionally list MAP numbers to apply this to.')
+    parser.add_argument('--cutscene-extract', nargs='*', type=int, default=None,
+                        metavar='N',
+                        help='Export only rows 2-19 (zero-based). '
                              'Optionally list MAP numbers to apply this to.')
 
     args = parser.parse_args()
 
-    # Build the set of screens that should NOT skip HUD rows.
-    if args.no_skip_hud is None:
-        no_skip_hud_set = set()          # skip HUD on all (default)
-    elif len(args.no_skip_hud) == 0:
-        no_skip_hud_set = None           # keep HUD on all
-    else:
-        no_skip_hud_set = set(args.no_skip_hud)
+    # Build sets for each non-default extract mode.
+    # None  → flag not given (doesn't apply to any map)
+    # set() → empty set after flag with no args → applies to all maps (sentinel: use None below)
+    # set of ints → applies only to listed maps
+
+    full_set = None
+    if args.full_extract is not None:
+        full_set = set(args.full_extract) if args.full_extract else None  # None = all maps
+
+    cutscene_set = None
+    if args.cutscene_extract is not None:
+        cutscene_set = set(args.cutscene_extract) if args.cutscene_extract else None  # None = all maps
 
     if not os.path.isfile(args.input_file):
         print(f"Error: Input file '{args.input_file}' not found", file=sys.stderr)
@@ -159,22 +183,32 @@ def main():
 
     print(f"Found {len(screens)} screens: MAP #{min(screens.keys())} to MAP #{max(screens.keys())}")
 
+    def get_extract_mode(map_num: int) -> str:
+        # --cutscene-extract takes priority over --full-extract
+        if (args.cutscene_extract is not None
+                and (cutscene_set is None or map_num in cutscene_set)):
+            return 'cutscene'
+        if (args.full_extract is not None
+                and (full_set is None or map_num in full_set)):
+            return 'full'
+        return 'default'
+
     if args.screen is not None:
         if args.screen not in screens:
             print(f"Error: MAP #{args.screen} not found. Available: {sorted(screens.keys())}",
                   file=sys.stderr)
             sys.exit(1)
 
-        skip_hud = not (no_skip_hud_set is None or args.screen in no_skip_hud_set)
+        mode = get_extract_mode(args.screen)
         output_path, byte_count = write_screen_header(
-            args.screen, screens[args.screen], args.output_dir, skip_hud=skip_hud)
-        print(f"Exported MAP #{args.screen} -> {output_path} ({byte_count} bytes)")
+            args.screen, screens[args.screen], args.output_dir, extract_mode=mode)
+        print(f"Exported MAP #{args.screen} -> {output_path} ({byte_count} bytes) [{mode}]")
     else:
         for map_num in sorted(screens.keys()):
-            skip_hud = not (no_skip_hud_set is None or map_num in no_skip_hud_set)
+            mode = get_extract_mode(map_num)
             output_path, byte_count = write_screen_header(
-                map_num, screens[map_num], args.output_dir, skip_hud=skip_hud)
-            print(f"Exported MAP #{map_num} -> {output_path} ({byte_count} bytes)")
+                map_num, screens[map_num], args.output_dir, extract_mode=mode)
+            print(f"Exported MAP #{map_num} -> {output_path} ({byte_count} bytes) [{mode}]")
 
     print("Done!")
 
