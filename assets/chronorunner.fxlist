@@ -7,10 +7,14 @@ sfxcollection/zxmsxdemo/zanac_1.afx
 #define FX_SHOW_KEY 3
 sfxcollection/zxmsxdemo/nemesis_6.afx
 #define FX_FORCE_FIELD 4
-sfxcollection/zxmsxdemo/girlyblock_3.afx
+sfxcollection/scossalunga.afx
 #define FX_DEATH 5
 sfxcollection/zxmsxdemo/druid_5.afx
 #define FX_JUMP 6
 sfxcollection/chrono_jump.afx
 #define FX_STOMP_ROBOT 7
 sfxcollection/zxmsxdemo/aleste_9.afx
+#define FX_GET_CRYSTAL 8
+sfxcollection/cristallo.afx
+#define FX_VORTEX 9
+sfxcollection/singularity.afx

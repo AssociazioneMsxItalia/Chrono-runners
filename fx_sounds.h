@@ -6,3 +6,5 @@
 #define FX_DEATH 5
 #define FX_JUMP 6
 #define FX_STOMP_ROBOT 7
+#define FX_GET_CRYSTAL 8
+#define FX_VORTEX 9

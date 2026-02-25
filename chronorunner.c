@@ -618,6 +618,8 @@ void TakeCrystal() {
 	g_PlayerRewindEnergy += (SNAPSHOT_BUFFER_SIZE / 4);
 	if (g_PlayerRewindEnergy > SNAPSHOT_BUFFER_SIZE)
 		g_PlayerRewindEnergy = SNAPSHOT_BUFFER_SIZE;
+
+	FxPlay(FX_GET_CRYSTAL);
 }
 
 //=============================================================================
@@ -895,7 +897,7 @@ bool State_Game()
 
 	// Easter egg: vortex teleportation
 	if (bboxCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY, 0, 0)) {
-		FxPlay(FX_EXIT_DOOR);
+		FxPlay(FX_VORTEX);
 
 		// Seleziona la giusta stanza segreta in base al livello in cui ci troviamo
 		if (g_CurrentLevelIdx < 7) {
