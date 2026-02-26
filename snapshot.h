@@ -62,7 +62,7 @@ typedef struct {
     u8 enemy_y[MAX_ENEMIES];
     i8 enemy_dir[MAX_ENEMIES];           // Movement direction (-1 or 1)
     u8 enemy_stunned[MAX_ENEMIES];       // Stunned timer
-    u8 enemy_field_state[MAX_ENEMIES];   // 0=no field, 1=stationary, 2=projectile
+    u8 enemy_field_state[MAX_ENEMIES];   // 0=no field, 1=stationary, 2=projectile, 3=pre-fire
     u8 enemy_field_x[MAX_ENEMIES];       // Energy field X position
     u8 enemy_field_y[MAX_ENEMIES];       // Energy field Y position
 } GameSnapshot;

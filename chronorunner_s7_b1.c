@@ -94,7 +94,7 @@ bool isPlayerHitByEnergyFields(struct Level *lvl) {
 	// Controlla i campi di forza di ciascun nemico
 	for (u8 e=0; e < lvl->num_enemies; e++) {
 
-		if (enemies[e].field_state != 0) {
+		if (enemies[e].field_state == 1 || enemies[e].field_state == 2) {
 			if (rectCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY,
 					        g_PlayerPawn.PositionX + 15, g_PlayerPawn.PositionY + 15,
 				        enemies[e].field_x + 2, enemies[e].field_y + 6,
@@ -623,15 +623,11 @@ void UpdateEnemies(struct Level *lvl) {
 				// Se il campo di forza è attivo, il nemico non si muove
 				continue;
 
-			} else if (enemy->field_state == 0) {
-				// Spawn window based on g_RemainingFS cycle
-				// Different enemies check at different counter values (offset by enemy index)
-				// This creates a natural phase offset without multiplication
-				u8 check_value = g_RemainingFS + e;
-				if (check_value >= 50) check_value -= 50;
+			} else if (enemy->field_state == 3) {
+				// Pre-fuoco: il nemico è fermo, il timer conta verso lo sparo
+				enemy->field_timer--;
 
-				// 10-frame window out of 50
-				if (check_value < 10 && Math_GetRandom8() < 10) {
+				if (enemy->field_timer == 0) {
 					FxPlay(FX_FORCE_FIELD);
 
 					enemy->field_state = 1;
@@ -642,19 +638,25 @@ void UpdateEnemies(struct Level *lvl) {
 					enemy->field_x = enemy->pos_x + (enemy->field_dir * 16);
 					enemy->field_y = enemy->pos_y;
 				}
+
+				// Il nemico non si muove durante il pre-fuoco
+				continue;
+
+			} else if (enemy->field_state == 0) {
+				if (Math_GetRandom8() < 2) {
+					enemy->field_state = 3;
+					enemy->field_timer = 25;
+				}
 			}
 		}
 
 		// Nemici tipo 3, campo di forza proiettile
 		if (enemy->type == 3) {
-			if (enemy->field_state == 0) {
-				// Spawn window based on g_RemainingFS cycle
-				// Different enemies check at different counter values (offset by enemy index)
-				u8 check_value = g_RemainingFS + e;
-				if (check_value >= 50) check_value -= 50;
+			if (enemy->field_state == 3) {
+				// Pre-fuoco: il nemico è fermo, il timer conta verso lo sparo
+				enemy->field_timer--;
 
-				// 8-frame window out of 50
-				if (check_value < 8 && Math_GetRandom8() < 5) {
+				if (enemy->field_timer == 0) {
 					FxPlay(FX_BULLET);
 
 					enemy->field_state = 2;
@@ -663,6 +665,15 @@ void UpdateEnemies(struct Level *lvl) {
 					enemy->field_x = enemy->pos_x + (enemy->field_dir * 16);
 					enemy->field_y = enemy->pos_y;
 					enemy->field_mDX = 0;
+				}
+
+				// Il nemico non si muove durante il pre-fuoco
+				continue;
+
+			} else if (enemy->field_state == 0) {
+				if (Math_GetRandom8() < 2) {
+					enemy->field_state = 3;
+					enemy->field_timer = 25;
 				}
 			}
 		}
