@@ -43,7 +43,7 @@ struct Enemy enemies_map24[] = {
 struct Level level_map24 = {
 	2, 4,       // start_x start_y
 	13, 6,       // end_x end_y
-	16, 10,      // key_x key_y
+	6, 20,      // key_x key_y
 	4, 8,        // crystal_x crystal_y
 	numberof(platforms_map24),  // num_platforms
 	platforms_map24,       // platforms

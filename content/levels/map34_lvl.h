@@ -28,7 +28,7 @@ struct Enemy enemies_map34[] = {
 			0}, // field_dir
   {15*8, 20*8,  // pos_x pos_y
 	        1,  // dir_x  TODO: set direction (-1 or 1)
-	7*8, 19*8,  // min_x max_x  TODO: adjust patrol range
+	7*8, 17*8,  // min_x max_x  TODO: adjust patrol range
 	        0,  // type (0-3)
 	        0,  // mDX (initialized to 0)
 	        0,  // stunned_timer (initialized to 0)

@@ -4,7 +4,7 @@
 
 struct Level level_map72 = {
 	0, 0,       // start_x start_y
-	2, 12,       // end_x end_y
+	2, 15,       // end_x end_y
 	0, 0,      // key_x key_y
 	0, 0,        // crystal_x crystal_y
 	0,           // num_platforms
@@ -19,7 +19,7 @@ struct Level level_map72 = {
 };
 
 // Unknown sprite placements:
-//   sprite 26 at pixel (96, 112)
-//   sprite 63 at pixel (144, 80)
-//   sprite 0 at pixel (48, 112)
-//   sprite 1 at pixel (48, 112)
+//   sprite 0 at pixel (40, 136)
+//   sprite 1 at pixel (40, 136)
+//   sprite 63 at pixel (128, 104)
+//   sprite 26 at pixel (128, 136)
