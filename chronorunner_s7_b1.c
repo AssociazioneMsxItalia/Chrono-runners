@@ -117,14 +117,22 @@ bool isPlayerHitByEnemies(struct Level *lvl) {
 	struct Enemy *enemies = lvl->enemies;
 
 	for (u8 e=0; e < lvl->num_enemies; e++) {
+		// Se un nemico è appena stordito disabilita le collisioni,
+		// così non sta tra i piedi
+		if (enemies[e].stunned_timer > 50)
+			continue;
 
 		if (rectCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY,
 					    g_PlayerPawn.PositionX + 15, g_PlayerPawn.PositionY + 15,
 				        enemies[e].pos_x + 4, enemies[e].pos_y,
 				        enemies[e].pos_x + 11, enemies[e].pos_y + 15)) {
 
-			// Se siamo sopra il nemico e stiamo scendendo
-			if (g_PlayerPawn.PositionY < enemies[e].pos_y && g_VelocityY < 0) {
+			// Se siamo sopra il nemico, stiamo scendendo, e il nemico non è
+			// appena stordito
+			if (g_PlayerPawn.PositionY < enemies[e].pos_y
+				&& g_VelocityY < 0
+				&& enemies[e].stunned_timer < 50) {
+
 				// Stordiamo il nemico
 				enemies[e].stunned_timer = 100;
 
