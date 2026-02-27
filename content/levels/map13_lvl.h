@@ -25,7 +25,7 @@ struct Enemy enemies_map13[] = {
 };
 
 struct Level level_map13 = {
-	0, 0,       // start_x start_y
+	3, 21,       // start_x start_y
 	15, 5,       // end_x end_y
 	28, 19,      // key_x key_y
 	18, 12,        // crystal_x crystal_y

@@ -3,8 +3,8 @@
 #include "content/screens/screen_63.h"
 
 struct Level level_map63 = {
-	1, 16,       // start_x start_y
-	29, 16,       // end_x end_y
+	1, 17,       // start_x start_y
+	29, 17,       // end_x end_y
 	0, 0,      // key_x key_y
 	0, 0,        // crystal_x crystal_y
 	0,           // num_platforms
@@ -15,7 +15,7 @@ struct Level level_map63 = {
 	NULL,        // enemies
 	-1,        // key_trigger_enemy (-1 = visible from start)
 	g_Screen63,   // layout
-	"CUTSCENE - LEONARDO VETTORI",  // name
+	"63",  // name
 };
 
 // Unknown sprite placements:

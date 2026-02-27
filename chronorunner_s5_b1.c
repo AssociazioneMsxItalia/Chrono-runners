@@ -300,10 +300,6 @@ const CutCmd g_IntroCutscene[] = {
 
     CUT_LOAD_LAYOUT(g_Screen5, 0, CUTSCENE_GFX_Y, 32, CUTSCENE_GFX_ROWS),
 
-    CUT_TEXT_TYPE("(...ALARM BELLS RINGING...)", 21),
-    CUT_WAIT_KEY(),
-    CUT_CLEAR_TEXT(),
-
     CUT_SPRITE_WALK(&g_DocWalkLeft, 29*8, 17*8, 20*8, 17*8, 1),
 
     CUT_TEXT_TYPE("TIME IS RUNNING OUT...", 21),

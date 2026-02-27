@@ -81,5 +81,5 @@ struct Level level_map30 = {
 	enemies_map30,  // enemies
 	2,           // key_trigger_enemy (enemy 2 reveals key)
 	g_Screen30,   // layout
-	"EASY PEASY - LORENZO MIRETTI",  // name
+	"EASY PEASY - LORENZO MORETTI",  // name
 };
