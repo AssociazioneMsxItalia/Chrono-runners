@@ -83,6 +83,7 @@ void DrawRewindGauge() {
 // COLLISION FUNCTIONS
 //=============================================================================
 
+extern void ReinitPlayer(Pawn *pawn, Pawn_Sprite *spr_layers, u8 n_spr_layers, u8 x, u8 y);
 extern bool bboxCollide(u8 x1, u8 y1, u8 x2, u8 y2);
 extern bool rectCollide(u8 ax1, u8 ay1, u8 ax2, u8 ay2,
 				        u8 bx1, u8 by1, u8 bx2, u8 by2);
@@ -841,3 +842,200 @@ u8 Snapshot_RewindStep() {
 //=============================================================================
 
 #include "cutscene_s7.c"
+
+//=============================================================================
+// BOSS FIGHT
+//=============================================================================
+
+// Frames between stance switches
+#define BOSS_SWITCH_FRAMES   75
+// Total number of stances: 3 sheets x 4 slots each
+#define BOSS_NUM_STANCES      9
+// Each stance is a 14x11 tile rectangle inside a 32-wide sheet
+#define BOSS_STANCE_W         14
+#define BOSS_STANCE_H         11
+// Destination tile position on the display where the stance is drawn
+// (adjust to match the art in screen 84)
+#define BOSS_STANCE_DST_X      9
+#define BOSS_STANCE_DST_Y      12
+// Head hitbox: 3-tile wide band at tile (15, 12); y covers top half of the tile
+#define BOSS_HEAD_X1  112   // (15 - 1) * 8
+#define BOSS_HEAD_X2  135   // (15 + 2) * 8 - 1
+#define BOSS_HEAD_Y1   96   // 12 * 8
+#define BOSS_HEAD_Y2  103   // 13 * 8 - 1
+// Player start position in the boss arena (pixels)
+#define BOSS_START_X   16
+#define BOSS_START_Y  144
+// Number of head hits needed to defeat the boss
+#define BOSS_HITS_REQUIRED   3
+
+u8  g_BossFrame    = 0;  // Frames elapsed in current stance
+u8  g_BossScreen   = 0;  // Current stance index (0 .. BOSS_NUM_STANCES-1)
+u8  g_BossHitCount = 0;  // Hits landed on the boss head so far
+
+// Boss fight: background + stance sprite sheets (4 stances each, 2x2 grid)
+#include "content/screens/screen_84.h"
+#include "content/screens/screen_85.h"
+#include "content/screens/screen_86.h"
+#include "content/screens/screen_87.h"
+
+// Boss arena platform definitions
+static const struct Platform g_BossPlatformsROM[] = {
+    {  1*8, 13*8,   // pos_x, pos_y
+		0,   -1,   // dir_x, dir_y
+	   1*8, 7*8,   // min_x, min_y
+	   1*8, 22*8}, // max_x, max_y
+    { 10*8, 6*8,
+		 1, 0,
+	  5*8, 6*8,
+      26*8, 6*8 },
+    { 20*8, 8*8,
+		 -1, 0,
+	  5*8, 8*8,
+      26*8, 8*8 },
+	{ 29*8, 9*8,
+		 0, 1,
+	  29*8, 7*8,
+      29*8, 22*8 },
+};
+#define BOSS_NUM_PLATFORMS (sizeof(g_BossPlatformsROM) / sizeof(g_BossPlatformsROM[0]))
+
+extern struct Platform g_RuntimePlatforms[];
+extern void AllocateCurrentLevelSprites();
+
+//=============================================================================
+// BOSS STATE
+//=============================================================================
+
+extern const Pawn_Sprite g_PlayerLayers[];
+extern void SetMessageScreen(const c8* text, i8 songId, u16 duration);
+extern bool State_MessageScreen();
+
+bool State_Boss();
+
+
+// Draw screen 84 as background, then overlay the current stance rectangle
+// sourced from sheets 85-87 (4 stances per sheet, 2x2 grid).
+void DrawBossStance()
+{
+	u8 sheet = g_BossScreen >> 2;        // which sheet: 0=85, 1=86, 2=87
+	u8 slot  = g_BossScreen & 3;         // which slot in sheet: 0-3
+	u8 src_x = (slot & 1) ? 17 : 1;     // bit 0: col 1 or col 17
+	u8 src_y = (slot & 2) ? 13 : 1;     // bit 1: row 1 or row 13
+	const u8 *sheet_ptr;
+
+	VDP_WriteLayout_GM2(g_Screen84, 0, 0, 32, 24);
+
+	if      (sheet == 0) sheet_ptr = g_Screen85;
+	else if (sheet == 1) sheet_ptr = g_Screen86;
+	else                 sheet_ptr = g_Screen87;
+
+	//DEBUG_PRINT();
+
+	for (u8 r = 0; r < BOSS_STANCE_H; r++) {
+		VDP_WriteLayout_GM2(sheet_ptr + (u16)(src_y + r) * 32 + src_x,
+		                    BOSS_STANCE_DST_X, BOSS_STANCE_DST_Y + r,
+		                    BOSS_STANCE_W, 1);
+	}
+}
+
+void InitBoss()
+{
+	VDP_HideAllSprites();
+
+	g_BossFrame    = 0;
+	g_BossScreen   = 0;
+	g_BossHitCount = 0;
+	g_PlayerDying  = FALSE;
+	g_mDX = 0;
+	g_mDY = 0;
+	g_VelocityY = 0;
+
+	// Populate g_ActiveLevel with boss arena data (platforms only)
+	g_ActiveLevel.num_platforms = BOSS_NUM_PLATFORMS;
+	g_ActiveLevel.platforms     = g_RuntimePlatforms;
+	g_ActiveLevel.num_mines     = 0;
+	g_ActiveLevel.num_enemies   = 0;
+	g_ActiveLevel.key_trigger_enemy = -1;
+
+	// Copy ROM platform data into the mutable runtime array
+	for (u8 i = 0; i < BOSS_NUM_PLATFORMS; i++) {
+		g_RuntimePlatforms[i] = g_BossPlatformsROM[i];
+	}
+
+	// Allocate sprite IDs
+	AllocateCurrentLevelSprites();
+
+	DrawBossStance();
+
+	ReinitPlayer(&g_PlayerPawn,
+	             g_PlayerLayers, 2,
+	             BOSS_START_X, BOSS_START_Y);
+
+	// TODO: Start boss music once the track is ready
+	// SoundSetSong(BOSS_SONG_ID);
+	// SoundLoop(TRUE);
+
+	Game_SetState(State_Boss);
+}
+
+bool State_Boss()
+{
+	struct Level *lvl = &g_ActiveLevel;
+
+	UpdatePlayerInput();
+	UpdatePlatforms(lvl);
+	struct Platform *platform = isPlayerOnPlatform(lvl);
+	UpdatePlayerMovement(platform);
+	UpdatePlayerAction();
+
+	Pawn_SetAction(&g_PlayerPawn, g_PlayerAction);
+	Pawn_SetMovement(&g_PlayerPawn, g_DX, g_DY);
+	Pawn_Update(&g_PlayerPawn);
+	Pawn_Draw(&g_PlayerPawn);
+
+	DrawPlatforms(lvl, FALSE);
+
+	// Head hit: vulnerable on any normal stance (not during hit/defeat poses)
+	if (g_BossScreen < BOSS_NUM_STANCES) {
+		if (rectCollide(g_PlayerPawn.PositionX,      g_PlayerPawn.PositionY,
+		                g_PlayerPawn.PositionX + 15, g_PlayerPawn.PositionY + 15,
+		                BOSS_HEAD_X1, BOSS_HEAD_Y1,
+		                BOSS_HEAD_X2, BOSS_HEAD_Y2)
+		    && g_PlayerPawn.PositionY < BOSS_HEAD_Y1
+		    && g_VelocityY < 0) {
+
+			g_BossHitCount++;
+			g_VelocityY = FORCE;
+			g_PlayerJumping = TRUE;
+			FxPlay(FX_STOMP_ROBOT);
+
+			g_BossFrame = 0;
+			if (g_BossHitCount >= BOSS_HITS_REQUIRED) {
+				g_BossScreen = 10;
+			} else {
+				g_BossScreen = 9;
+			}
+			DrawBossStance();
+		}
+	}
+
+	// Advance stance after BOSS_SWITCH_FRAMES frames
+	g_BossFrame++;
+	if (g_BossFrame >= BOSS_SWITCH_FRAMES) {
+		g_BossFrame = 0;
+		if (g_BossScreen == 10) {
+			SetMessageScreen("YOU WON!", -1, 500);
+			Game_SetState(State_MessageScreen);
+			return TRUE;
+		} else if (g_BossScreen == 9) {
+			g_BossScreen = 0;
+			DrawBossStance();
+		} else {
+			g_BossScreen = (g_BossScreen + 1) % BOSS_NUM_STANCES;
+			DrawBossStance();
+		}
+	}
+
+	return TRUE;
+}

@@ -293,13 +293,18 @@ extern void UpdatePlayerAction();
 extern void UpdatePlatforms(struct Level *lvl);
 extern void UpdateEnemies(struct Level *lvl);
 
+extern void InitBoss();
+extern bool State_Boss();
+extern void DrawBossStance();
+void AllocateCurrentLevelSprites();
+
 //=============================================================================
 // LEVELS
 //=============================================================================
 
 // Per partire velocemente da un punto della sequenza per il debug
 // 0 = dall'inizio (mostra il menu), >0 = salta direttamente a quel punto
-#define START_SEQUENCE_IDX 0
+#define START_SEQUENCE_IDX 38
 
 u8 g_CurrentLevelIdx;
 u8 g_NextLevelIdx;
@@ -409,8 +414,7 @@ void SetMessageScreen(const c8* text, i8 songId, u16 duration);
 void AdvanceSequence()
 {
 	if (g_SequenceIdx >= g_SequenceLength) {
-		SetMessageScreen("YOU WON!", -1, 500);
-		Game_SetState(State_MessageScreen);
+		InitBoss();
 		return;
 	}
 
@@ -849,6 +853,15 @@ WITH_SEGMENT(3) {
 	PrintTime();
 
 	Game_SetState(State_Game);
+}
+
+// Shim callable from segment 7 code (which cannot use WITH_SEGMENT itself):
+// routes AllocateSpriteIDs through the main segment so the bank switch is safe.
+void AllocateCurrentLevelSprites()
+{
+WITH_SEGMENT(3) {
+	AllocateSpriteIDs(&g_ActiveLevel);
+}
 }
 
 bool State_Game()
