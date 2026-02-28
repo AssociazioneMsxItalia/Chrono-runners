@@ -1039,6 +1039,7 @@ bool State_Death()
 				VDP_SetColor(COLOR_WHITE);
 				PlayerRestart();
 				Game_SetState(State_Game);
+				Halt();
 				VDP_SetColor(COLOR_BLACK);
 			}
 		}
