@@ -848,7 +848,7 @@ u8 Snapshot_RewindStep() {
 //=============================================================================
 
 // Frames between stance switches
-#define BOSS_SWITCH_FRAMES   75
+#define BOSS_SWITCH_FRAMES   25
 // Total number of stances: 3 sheets x 4 slots each
 #define BOSS_NUM_STANCES      9
 // Each stance is a 14x11 tile rectangle inside a 32-wide sheet
@@ -867,11 +867,53 @@ u8 Snapshot_RewindStep() {
 #define BOSS_START_X   16
 #define BOSS_START_Y  144
 // Number of head hits needed to defeat the boss
-#define BOSS_HITS_REQUIRED   3
+#define BOSS_HITS_REQUIRED   5
+// Boss horizontal movement: ±BOSS_MOVE_RANGE tiles, steps once per stance change
+#define BOSS_MOVE_RANGE       3
+// Pixel offset of head hitbox from stance left edge: BOSS_HEAD_X1 - BOSS_STANCE_DST_X*8
+#define BOSS_HEAD_OFFSET_X   40
+// Boss stances
+#define BOSS_STUN_STANCE    9   // boss is stunned (head stomped)
+#define BOSS_DEFEAT_STANCE 10   // boss is defeated (5th stomp)
+// Boss bullet
+#define BOSS_FIRE_FRAMES      200               // frames between shots
+#define BOSS_BULLET_SPEED       2               // pixels/frame along dominant axis
+// Boss vortex (shared motion logic with bullet)
+#define BOSS_VORTEX_SPEED   2   // pixels/frame
+#define BOSS_ARRIVE_DIST    8   // arrival detection radius in pixels
+// Vortex states
+#define VORTEX_INACTIVE  0  // not in play
+#define VORTEX_TO_SLOT   1  // flying from boss head toward corner slot
+#define VORTEX_AT_SLOT   2  // at slot, waiting for player to touch
+#define VORTEX_TO_BOSS   3  // flying back as weapon (black)
 
-u8  g_BossFrame    = 0;  // Frames elapsed in current stance
-u8  g_BossScreen   = 0;  // Current stance index (0 .. BOSS_NUM_STANCES-1)
-u8  g_BossHitCount = 0;  // Hits landed on the boss head so far
+u8   g_BossFrame          = 0;  // Frames elapsed in current stance
+u8   g_BossScreen         = 0;  // Current stance index (0 .. BOSS_NUM_STANCES-1)
+u8   g_BossHitCount       = 0;  // Stomps landed on the boss head so far
+u8   g_BossDstX           = 0;  // Current stance X position in tiles (runtime)
+i8   g_BossMoveDir        = 1;  // Movement direction: +1 right, -1 left
+bool g_BossBulletActive   = FALSE;
+u8   g_BossBulletX        = 0;
+u8   g_BossBulletY        = 0;
+i8   g_BossBulletDX       = 0;  // pixels per frame, X
+i8   g_BossBulletDY       = 0;  // pixels per frame, Y
+u8   g_BossFireTimer      = 0;
+// Flying vortex state machine
+u8   g_VortexState    = VORTEX_INACTIVE;
+i16  g_VortexX        = 0;
+i16  g_VortexY        = 0;
+i8   g_VortexDX       = 0;
+i8   g_VortexDY       = 0;
+// g_VortexAnimFrame is already defined in chronorunner.c (declared extern above)
+u8   g_VortexSlotIdx  = 0;  // 0-3: which corner slot this vortex targets
+
+// Vortex corner slot positions in tiles
+static const u8 g_BossVortexPos[4][2] = {
+    {  4, 19 },
+    {  6,  4 },
+    { 24,  4 },
+    { 26, 19 },
+};
 
 // Boss fight: background + stance sprite sheets (4 stances each, 2x2 grid)
 #include "content/screens/screen_84.h"
@@ -900,9 +942,6 @@ static const struct Platform g_BossPlatformsROM[] = {
 };
 #define BOSS_NUM_PLATFORMS (sizeof(g_BossPlatformsROM) / sizeof(g_BossPlatformsROM[0]))
 
-extern struct Platform g_RuntimePlatforms[];
-extern void AllocateCurrentLevelSprites();
-
 //=============================================================================
 // BOSS STATE
 //=============================================================================
@@ -910,12 +949,33 @@ extern void AllocateCurrentLevelSprites();
 extern const Pawn_Sprite g_PlayerLayers[];
 extern void SetMessageScreen(const c8* text, i8 songId, u16 duration);
 extern bool State_MessageScreen();
+extern bool State_Death();
+extern u8 g_CountDownTicks;
+extern struct Platform g_RuntimePlatforms[];
+extern void AllocateCurrentLevelSprites();
+extern void SetSong(u8 id);
+extern void Loop(bool value);
+extern void Play();
 
 bool State_Boss();
 
+// Compute Chebyshev-normalized velocity from (sx,sy) toward (tx,ty) at given speed.
+// Used by both boss bullet and flying vortex to avoid code duplication.
+static void AimProjectile(u8 sx, u8 sy, u8 tx, u8 ty, u8 speed, i8 *dx, i8 *dy)
+{
+	i16 ddx = (i16)tx - (i16)sx;
+	i16 ddy = (i16)ty - (i16)sy;
+	i16 ax  = ddx < 0 ? -ddx : ddx;
+	i16 ay  = ddy < 0 ? -ddy : ddy;
+	i16 m   = ax > ay ? ax : ay;
+	if (m == 0) m = 1;
+	*dx = (i8)(ddx * speed / m);
+	*dy = (i8)(ddy * speed / m);
+}
 
-// Draw screen 84 as background, then overlay the current stance rectangle
-// sourced from sheets 85-87 (4 stances per sheet, 2x2 grid).
+// Clear the boss area (tile 84 = arena background) then overlay the current
+// stance rectangle sourced from sheets 85-87 (4 stances per sheet, 2x2 grid).
+// g_Screen84 is drawn once on entry; this only repaints the dynamic region.
 void DrawBossStance()
 {
 	u8 sheet = g_BossScreen >> 2;        // which sheet: 0=85, 1=86, 2=87
@@ -924,17 +984,16 @@ void DrawBossStance()
 	u8 src_y = (slot & 2) ? 13 : 1;     // bit 1: row 1 or row 13
 	const u8 *sheet_ptr;
 
-	VDP_WriteLayout_GM2(g_Screen84, 0, 0, 32, 24);
+	// Clear only the boss rectangle with the arena background tile
+	VDP_FillLayout_GM2(84, 6, 10, 20, 13);
 
 	if      (sheet == 0) sheet_ptr = g_Screen85;
 	else if (sheet == 1) sheet_ptr = g_Screen86;
 	else                 sheet_ptr = g_Screen87;
 
-	//DEBUG_PRINT();
-
 	for (u8 r = 0; r < BOSS_STANCE_H; r++) {
 		VDP_WriteLayout_GM2(sheet_ptr + (u16)(src_y + r) * 32 + src_x,
-		                    BOSS_STANCE_DST_X, BOSS_STANCE_DST_Y + r,
+		                    g_BossDstX, BOSS_STANCE_DST_Y + r,
 		                    BOSS_STANCE_W, 1);
 	}
 }
@@ -943,10 +1002,21 @@ void InitBoss()
 {
 	VDP_HideAllSprites();
 
-	g_BossFrame    = 0;
-	g_BossScreen   = 0;
-	g_BossHitCount = 0;
-	g_PlayerDying  = FALSE;
+	g_BossFrame        = 0;
+	g_BossScreen       = 0;
+	g_BossHitCount     = 0;
+	g_BossDstX         = BOSS_STANCE_DST_X;
+	g_BossMoveDir      = 1;
+	g_BossBulletActive = FALSE;
+	g_BossFireTimer    = 0;
+	g_VortexState      = VORTEX_INACTIVE;
+	g_VortexSlotIdx    = 0;
+	g_VortexAnimFrame  = 0;
+	// Zero the timer so State_Death always routes to GAME OVER in boss mode
+	g_RemainingMinutes   = 0;
+	g_RemainingSeconds   = 0;
+	g_CountDownTicks     = 0;
+	g_PlayerDying        = FALSE;
 	g_mDX = 0;
 	g_mDY = 0;
 	g_VelocityY = 0;
@@ -966,15 +1036,17 @@ void InitBoss()
 	// Allocate sprite IDs
 	AllocateCurrentLevelSprites();
 
+	// Draw the full arena background once; DrawBossStance only refreshes the dynamic region
+	VDP_WriteLayout_GM2(g_Screen84, 0, 0, 32, 24);
 	DrawBossStance();
 
 	ReinitPlayer(&g_PlayerPawn,
 	             g_PlayerLayers, 2,
 	             BOSS_START_X, BOSS_START_Y);
 
-	// TODO: Start boss music once the track is ready
-	// SoundSetSong(BOSS_SONG_ID);
-	// SoundLoop(TRUE);
+	SetSong(3);
+	Loop(TRUE);
+	Play();
 
 	Game_SetState(State_Boss);
 }
@@ -996,12 +1068,54 @@ bool State_Boss()
 
 	DrawPlatforms(lvl, FALSE);
 
+	// Boss bullet: fire toward player (normal stances only)
+	if (g_BossScreen < BOSS_NUM_STANCES) {
+		g_BossFireTimer++;
+		if (g_BossFireTimer >= BOSS_FIRE_FRAMES && !g_BossBulletActive) {
+			g_BossFireTimer = 0;
+			g_BossBulletActive = TRUE;
+			u8 origin_x = g_BossDstX * 8 + BOSS_HEAD_OFFSET_X + 8;
+			u8 origin_y = (BOSS_HEAD_Y1 + BOSS_HEAD_Y2) / 2;
+			g_BossBulletX = origin_x;
+			g_BossBulletY = origin_y;
+			AimProjectile(origin_x, origin_y,
+			              g_PlayerPawn.PositionX + 8, g_PlayerPawn.PositionY + 8,
+			              BOSS_BULLET_SPEED, &g_BossBulletDX, &g_BossBulletDY);
+			FxPlay(FX_BULLET);
+		}
+	}
+
+	// Boss bullet: move, draw, and collide
+	if (g_BossBulletActive) {
+		g_BossBulletX += g_BossBulletDX;
+		g_BossBulletY += g_BossBulletDY;
+		if (g_BossBulletX < 4 || g_BossBulletX > 248 || g_BossBulletY > 192) {
+			g_BossBulletActive = FALSE;
+			VDP_HideSprite(VORTEX_SPRITE_ID);
+		} else if (rectCollide(g_PlayerPawn.PositionX,      g_PlayerPawn.PositionY,
+		                       g_PlayerPawn.PositionX + 15, g_PlayerPawn.PositionY + 15,
+		                       g_BossBulletX + 6, g_BossBulletY + 6,
+		                       g_BossBulletX + 9, g_BossBulletY + 9)) {
+			g_BossBulletActive = FALSE;
+			VDP_HideSprite(VORTEX_SPRITE_ID);
+			g_PlayerDying = FALSE;  // reset so State_Death initialises properly
+			Game_SetState(State_Death);
+			return TRUE;
+		} else {
+			VDP_SetSpriteSM1(VORTEX_SPRITE_ID,
+			                 g_BossBulletX, g_BossBulletY,
+			                 BOSSBULLET_FRAME(0), COLOR_LIGHT_RED);
+		}
+	}
+
 	// Head hit: vulnerable on any normal stance (not during hit/defeat poses)
 	if (g_BossScreen < BOSS_NUM_STANCES) {
+		u8 head_x1 = g_BossDstX * 8 + BOSS_HEAD_OFFSET_X;
+		u8 head_x2 = head_x1 + (BOSS_HEAD_X2 - BOSS_HEAD_X1);
 		if (rectCollide(g_PlayerPawn.PositionX,      g_PlayerPawn.PositionY,
 		                g_PlayerPawn.PositionX + 15, g_PlayerPawn.PositionY + 15,
-		                BOSS_HEAD_X1, BOSS_HEAD_Y1,
-		                BOSS_HEAD_X2, BOSS_HEAD_Y2)
+		                head_x1, BOSS_HEAD_Y1,
+		                head_x2, BOSS_HEAD_Y2)
 		    && g_PlayerPawn.PositionY < BOSS_HEAD_Y1
 		    && g_VelocityY < 0) {
 
@@ -1010,30 +1124,100 @@ bool State_Boss()
 			g_PlayerJumping = TRUE;
 			FxPlay(FX_STOMP_ROBOT);
 
-			g_BossFrame = 0;
-			if (g_BossHitCount >= BOSS_HITS_REQUIRED) {
-				g_BossScreen = 10;
-			} else {
-				g_BossScreen = 9;
+			if (g_BossHitCount < BOSS_HITS_REQUIRED) {
+				// Spawn vortex flying from boss head toward its corner slot
+				g_VortexSlotIdx   = g_BossHitCount - 1;  // stomp 1→slot 0, stomp 2→slot 1, ...
+				u8 ox = g_BossDstX * 8 + BOSS_HEAD_OFFSET_X + 8;
+				u8 oy = (BOSS_HEAD_Y1 + BOSS_HEAD_Y2) / 2;
+				g_VortexX = ox;  g_VortexY = oy;
+				AimProjectile(ox, oy,
+				              g_BossVortexPos[g_VortexSlotIdx][0] * 8,
+				              g_BossVortexPos[g_VortexSlotIdx][1] * 8,
+				              BOSS_VORTEX_SPEED, &g_VortexDX, &g_VortexDY);
+				g_VortexState     = VORTEX_TO_SLOT;
+				g_VortexAnimFrame = 0;
 			}
+			g_BossFrame  = 0;
+			g_BossScreen = (g_BossHitCount >= BOSS_HITS_REQUIRED)
+			               ? BOSS_DEFEAT_STANCE : BOSS_STUN_STANCE;
 			DrawBossStance();
 		}
 	}
 
-	// Advance stance after BOSS_SWITCH_FRAMES frames
-	g_BossFrame++;
-	if (g_BossFrame >= BOSS_SWITCH_FRAMES) {
-		g_BossFrame = 0;
-		if (g_BossScreen == 10) {
-			SetMessageScreen("YOU WON!", -1, 500);
-			Game_SetState(State_MessageScreen);
-			return TRUE;
-		} else if (g_BossScreen == 9) {
-			g_BossScreen = 0;
-			DrawBossStance();
-		} else {
+	// Advance stance after BOSS_SWITCH_FRAMES frames (does NOT tick while stunned)
+	if (g_BossScreen != BOSS_STUN_STANCE) {
+		g_BossFrame++;
+		if (g_BossFrame >= BOSS_SWITCH_FRAMES) {
+			g_BossFrame = 0;
+			if (g_BossScreen == BOSS_DEFEAT_STANCE) {
+				SetMessageScreen("YOU WON!", -1, 500);
+				Game_SetState(State_MessageScreen);
+				return TRUE;
+			}
+			// Normal stance cycling
 			g_BossScreen = (g_BossScreen + 1) % BOSS_NUM_STANCES;
+			// Step position 1 tile in current direction, bounce at limits
+			g_BossDstX += g_BossMoveDir;
+			if ((i8)g_BossDstX >= (i8)(BOSS_STANCE_DST_X + BOSS_MOVE_RANGE))
+				g_BossMoveDir = -1;
+			else if ((i8)g_BossDstX <= (i8)(BOSS_STANCE_DST_X - BOSS_MOVE_RANGE))
+				g_BossMoveDir = 1;
 			DrawBossStance();
+		}
+	}
+
+	// Flying vortex state machine
+	if (g_VortexState != VORTEX_INACTIVE) {
+		g_VortexAnimFrame++;
+		if (g_VortexAnimFrame >= 30) g_VortexAnimFrame = 0;
+		u8 vpattern = VORTEX_FRAME(g_VortexAnimFrame / 10);
+		u8 sx = g_BossVortexPos[g_VortexSlotIdx][0] * 8;
+		u8 sy = g_BossVortexPos[g_VortexSlotIdx][1] * 8;
+
+		if (g_VortexState == VORTEX_TO_SLOT) {
+			g_VortexX += g_VortexDX;
+			g_VortexY += g_VortexDY;
+			// Arrival: each axis has reached or passed its target (no u8 wrap risk with i16)
+			u8 x_arr = (g_VortexDX == 0) || (g_VortexDX > 0 ? (g_VortexX >= (i16)sx) : (g_VortexX <= (i16)sx));
+			u8 y_arr = (g_VortexDY == 0) || (g_VortexDY > 0 ? (g_VortexY >= (i16)sy) : (g_VortexY <= (i16)sy));
+			if (x_arr && y_arr) {
+				g_VortexX = sx;  g_VortexY = sy;
+				g_VortexState = VORTEX_AT_SLOT;
+			}
+			VDP_SetSpriteSM1(VORTEX_SPRITE_ID, (u8)g_VortexX, (u8)g_VortexY, vpattern, COLOR_WHITE);
+
+		} else if (g_VortexState == VORTEX_AT_SLOT) {
+			VDP_SetSpriteSM1(VORTEX_SPRITE_ID, (u8)g_VortexX, (u8)g_VortexY, vpattern, COLOR_WHITE);
+			// Player touches vortex → becomes weapon, flies back to boss
+			if (rectCollide(g_PlayerPawn.PositionX,      g_PlayerPawn.PositionY,
+			                g_PlayerPawn.PositionX + 15, g_PlayerPawn.PositionY + 15,
+			                (u8)g_VortexX, (u8)g_VortexY, (u8)g_VortexX + 15, (u8)g_VortexY + 15)) {
+				u8 bx = g_BossDstX * 8 + BOSS_HEAD_OFFSET_X + 8;
+				u8 by = (BOSS_HEAD_Y1 + BOSS_HEAD_Y2) / 2;
+				AimProjectile(sx, sy, bx, by, BOSS_VORTEX_SPEED, &g_VortexDX, &g_VortexDY);
+				g_VortexX = sx;  g_VortexY = sy;
+				g_VortexState = VORTEX_TO_BOSS;
+			}
+
+		} else {  // VORTEX_TO_BOSS
+			g_VortexX += g_VortexDX;
+			g_VortexY += g_VortexDY;
+			u8 bx = g_BossDstX * 8 + BOSS_HEAD_OFFSET_X + 8;
+			u8 by = (BOSS_HEAD_Y1 + BOSS_HEAD_Y2) / 2;
+			// Arrival: each axis has reached or passed its target
+			u8 x_arr = (g_VortexDX == 0) || (g_VortexDX > 0 ? (g_VortexX >= (i16)bx) : (g_VortexX <= (i16)bx));
+			u8 y_arr = (g_VortexDY == 0) || (g_VortexDY > 0 ? (g_VortexY >= (i16)by) : (g_VortexY <= (i16)by));
+			if (x_arr && y_arr) {
+				// Vortex hits boss: boss takes damage and resumes patrol
+				g_VortexState = VORTEX_INACTIVE;
+				VDP_HideSprite(VORTEX_SPRITE_ID);
+				FxPlay(FX_STOMP_ROBOT);  // placeholder: swap for dedicated vortex SFX
+				g_BossScreen = 0;
+				g_BossFrame  = 0;
+				DrawBossStance();
+			} else {
+				VDP_SetSpriteSM1(VORTEX_SPRITE_ID, (u8)g_VortexX, (u8)g_VortexY, vpattern, COLOR_BLACK);
+			}
 		}
 	}
 

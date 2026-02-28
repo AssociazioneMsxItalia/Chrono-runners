@@ -298,7 +298,7 @@ void AllocateCurrentLevelSprites();
 
 // Per partire velocemente da un punto della sequenza per il debug
 // 0 = dall'inizio (mostra il menu), >0 = salta direttamente a quel punto
-#define START_SEQUENCE_IDX 38
+#define START_SEQUENCE_IDX 0
 
 u8 g_CurrentLevelIdx;
 u8 g_NextLevelIdx;
@@ -466,6 +466,32 @@ void LoadLevel(u8 levelIndex) {
 void FxPlay(u8 id) {
 WITH_SEGMENT(4) {
 	S4_FxPlay(id);
+}
+}
+
+void SetSong(u8 id) {
+WITH_SEGMENT(4) {
+	SoundSetSong(id);
+}
+}
+
+void Play() {
+WITH_SEGMENT(4) {
+	SoundPlay();
+}
+}
+
+void Loop(bool value) {
+WITH_SEGMENT(4) {
+	SoundLoop(value);
+}
+}
+
+// Shim callable from segment 7 code
+void AllocateCurrentLevelSprites()
+{
+WITH_SEGMENT(3) {
+	AllocateSpriteIDs(&g_ActiveLevel);
 }
 }
 
@@ -844,15 +870,6 @@ WITH_SEGMENT(3) {
 	PrintTime();
 
 	Game_SetState(State_Game);
-}
-
-// Shim callable from segment 7 code (which cannot use WITH_SEGMENT itself):
-// routes AllocateSpriteIDs through the main segment so the bank switch is safe.
-void AllocateCurrentLevelSprites()
-{
-WITH_SEGMENT(3) {
-	AllocateSpriteIDs(&g_ActiveLevel);
-}
 }
 
 bool State_Game()
