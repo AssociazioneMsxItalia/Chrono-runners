@@ -224,12 +224,6 @@ extern void AllocateSpriteIDs(struct Level *lvl);
 // SEGMENT 4, BANK 1
 //=============================================================================
 
-extern const u8 g_chronorunner[];
-extern const u8 g_gameover[];
-extern const u8 g_menu[];
-
-extern const u8* g_SongData[3];
-
 extern void SoundInit();
 extern void SoundPlay();
 extern void SoundSetSong(u8 songId);
@@ -663,9 +657,6 @@ WITH_SEGMENT(3) {
 	InitLevels();
 
 WITH_SEGMENT(4) {
-	g_SongData[0] = g_chronorunner;
-	g_SongData[1] = g_gameover;
-	g_SongData[2] = g_menu;
 	SoundStop();
 }
 
