@@ -849,8 +849,8 @@ u8 Snapshot_RewindStep() {
 
 // Frames between stance switches
 #define BOSS_SWITCH_FRAMES   25
-// Total number of stances: 3 sheets x 4 slots each
-#define BOSS_NUM_STANCES      9
+// Number of normal (patrol) stances 0-3; used to distinguish from STUN/DEFEAT
+#define BOSS_NORMAL_STANCES   4
 // Each stance is a 14x11 tile rectangle inside a 32-wide sheet
 #define BOSS_STANCE_W         14
 #define BOSS_STANCE_H         11
@@ -868,8 +868,6 @@ u8 Snapshot_RewindStep() {
 #define BOSS_START_Y  144
 // Number of head hits needed to defeat the boss
 #define BOSS_HITS_REQUIRED   5
-// Boss horizontal movement: ±BOSS_MOVE_RANGE tiles, steps once per stance change
-#define BOSS_MOVE_RANGE       3
 // Pixel offset of head hitbox from stance left edge: BOSS_HEAD_X1 - BOSS_STANCE_DST_X*8
 #define BOSS_HEAD_OFFSET_X   40
 // Boss stances
@@ -888,10 +886,11 @@ u8 Snapshot_RewindStep() {
 #define VORTEX_TO_BOSS   3  // flying back as weapon (black)
 
 u8   g_BossFrame          = 0;  // Frames elapsed in current stance
-u8   g_BossScreen         = 0;  // Current stance index (0 .. BOSS_NUM_STANCES-1)
+u8   g_BossScreen         = 0;  // Current stance index (0-3 normal, 9 stun, 10 defeat)
 u8   g_BossHitCount       = 0;  // Stomps landed on the boss head so far
 u8   g_BossDstX           = 0;  // Current stance X position in tiles (runtime)
-i8   g_BossMoveDir        = 1;  // Movement direction: +1 right, -1 left
+u8   g_BossWalkDir        = 1;  // 0 = right sequence, 1 = left sequence
+u8   g_BossSeqStep        = 0;  // Current step index within the walk sequence (0-4)
 bool g_BossBulletActive   = FALSE;
 u8   g_BossBulletX        = 0;
 u8   g_BossBulletY        = 0;
@@ -913,6 +912,16 @@ static const u8 g_BossVortexPos[4][2] = {
     {  6,  4 },
     { 24,  4 },
     { 26, 19 },
+};
+
+// Boss patrol sequences: each step is {stance index (0-3), tile delta X}
+typedef struct { u8 stance; i8 dx; } BossStep;
+
+static const BossStep g_WalkRight[5] = {
+    {2, 0}, {0, 0}, {1, 1}, {3, 1}, {2, 0}
+};
+static const BossStep g_WalkLeft[5] = {
+    {2, 0}, {3, 0}, {1,-1}, {0,-1}, {2, 0}
 };
 
 // Boss fight: background + stance sprite sheets (4 stances each, 2x2 grid)
@@ -1003,10 +1012,11 @@ void InitBoss()
 	VDP_HideAllSprites();
 
 	g_BossFrame        = 0;
-	g_BossScreen       = 0;
+	g_BossScreen       = g_WalkLeft[0].stance;  // first step of left sequence
 	g_BossHitCount     = 0;
 	g_BossDstX         = BOSS_STANCE_DST_X;
-	g_BossMoveDir      = 1;
+	g_BossWalkDir      = 1;   // start with left sequence
+	g_BossSeqStep      = 1;   // step 0 consumed by the initial draw above
 	g_BossBulletActive = FALSE;
 	g_BossFireTimer    = 0;
 	g_VortexState      = VORTEX_INACTIVE;
@@ -1069,7 +1079,7 @@ bool State_Boss()
 	DrawPlatforms(lvl, FALSE);
 
 	// Boss bullet: fire toward player (normal stances only)
-	if (g_BossScreen < BOSS_NUM_STANCES) {
+	if (g_BossScreen < BOSS_NORMAL_STANCES) {
 		g_BossFireTimer++;
 		if (g_BossFireTimer >= BOSS_FIRE_FRAMES && !g_BossBulletActive) {
 			g_BossFireTimer = 0;
@@ -1109,7 +1119,7 @@ bool State_Boss()
 	}
 
 	// Head hit: vulnerable on any normal stance (not during hit/defeat poses)
-	if (g_BossScreen < BOSS_NUM_STANCES) {
+	if (g_BossScreen < BOSS_NORMAL_STANCES) {
 		u8 head_x1 = g_BossDstX * 8 + BOSS_HEAD_OFFSET_X;
 		u8 head_x2 = head_x1 + (BOSS_HEAD_X2 - BOSS_HEAD_X1);
 		if (rectCollide(g_PlayerPawn.PositionX,      g_PlayerPawn.PositionY,
@@ -1154,14 +1164,17 @@ bool State_Boss()
 				Game_SetState(State_MessageScreen);
 				return TRUE;
 			}
-			// Normal stance cycling
-			g_BossScreen = (g_BossScreen + 1) % BOSS_NUM_STANCES;
-			// Step position 1 tile in current direction, bounce at limits
-			g_BossDstX += g_BossMoveDir;
-			if ((i8)g_BossDstX >= (i8)(BOSS_STANCE_DST_X + BOSS_MOVE_RANGE))
-				g_BossMoveDir = -1;
-			else if ((i8)g_BossDstX <= (i8)(BOSS_STANCE_DST_X - BOSS_MOVE_RANGE))
-				g_BossMoveDir = 1;
+			// Sequence-driven stance and movement
+			{
+				const BossStep* seq = g_BossWalkDir ? g_WalkLeft : g_WalkRight;
+				g_BossScreen = seq[g_BossSeqStep].stance;
+				g_BossDstX  += seq[g_BossSeqStep].dx;
+				g_BossSeqStep++;
+				if (g_BossSeqStep >= 5) {
+					g_BossSeqStep = 0;
+					g_BossWalkDir ^= 1;  // alternate direction each full cycle
+				}
+			}
 			DrawBossStance();
 		}
 	}
@@ -1212,7 +1225,13 @@ bool State_Boss()
 				g_VortexState = VORTEX_INACTIVE;
 				VDP_HideSprite(VORTEX_SPRITE_ID);
 				FxPlay(FX_STOMP_ROBOT);  // placeholder: swap for dedicated vortex SFX
-				g_BossScreen = 0;
+				// Resume toward center: left of center → go right, right of center → go left
+				g_BossWalkDir = (g_BossDstX < BOSS_STANCE_DST_X) ? 0 : 1;
+				g_BossSeqStep  = 1;  // step 0 consumed below
+				{
+					const BossStep* seq = g_BossWalkDir ? g_WalkLeft : g_WalkRight;
+					g_BossScreen = seq[0].stance;
+				}
 				g_BossFrame  = 0;
 				DrawBossStance();
 			} else {
