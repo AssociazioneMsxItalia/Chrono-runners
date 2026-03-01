@@ -95,6 +95,20 @@ static const CutSpriteAnimDef g_VortexAnim = {
 };
 
 //-----------------------------------------------------------------------------
+// Crystal animation definition
+//-----------------------------------------------------------------------------
+static const CutSpriteAnimDef g_CrystalAnim = {
+    CRYSTAL_SPRITE_ID,                                  // baseId
+    1,                                                  // numLayers
+    2,                                                  // numFrames
+    { CRYSTAL_FRAME(0), CRYSTAL_FRAME(1), NULL },       // frames
+    CRYSTAL_FRAME(0),                                   // idleFrame
+    12,                                                 // animSpeed
+    laySize,                                            // layerOffset
+    { COLOR_MEDIUM_RED, 0 }                             // colors
+};
+
+//-----------------------------------------------------------------------------
 // Force field animation definitions (for electrician robots in World 4)
 //-----------------------------------------------------------------------------
 static const CutSpriteAnimDef g_ForceFieldAnim = {
@@ -332,13 +346,31 @@ const CutCmd g_IntroCutscene[] = {
 	CUT_WAIT_KEY(),
 	CUT_CLEAR_TEXT(),
 
+    CUT_SPRITE_ANIM(&g_VortexAnim, 15*8, 10*8, 100),
+
 	CUT_TEXT_TYPE("OTHERWISE, DR. CRAZY WILL USE", 21),
 	CUT_TEXT_TYPE("THEM TO TRAVEL BACK IN TIME!", 23),
 	CUT_WAIT_KEY(),
 	CUT_CLEAR_TEXT(),
 
-	CUT_TEXT_TYPE("BRING THEM ALL TO ME", 21),
-	CUT_TEXT_TYPE("AND WE WILL SAVE THE WORLD!", 23),
+	CUT_SPRITE_HIDE(VORTEX_SPRITE_ID),
+
+	CUT_TEXT_TYPE("IN YOUR JOURNEY YOU WILL FIND", 21),
+	CUT_TEXT_TYPE("THE TIME CRYSTALS.", 23),
+	CUT_WAIT_KEY(),
+	CUT_CLEAR_TEXT(),
+
+    CUT_SPRITE_ANIM(&g_CrystalAnim, 15*8, 10*8, 100),
+
+	CUT_TEXT_TYPE("THEY ALLOW YOU TO REWIND TIME.", 21),
+	CUT_TEXT_TYPE("USE THEM WISELY!", 23),
+	CUT_WAIT_KEY(),
+	CUT_CLEAR_TEXT(),
+
+	CUT_SPRITE_HIDE(CRYSTAL_SPRITE_ID),
+
+	CUT_TEXT_TYPE("BRING THE SINGULARITIES TO ME", 21),
+	CUT_TEXT_TYPE("WE WILL SAVE THE WORLD! GO!!!", 23),
 	CUT_WAIT_KEY(),
 	CUT_CLEAR_TEXT(),
 
