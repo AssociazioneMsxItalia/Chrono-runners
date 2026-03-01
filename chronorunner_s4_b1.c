@@ -3,9 +3,9 @@
 #include "ayfx/ayfx_player.h"
 #include "pt3/pt3_notetable2.h"
 
-#include "content/pt3/chronorunner.h"
+#include "content/pt3/game_bitslower.h"
 #include "content/pt3/gameover.h"
-#include "content/pt3/menu.h"
+#include "content/pt3/german4.h"
 #include "content/pt3/hitlerfinale.h"
 
 #include "content/ayfx/fx_chronorunner.h"
@@ -43,9 +43,9 @@ void SoundInit() {
 	ayFX_SetChannel(PSG_CHANNEL_C);
 	ayFX_SetMode(AYFX_MODE_FIXED);
 
-	g_SongData[0] = g_chronorunner;
+	g_SongData[0] = g_game_bitslower;
 	g_SongData[1] = g_gameover;
-	g_SongData[2] = g_menu;
+	g_SongData[2] = g_german4;
 	g_SongData[3] = g_hitlerfinale;
 }
 

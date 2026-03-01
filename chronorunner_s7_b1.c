@@ -1044,7 +1044,7 @@ void InitBoss()
 	             g_PlayerLayers, 2,
 	             BOSS_START_X, BOSS_START_Y);
 
-	SetSong(3);
+	SetSong(MUSIC_BOSS);
 	Loop(TRUE);
 	Play();
 

@@ -705,7 +705,7 @@ WITH_SEGMENT(4) {
 	if (g_SequenceIdx == 0) {
 WITH_SEGMENT(4) {
 		// Start menu music
-		SoundSetSong(2);
+		SoundSetSong(MUSIC_MENU);
 		SoundLoop(TRUE);
 		SoundPlay();
 }
@@ -783,7 +783,7 @@ bool State_Intermission()
 
 WITH_SEGMENT(4) {
 		if (SoundGetSong() != 0) {
-			SoundSetSong(0);
+			SoundSetSong(MUSIC_GAME);
 			SoundLoop(TRUE);
 			SoundPlay();
 		}
@@ -1040,7 +1040,7 @@ bool State_Death()
 		} else {
 			// Se il tempo è esaurito, vai a Game Over
 			if (g_RemainingMinutes == 0 && g_RemainingSeconds == 0) {
-				SetMessageScreen("GAME OVER", 1, 500);
+				SetMessageScreen("GAME OVER", MUSIC_GAMEOVER, 500);
 				Game_SetState(State_MessageScreen);
 			} else {
 				// Flash su respawn personaggio
