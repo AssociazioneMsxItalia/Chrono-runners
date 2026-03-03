@@ -79,6 +79,10 @@ static const CutSpriteAnimDef g_PlayerFreaked = {
 #include "content/screens/screen_63.h"
 #include "content/screens/screen_76.h"
 
+// Preboss cutscene
+#include "content/screens/screen_82.h"
+#include "content/screens/screen_77.h"
+
 
 //-----------------------------------------------------------------------------
 // Vortex animation definition (for world-end cutscenes)
@@ -391,5 +395,130 @@ const CutCmd g_IntroCutscene[] = {
     CUT_WAIT_KEY(),
 	CUT_WAIT(10),
 
+    CUT_END(),
+};
+
+//-----------------------------------------------------------------------------
+// True colors cutscene
+//-----------------------------------------------------------------------------
+
+const CutCmd g_TrueColorsCutscene[] = {
+
+    // Clear and show new text
+    CUT_CLEAR_TEXT(),
+
+    CUT_LOAD_LAYOUT(g_Screen5, 0, CUTSCENE_GFX_Y, 32, CUTSCENE_GFX_ROWS),
+    CUT_SPRITE_SHOW(2, 20*8, 17*8, DOC_FRAME(0), COLOR_BLACK),
+
+	// Entra Chrono
+    CUT_SPRITE_WALK(&g_PlayerWalkRight, 0*8, 17*8, 14*8, 17*8, 2),
+
+    CUT_SPRITE_WALK(&g_VortexAnim, 14*8, 17*8, 20*8, 17*8, 3),
+    CUT_SPRITE_WALK(&g_VortexAnim, 14*8, 17*8, 20*8, 17*8, 3),
+    CUT_SPRITE_WALK(&g_VortexAnim, 14*8, 17*8, 20*8, 17*8, 3),
+    CUT_SPRITE_WALK(&g_VortexAnim, 14*8, 17*8, 20*8, 17*8, 3),
+
+    CUT_SPRITE_HIDE(VORTEX_SPRITE_ID),
+
+	CUT_TEXT_TYPE("AGENT, GREAT! YOU MADE IT!", 21),
+	CUT_TEXT_TYPE("THE WORLD IS NOW SAFE!", 23),
+	CUT_WAIT_KEY(),
+	CUT_CLEAR_TEXT(),
+
+    // Chrono inizia ad uscire
+    CUT_SPRITE_WALK(&g_PlayerWalkLeft, 14*8, 17*8, 5*8, 17*8, 2),
+
+    CUT_TEXT_TYPE("DANKE!", 22),
+    CUT_WAIT(100),
+    CUT_CLEAR_TEXT(),
+
+    CUT_TEXT_TYPE("AH AH AH!!! YOU FOOL!!!", 21),
+    CUT_TEXT_TYPE("THANKS FOR DOING ALL THE WORK!!!", 23),
+	CUT_WAIT_KEY(),
+	CUT_CLEAR_TEXT(),
+
+	CUT_SPRITE_ANIM(&g_PlayerFreaked, 5*8, 17*8, 100),
+
+	CUT_TEXT_TYPE("THE ROBOTS WERE DEFENDING THE", 21),
+	CUT_TEXT_TYPE("SINGULARITIES... FROM ME!!!", 23),
+	CUT_WAIT_KEY(),
+	CUT_CLEAR_TEXT(),
+
+    CUT_SPRITE_ANIM(&g_PlayerFreaked, 5*8, 17*8, 100),
+
+	CUT_TEXT_TYPE("I AM DOCTOR CRAZY!!!", 22),
+	CUT_WAIT_KEY(),
+	CUT_CLEAR_TEXT(),
+
+    CUT_SPRITE_ANIM(&g_PlayerFreaked, 5*8, 17*8, 100),
+
+    CUT_TEXT_TYPE("NOW I CAN TRAVEL BACK TO 1944 TO", 21),
+	CUT_TEXT_TYPE("BRING THE FINAL WEAPON TO HITLER", 23),
+	CUT_WAIT_KEY(),
+	CUT_CLEAR_TEXT(),
+
+    // Dottore scappa
+    CUT_SPRITE_WALK(&g_DocWalkRight, 20*8, 17*8, 29*8, 17*8, 2),
+
+    // Chrono rintronato
+    CUT_SPRITE_ANIM(&g_PlayerFreaked, 5*8, 17*8, 100),
+
+    // Chrono lo rincorre
+    CUT_SPRITE_WALK(&g_PlayerWalkRight, 5*8, 17*8, 31*8, 17*8, 2),
+	CUT_SPRITE_HIDE(0),
+	CUT_SPRITE_HIDE(1),
+
+	CUT_WAIT_KEY(),
+
+    CUT_END(),
+};
+
+//-----------------------------------------------------------------------------
+// Pre-boss cutscene
+//-----------------------------------------------------------------------------
+
+const CutCmd g_PreBossCutscene[] = {
+    CUT_LOAD_LAYOUT(g_Screen82, 0, CUTSCENE_GFX_Y, 32, CUTSCENE_GFX_ROWS),
+
+    CUT_SPRITE_SHOW(2, 22*8, 17*8, DOC_FRAME(0), COLOR_BLACK),
+
+    CUT_SPRITE_SHOW(6, 3*8, 5*8, VORTEX_FRAME(0), COLOR_WHITE),
+    CUT_SPRITE_SHOW(7, 9*8, 5*8, VORTEX_FRAME(0), COLOR_WHITE),
+    CUT_SPRITE_SHOW(8, 21*8, 5*8, VORTEX_FRAME(0), COLOR_WHITE),
+    CUT_SPRITE_SHOW(9, 27*8, 5*8, VORTEX_FRAME(0), COLOR_WHITE),
+
+    CUT_SPRITE_HIDE(6),
+    CUT_SPRITE_WALK(&g_VortexAnim, 3*8, 5*8, 15*8, 13*8, 3),
+    CUT_SPRITE_HIDE(7),
+    CUT_SPRITE_WALK(&g_VortexAnim, 9*8, 5*8, 15*8, 13*8, 3),
+    CUT_SPRITE_HIDE(8),
+    CUT_SPRITE_WALK(&g_VortexAnim, 21*8, 5*8, 15*8, 13*8, 3),
+    CUT_SPRITE_HIDE(9),
+    CUT_SPRITE_WALK(&g_VortexAnim, 27*8, 5*8, 15*8, 13*8, 3),
+
+    CUT_SPRITE_MOVE(2, 22*8, 17*8, 15*8, 13*8, 10),
+
+    CUT_TEXT_TYPE("ACTIVATE TIME TRAVEL!", 22),
+	CUT_WAIT_KEY(),
+	CUT_CLEAR_TEXT(),
+
+    CUT_SPRITE_HIDE(2),
+    CUT_SPRITE_HIDE(VORTEX_SPRITE_ID),
+
+    CUT_LOAD_LAYOUT(g_Screen77, 0, CUTSCENE_GFX_Y, 32, CUTSCENE_GFX_ROWS),
+
+    CUT_SPRITE_WALK(&g_VortexAnim, 15*8, 12*8, 15*8, 17*8, 1),
+
+    // Entra Chrono
+    CUT_SPRITE_WALK(&g_PlayerWalkRight, 0*8, 17*8, 5*8, 17*8, 2),
+    CUT_WAIT(50),
+
+    CUT_SPRITE_WALK(&g_PlayerWalkRight, 5*8, 17*8, 15*8, 17*8, 2),
+
+    CUT_SPRITE_HIDE(0),
+    CUT_SPRITE_HIDE(1),
+    CUT_SPRITE_HIDE(VORTEX_SPRITE_ID),
+
+    CUT_WAIT_KEY(),
     CUT_END(),
 };
