@@ -564,6 +564,9 @@ u8 g_EnemyKeyHintCounter;
 u8 g_EnergyFieldSpritesBaseID;
 u8 g_EnergyFieldAnimCounter;
 
+// Cheat mode
+bool g_CheatEnabled = FALSE;
+
 //=============================================================================
 // PHYSICS
 //=============================================================================
@@ -834,7 +837,7 @@ WITH_SEGMENT(next_lvl_seg) {
 
 	g_IntermissionState++;
 
-	if (g_IntermissionState > 100 || Keyboard_IsKeyPressed(KEY_F1)) {
+	if (g_IntermissionState > 100 || (g_CheatEnabled && Keyboard_IsKeyPressed(KEY_F1))) {
 		g_IntermissionState = 0;
 		ChangeLevel();
 		return FALSE;
@@ -972,7 +975,7 @@ bool State_Game()
     }
 
 	// Controlla se il giocatore ha raggiunto l'uscita
-	if (isPlayerAtExit() || Keyboard_IsKeyPressed(KEY_F1)) {
+	if (isPlayerAtExit() || (g_CheatEnabled && Keyboard_IsKeyPressed(KEY_F1))) {
 		FxPlay(FX_EXIT_DOOR);
 		AdvanceSequence();
 		return TRUE;
@@ -1178,6 +1181,9 @@ WITH_SEGMENT(1) {
     }
 
     u8 row8 = Keyboard_Read(8);
+
+    if (Keyboard_IsKeyPressed(KEY_F1))
+        g_CheatEnabled = TRUE;
 
     // Wait for all keys to be released before accepting new input
     if (g_MenuWait && IS_KEY_RELEASED(row8, KEY_UP) && IS_KEY_RELEASED(row8, KEY_DOWN) && IS_KEY_RELEASED(row8, KEY_SPACE)) {
