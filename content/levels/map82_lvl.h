@@ -4,7 +4,7 @@
 
 struct Level level_map82 = {
 	2, 17,       // start_x start_y
-	28, 17,       // end_x end_y
+	0, 0,       // end_x end_y
 	0, 0,      // key_x key_y
 	0, 0,        // crystal_x crystal_y
 	0,           // num_platforms
@@ -15,7 +15,7 @@ struct Level level_map82 = {
 	NULL,        // enemies
 	-1,        // key_trigger_enemy (-1 = visible from start)
 	g_Screen82,   // layout
-	"CUTSCENE - LEONARDO VETTORI",  // name
+	"",  // name
 };
 
 // Unknown sprite placements:

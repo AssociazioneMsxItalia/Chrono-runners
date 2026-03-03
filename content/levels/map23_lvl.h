@@ -12,7 +12,7 @@ struct Platform platforms_map23[] = {
 struct Enemy enemies_map23[] = {
   {22*8, 6*8,  // pos_x pos_y
 	        1,  // dir_x  TODO: set direction (-1 or 1)
-	16*8, 24*8,  // min_x max_x  TODO: adjust patrol range
+	18*8, 24*8,  // min_x max_x  TODO: adjust patrol range
 	        1,  // type (0-3)
 	        0,  // mDX (initialized to 0)
 	        0,  // stunned_timer (initialized to 0)
@@ -24,7 +24,7 @@ struct Enemy enemies_map23[] = {
 			0}, // field_dir
   {9*8, 6*8,  // pos_x pos_y
 	        1,  // dir_x  TODO: set direction (-1 or 1)
-	6*8, 13*8,  // min_x max_x  TODO: adjust patrol range
+	6*8, 11*8,  // min_x max_x  TODO: adjust patrol range
 	        1,  // type (0-3)
 	        0,  // mDX (initialized to 0)
 	        0,  // stunned_timer (initialized to 0)
