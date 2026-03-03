@@ -31,8 +31,6 @@
 #include "content/sprite/energyfield_sprt_layer.h"  // Energy field sprite
 #include "content/sprite/bullet_sprt_layer.h"       // Bullet sprite (Type 3 projectile)
 
-#include "content/sprite/bossbullet_sprt_layer.h" // Boss bullet
-
 #include "content/tile/data_tile_gm2.h"
 
 
@@ -124,7 +122,6 @@ void InitializeSprite() {
 	// Load bullet sprite (Type 3 projectile, 1 frame)
 	VDP_LoadSpritePattern(g_BulletSprtLayer, BULLET_PATTERN_OFFSET, BULLET_PATTERN_TOTAL);
 
-	VDP_LoadSpritePattern(g_BossBulletSprtLayer, BOSSBULLET_PATTERN_OFFSET, BOSSBULLET_PATTERN_TOTAL);
 }
 
 extern u8 g_PlatformSpritesBaseID;

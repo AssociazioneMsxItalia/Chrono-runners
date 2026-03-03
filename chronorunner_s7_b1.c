@@ -418,7 +418,7 @@ void DrawEnergyFields(struct Level *lvl, bool rewind) {
 			if (rewind) {
 				color = COLOR_WHITE;
 			} else {
-				color = COLOR_CYAN;
+				color = COLOR_LIGHT_RED;
 			}
 			VDP_SetSpriteSM1(sprite_id, enemies[e].field_x, enemies[e].field_y, BULLET_PATTERN_OFFSET, color);
 		} else if (enemies[e].field_state == 1) {
@@ -1114,7 +1114,7 @@ bool State_Boss()
 		} else {
 			VDP_SetSpriteSM1(VORTEX_SPRITE_ID,
 			                 g_BossBulletX, g_BossBulletY,
-			                 BOSSBULLET_FRAME(0), COLOR_LIGHT_RED);
+			                 BULLET_FRAME(0), COLOR_LIGHT_RED);
 		}
 	}
 
