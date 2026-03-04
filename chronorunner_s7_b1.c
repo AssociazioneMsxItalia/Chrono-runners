@@ -931,6 +931,9 @@ static const BossStep g_WalkLeft[5] = {
     {2, 0}, {3, 0}, {1,-1}, {0,-1}, {2, 0}
 };
 
+// Minimum tiles that must be free on a side before the boss walks toward it
+#define BOSS_WALK_MARGIN  8
+
 // Boss fight: background + stance sprite sheets (4 stances each, 2x2 grid)
 #include "content/screens/screen_84.h"
 #include "content/screens/screen_85.h"
@@ -1008,16 +1011,34 @@ void DrawBossStance()
 	}
 }
 
+// Choose the next walk direction based on available screen space.
+// Continues in the current direction if there is room; otherwise switches.
+static u8 ChooseWalkDir()
+{
+	if (g_BossWalkDir == 1)  // currently going left
+		return (g_BossDstX >= BOSS_WALK_MARGIN) ? 1 : 0;
+	else                     // currently going right
+		return (g_BossDstX + BOSS_STANCE_W + BOSS_WALK_MARGIN <= 32) ? 0 : 1;
+}
+
+// Begin a walk cycle from step 0 of the given direction (0=right, 1=left).
+// Resets the frame timer and redraws immediately. Called from init and resume points.
+static void StartBossWalkCycle(u8 dir)
+{
+	const BossStep* seq = dir ? g_WalkLeft : g_WalkRight;
+	g_BossWalkDir = dir;
+	g_BossSeqStep = 1;           // step 0 drawn immediately below
+	g_BossScreen  = seq[0].stance;
+	g_BossFrame   = 0;
+	DrawBossStance();
+}
+
 void InitBoss()
 {
 	VDP_HideAllSprites();
 
-	g_BossFrame        = 0;
-	g_BossScreen       = g_WalkLeft[0].stance;  // first step of left sequence
 	g_BossHitCount     = 0;
 	g_BossDstX         = BOSS_STANCE_DST_X;
-	g_BossWalkDir      = 1;   // start with left sequence
-	g_BossSeqStep      = 1;   // step 0 consumed by the initial draw above
 	g_BossBulletActive = FALSE;
 	g_BossFireTimer    = 0;
 	g_BossFirePhase    = BOSS_FIRE_IDLE;
@@ -1050,7 +1071,7 @@ void InitBoss()
 
 	// Draw the full arena background once; DrawBossStance only refreshes the dynamic region
 	VDP_WriteLayout_GM2(g_Screen84, 0, 0, 32, 24);
-	DrawBossStance();
+	StartBossWalkCycle(1);  // always start walking left
 
 	ReinitPlayer(&g_PlayerPawn,
 	             g_PlayerLayers, 2,
@@ -1116,13 +1137,7 @@ bool State_Boss()
 			// Return to patrol from step 0 of the current walk direction
 			g_BossFirePhase = BOSS_FIRE_IDLE;
 			g_BossFireTimer = 0;
-			g_BossFrame     = 0;
-			g_BossSeqStep   = 1;
-			{
-				const BossStep* seq = g_BossWalkDir ? g_WalkLeft : g_WalkRight;
-				g_BossScreen = seq[0].stance;
-			}
-			DrawBossStance();
+			StartBossWalkCycle(g_BossWalkDir);
 		}
 	}
 
@@ -1145,7 +1160,7 @@ bool State_Boss()
 		} else {
 			VDP_SetSpriteSM1(VORTEX_SPRITE_ID,
 			                 g_BossBulletX, g_BossBulletY,
-			                 BULLET_FRAME(0), COLOR_LIGHT_RED);
+			                 (u8)(BULLET_FRAME(0)), COLOR_LIGHT_RED);
 		}
 	}
 
@@ -1205,7 +1220,7 @@ bool State_Boss()
 				g_BossSeqStep++;
 				if (g_BossSeqStep >= 5) {
 					g_BossSeqStep = 0;
-					g_BossWalkDir ^= 1;  // alternate direction each full cycle
+					g_BossWalkDir = ChooseWalkDir();
 				}
 			}
 			DrawBossStance();
@@ -1258,17 +1273,9 @@ bool State_Boss()
 				g_VortexState = VORTEX_INACTIVE;
 				VDP_HideSprite(VORTEX_SPRITE_ID);
 				FxPlay(FX_STOMP_ROBOT);  // placeholder: swap for dedicated vortex SFX
-				// Resume toward center: left of center → go right, right of center → go left
-				g_BossWalkDir   = (g_BossDstX < BOSS_STANCE_DST_X) ? 0 : 1;
-				g_BossSeqStep   = 1;  // step 0 consumed below
 				g_BossFirePhase = BOSS_FIRE_IDLE;
 				g_BossFireTimer = 0;
-				{
-					const BossStep* seq = g_BossWalkDir ? g_WalkLeft : g_WalkRight;
-					g_BossScreen = seq[0].stance;
-				}
-				g_BossFrame  = 0;
-				DrawBossStance();
+				StartBossWalkCycle(ChooseWalkDir());
 			} else {
 				VDP_SetSpriteSM1(VORTEX_SPRITE_ID, (u8)g_VortexX, (u8)g_VortexY, vpattern, COLOR_BLACK);
 			}
