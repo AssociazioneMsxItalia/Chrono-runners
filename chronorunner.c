@@ -31,7 +31,7 @@ typedef struct { u8 type; u8 idx; } SequenceEntry;
 // Function prototypes
 bool State_Initialize();
 bool State_Menu();
-bool State_Credits();
+bool State_Slideshow();
 bool State_Game();
 bool State_Death();
 bool State_Rewind();
@@ -156,6 +156,7 @@ extern const u8 g_Screen2[];
 // Credits screen
 extern const u8 g_Screen80[];
 extern const u8 g_Screen81[];
+extern const u8 g_Screen91[];
 
 // Intermission screen
 extern const u8 g_Screen15[];
@@ -1156,16 +1157,26 @@ u8 g_MenuState = 0;
 u8 g_MenuSelection = 0;
 u8 g_MenuWait = 0;
 
-u8 g_CreditsState = 0;
-u8 g_CreditsWait = 0;
+// Slideshow state
+typedef struct {
+    const u8** screens;
+    u8         count;
+} SlideshowConfig;
 
-// Menu option Y positions (rows 11, 13, 15, 17)
-#define MENU_NUM_OPTIONS    4
+SlideshowConfig g_SlideshowConfig;
+u8 g_SlideshowPage;   // 0xFF = needs init
+u8 g_SlideshowWait;
+
+static const u8* g_CreditsScreensList[] = { g_Screen80, g_Screen81 };
+static const u8* g_RatingScreensList[]  = { g_Screen91 };
+
+// Menu option positions: (col, row) = (12,12) start, (10,14) none, (8,16) credits
+#define MENU_NUM_OPTIONS    3
 #define MENU_HIGHLIGHT_TILE 49
 #define MENU_EMPTY_TILE     47
 
-static const u8 g_MenuRows[MENU_NUM_OPTIONS] = { 11, 13, 15, 17 };
-static const u8 g_MenuColumns[MENU_NUM_OPTIONS] = { 14, 12, 10, 8 };
+static const u8 g_MenuRows[MENU_NUM_OPTIONS] = { 12, 14, 16 };
+static const u8 g_MenuColumns[MENU_NUM_OPTIONS] = { 12, 10, 8 };
 
 bool State_Menu()
 {
@@ -1205,9 +1216,18 @@ WITH_SEGMENT(1) {
 			g_MenuState = 0;
             g_SequenceIdx = 0;
             AdvanceSequence();
-        } else if (g_MenuSelection == 3) {
+        } else if (g_MenuSelection == 1) {
+            g_SlideshowConfig.screens = g_RatingScreensList;
+            g_SlideshowConfig.count   = 1;
+            g_SlideshowPage           = 0xFF;
             g_MenuState = 0;
-            Game_SetState(State_Credits);
+            Game_SetState(State_Slideshow);
+        } else if (g_MenuSelection == 2) {
+            g_SlideshowConfig.screens = g_CreditsScreensList;
+            g_SlideshowConfig.count   = 2;
+            g_SlideshowPage           = 0xFF;
+            g_MenuState = 0;
+            Game_SetState(State_Slideshow);
         }
         return TRUE;
     }
@@ -1221,39 +1241,36 @@ WITH_SEGMENT(1) {
 }
 
 //=============================================================================
-// CREDITS STATE
+// SLIDESHOW STATE
 //=============================================================================
 
-bool State_Credits()
+bool State_Slideshow()
 {
-    if (g_CreditsState == 0) {
+    if (g_SlideshowPage == 0xFF) {
         VDP_HideAllSprites();
 WITH_SEGMENT(1) {
-        VDP_WriteLayout_GM2(g_Screen80, 0, 0, 32, 24);
+        VDP_WriteLayout_GM2(g_SlideshowConfig.screens[0], 0, 0, 32, 24);
 }
-        g_CreditsState = 1;
-        g_CreditsWait = 1;  // Discard the SPACE that triggered credits from menu
+        g_SlideshowPage = 0;
+        g_SlideshowWait = 1;  // Discard the SPACE that triggered the slideshow
     }
 
     u8 row8 = Keyboard_Read(8);
 
-    // Wait for SPACE to be released before accepting next press
-    if (g_CreditsWait) {
-        if (IS_KEY_RELEASED(row8, KEY_SPACE)) {
-            g_CreditsWait = 0;
-        }
+    if (g_SlideshowWait) {
+        if (IS_KEY_RELEASED(row8, KEY_SPACE))
+            g_SlideshowWait = 0;
         return TRUE;
     }
 
     if (IS_KEY_PRESSED(row8, KEY_SPACE)) {
-        if (g_CreditsState == 1) {
+        if (g_SlideshowPage + 1 < g_SlideshowConfig.count) {
+            g_SlideshowPage++;
 WITH_SEGMENT(1) {
-            VDP_WriteLayout_GM2(g_Screen81, 0, 0, 32, 24);
+            VDP_WriteLayout_GM2(g_SlideshowConfig.screens[g_SlideshowPage], 0, 0, 32, 24);
 }
-            g_CreditsState = 2;
-            g_CreditsWait = 1;
-        } else if (g_CreditsState == 2) {
-            g_CreditsState = 0;
+            g_SlideshowWait = 1;
+        } else {
             Game_SetState(State_Menu);
         }
     }

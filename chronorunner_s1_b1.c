@@ -13,6 +13,9 @@
 #include "content/screens/screen_80.h"
 #include "content/screens/screen_81.h"
 
+// Info screen
+#include "content/screens/screen_91.h"
+
 // Intermission screen
 #include "content/screens/screen_15.h"
 
