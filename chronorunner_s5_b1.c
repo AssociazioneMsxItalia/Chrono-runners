@@ -589,3 +589,29 @@ const CutCmd g_PreFightCutscene[] = {
 
     CUT_END(),
 };
+
+//-----------------------------------------------------------------------------
+// Final cutscene (after boss defeat)
+//-----------------------------------------------------------------------------
+
+const CutCmd g_FinalCutscene[] = {
+    CUT_FILL(47, 0, CUTSCENE_GFX_Y, 32, CUTSCENE_GFX_ROWS),
+
+    CUT_TEXT_TYPE("CONGRATULATIONS!", 0),
+    CUT_WAIT_KEY(),
+
+    CUT_TEXT_TYPE("AFTER DEFEATING THE WUNDERWAFFE", 3),
+    CUT_TEXT_TYPE("YOU RETURN TO 2026, BRINGING", 5),
+    CUT_TEXT_TYPE("BACK THE SINGULARITIES.", 7),
+    CUT_WAIT_KEY(),
+
+    CUT_TEXT_TYPE("SCIENTISTS USE THEM TO PRODUCE", 10),
+    CUT_TEXT_TYPE("FREE ENERGY, ENDING ALL WARS.", 12),
+    CUT_WAIT_KEY(),
+
+    CUT_TEXT_TYPE("NOW TURN OFF THE COMPUTER", 21),
+    CUT_TEXT_TYPE("AND GO TO SLEEP.", 23),
+    CUT_WAIT_KEY(),
+
+    CUT_END(),
+};

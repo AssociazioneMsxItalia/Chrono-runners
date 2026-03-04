@@ -23,8 +23,9 @@
 // Sequence system: interleave levels and cutscenes
 #define SEQ_LEVEL    0
 #define SEQ_CUTSCENE 1
-#define MAX_CUTSCENES 12
-#define MAX_SEQUENCE  (NUM_LEVELS + MAX_CUTSCENES)
+#define SEQ_BOSS     2
+#define MAX_CUTSCENES 13
+#define MAX_SEQUENCE  (NUM_LEVELS + MAX_CUTSCENES + 1) // +1 for boss entry
 
 typedef struct { u8 type; u8 idx; } SequenceEntry;
 
@@ -252,6 +253,7 @@ extern const CutCmd g_World4EndCutscene[];
 extern const CutCmd g_TrueColorsCutscene[];
 extern const CutCmd g_PreBossCutscene[];
 extern const CutCmd g_PreFightCutscene[];
+extern const CutCmd g_FinalCutscene[];
 
 //=============================================================================
 // SEGMENT 6, BANK 1
@@ -344,6 +346,11 @@ u8 SegmentForLevel(u8 lvlidx) {
 	s++; c++; \
 } while(0)
 
+#define ADD_BOSS() do { \
+	g_Sequence[s].type = SEQ_BOSS; g_Sequence[s].idx = 0; \
+	s++; \
+} while(0)
+
 void InitLevels() {
 	u8 s = 0, l = 0, c = 0;
 
@@ -400,6 +407,8 @@ void InitLevels() {
 	ADD_LEVEL(level_map13);
 	ADD_CUTSCENE(g_PreBossCutscene);
 	ADD_CUTSCENE(g_PreFightCutscene);
+	ADD_BOSS();
+	ADD_CUTSCENE(g_FinalCutscene);
 
 	g_SequenceLength = s;
 
@@ -415,7 +424,9 @@ void SetMessageScreen(const c8* text, i8 songId, u16 duration);
 void AdvanceSequence()
 {
 	if (g_SequenceIdx >= g_SequenceLength) {
-		InitBoss();
+		// Past end of sequence: game complete
+		SetMessageScreen("THE END", -1, 150);
+		Game_SetState(State_MessageScreen);
 		return;
 	}
 
@@ -424,6 +435,9 @@ void AdvanceSequence()
 	if (entry->type == SEQ_CUTSCENE) {
 		g_SequenceIdx++;
 		Cutscene_Start(g_CutsceneScripts[entry->idx]);
+	} else if (entry->type == SEQ_BOSS) {
+		g_SequenceIdx++;
+		InitBoss();
 	} else {
 		// Level: don't advance g_SequenceIdx yet, State_ChangeLevel will
 		g_NextLevelIdx = entry->idx;

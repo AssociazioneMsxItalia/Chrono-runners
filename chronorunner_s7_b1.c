@@ -9,6 +9,8 @@
 #include "snapshot.h"
 #include "fx_sounds.h"
 
+extern void AdvanceSequence();
+
 extern u8 g_RemainingMinutes;
 extern u8 g_RemainingSeconds;
 extern u8 g_PlayerRewindEnergy;
@@ -1207,8 +1209,7 @@ bool State_Boss()
 		if (g_BossFrame >= BOSS_SWITCH_FRAMES) {
 			g_BossFrame = 0;
 			if (g_BossScreen == BOSS_DEFEAT_STANCE) {
-				SetMessageScreen("YOU WON!", -1, 500);
-				Game_SetState(State_MessageScreen);
+				AdvanceSequence();
 				return TRUE;
 			}
 			// Sequence-driven stance and movement
