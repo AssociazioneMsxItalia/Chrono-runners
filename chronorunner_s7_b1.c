@@ -38,8 +38,7 @@ u8 CharToTile(c8 c) {
 	else if (c == 33) return 43;  // !
 	else if (c == 34) return 40;  // "
 	else if (c == 39) return 38;  // '
-	else if (c == 40) return 45;  // (
-	else if (c == 41) return 46;  // )
+	else if (c == 40) return 220;  // (
 	else if (c == 44) return 39;  // ,
 	else if (c == 45) return 42;  // -
 	else if (c == 46) return 37;  // .

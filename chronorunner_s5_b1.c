@@ -53,6 +53,17 @@ static const CutSpriteAnimDef g_DocWalkRight = {
     .colors = { COLOR_BLACK, 0 }
 };
 
+static const CutSpriteAnimDef g_DocPanic = {
+    .baseId = 2,
+    .numLayers = 1,
+    .numFrames = 2,
+    .frames = { DOC_FRAME(0), DOC_FRAME(2), NULL },
+    .idleFrame = DOC_FRAME(0),
+    .animSpeed = 6,
+    .layerOffset = laySize,
+    .colors = { COLOR_BLACK, 0 }
+};
+
 static const CutSpriteAnimDef g_PlayerFreaked = {
     .baseId = 0,
     .numLayers = 2,
@@ -82,6 +93,9 @@ static const CutSpriteAnimDef g_PlayerFreaked = {
 // Preboss cutscene
 #include "content/screens/screen_82.h"
 #include "content/screens/screen_77.h"
+
+// Prefight cutscene
+#include "content/screens/screen_90.h"
 
 
 //-----------------------------------------------------------------------------
@@ -520,5 +534,58 @@ const CutCmd g_PreBossCutscene[] = {
     CUT_SPRITE_HIDE(VORTEX_SPRITE_ID),
 
     CUT_WAIT_KEY(),
+    CUT_END(),
+};
+
+//-----------------------------------------------------------------------------
+// Post-boss cutscene
+//-----------------------------------------------------------------------------
+
+const CutCmd g_PreFightCutscene[] = {
+    CUT_LOAD_LAYOUT(g_Screen90, 0, CUTSCENE_GFX_Y, 32, CUTSCENE_GFX_ROWS),
+
+    CUT_SPRITE_SHOW(2, 14*8, 17*8, DOC_FRAME(2), COLOR_BLACK),
+
+    CUT_TEXT_TYPE("MEIN FUHRER, I MADE IT IN YOUR", 21),
+    CUT_TEXT_TYPE("IMAGE AND LIKENESS.", 23),
+    CUT_WAIT_KEY(),
+    CUT_CLEAR_TEXT(),
+
+    CUT_TEXT_TYPE("(MIT DIESER WUNDERWAFFE...", 21),
+    CUT_TEXT_TYPE("WITH THIS GREAT WEAPON...", 23),
+    CUT_WAIT_KEY(),
+    CUT_CLEAR_TEXT(),
+
+    CUT_TEXT_TYPE("(...DER ENDSIEG IST UNSER!", 21),
+    CUT_TEXT_TYPE("...THE FINAL VICTORY IS OURS!", 23),
+    CUT_WAIT_KEY(),
+    CUT_CLEAR_TEXT(),
+
+    CUT_TEXT_TYPE("(ICH BRAUCHE SIE NICHT MEHR.", 21),
+    CUT_TEXT_TYPE("I DON'T NEED YOU ANYMORE.", 23),
+    CUT_WAIT_KEY(),
+    CUT_CLEAR_TEXT(),
+
+    // Doctor panics and dies
+    CUT_SPRITE_ANIM(&g_DocPanic, 14*8, 17*8, 60),
+    CUT_SPRITE_WALK(&g_DocPanic, 14*8, 17*8, 14*8, 13*8, 1),
+    CUT_TEXT_TYPE("NOOO!!!", 22),
+    CUT_SPRITE_ANIM(&g_DocPanic, 14*8, 13*8, 60),
+    CUT_SPRITE_HIDE(2),
+
+    CUT_WAIT_KEY(),
+    CUT_CLEAR_TEXT(),
+
+    // Entra Chrono
+    CUT_SPRITE_WALK(&g_PlayerWalkRight, 0*8, 17*8, 8*8, 17*8, 2),
+
+    CUT_TEXT_TYPE("(DEM SCHICKSAL NICHT TROTZEN!", 21),
+    CUT_TEXT_TYPE("DON'T OPPOSE FATE!", 23),
+    CUT_WAIT_KEY(),
+    CUT_CLEAR_TEXT(),
+
+    CUT_SPRITE_HIDE(0),
+    CUT_SPRITE_HIDE(1),
+
     CUT_END(),
 };

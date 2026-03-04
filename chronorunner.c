@@ -23,7 +23,7 @@
 // Sequence system: interleave levels and cutscenes
 #define SEQ_LEVEL    0
 #define SEQ_CUTSCENE 1
-#define MAX_CUTSCENES 11
+#define MAX_CUTSCENES 12
 #define MAX_SEQUENCE  (NUM_LEVELS + MAX_CUTSCENES)
 
 typedef struct { u8 type; u8 idx; } SequenceEntry;
@@ -251,6 +251,7 @@ extern const CutCmd g_World3EndCutscene[];
 extern const CutCmd g_World4EndCutscene[];
 extern const CutCmd g_TrueColorsCutscene[];
 extern const CutCmd g_PreBossCutscene[];
+extern const CutCmd g_PreFightCutscene[];
 
 //=============================================================================
 // SEGMENT 6, BANK 1
@@ -398,6 +399,7 @@ void InitLevels() {
 	ADD_CUTSCENE(g_TrueColorsCutscene);
 	ADD_LEVEL(level_map13);
 	ADD_CUTSCENE(g_PreBossCutscene);
+	ADD_CUTSCENE(g_PreFightCutscene);
 
 	g_SequenceLength = s;
 
