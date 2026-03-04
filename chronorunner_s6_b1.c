@@ -35,6 +35,7 @@ void ShowSplashScreen() {
 	for (u8 ii = 0; ii < 150; ii++) {
 		Halt();
 	}
+	while (!Keyboard_IsKeyPressed(KEY_SPACE)) { Halt(); }
 	VDP_EnableVBlank(FALSE);
 	VDP_ClearVRAM();
 }
