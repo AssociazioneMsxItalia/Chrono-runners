@@ -871,11 +871,17 @@ u8 Snapshot_RewindStep() {
 // Pixel offset of head hitbox from stance left edge: BOSS_HEAD_X1 - BOSS_STANCE_DST_X*8
 #define BOSS_HEAD_OFFSET_X   40
 // Boss stances
-#define BOSS_STUN_STANCE    9   // boss is stunned (head stomped)
-#define BOSS_DEFEAT_STANCE 10   // boss is defeated (5th stomp)
-// Boss bullet
-#define BOSS_FIRE_FRAMES      200               // frames between shots
-#define BOSS_BULLET_SPEED       2               // pixels/frame along dominant axis
+#define BOSS_STUN_STANCE    5   // boss is stunned (head stomped)
+#define BOSS_DEFEAT_STANCE  6   // boss is defeated (5th stomp)
+// Boss bullet / fire sequence
+#define BOSS_FIRE_FRAMES       200  // frames between shots (idle phase)
+#define BOSS_FIRE_PRE_FRAMES    25  // frames of pre-shoot pause (stance 4)
+#define BOSS_FIRE_SHOOT_FRAMES  50  // frames of shooting pose (stance 7, ~1 sec)
+#define BOSS_BULLET_SPEED        2  // pixels/frame along dominant axis
+// Boss fire phases
+#define BOSS_FIRE_IDLE   0  // normal patrol, timer counts up to BOSS_FIRE_FRAMES
+#define BOSS_FIRE_PRE    1  // pre-shoot: stance 4, timer counts down
+#define BOSS_FIRE_SHOOT  2  // shooting:  stance 7, bullet in flight, timer counts down
 // Boss vortex (shared motion logic with bullet)
 #define BOSS_VORTEX_SPEED   2   // pixels/frame
 #define BOSS_ARRIVE_DIST    8   // arrival detection radius in pixels
@@ -897,6 +903,7 @@ u8   g_BossBulletY        = 0;
 i8   g_BossBulletDX       = 0;  // pixels per frame, X
 i8   g_BossBulletDY       = 0;  // pixels per frame, Y
 u8   g_BossFireTimer      = 0;
+u8   g_BossFirePhase     = BOSS_FIRE_IDLE;
 // Flying vortex state machine
 u8   g_VortexState    = VORTEX_INACTIVE;
 i16  g_VortexX        = 0;
@@ -927,7 +934,6 @@ static const BossStep g_WalkLeft[5] = {
 // Boss fight: background + stance sprite sheets (4 stances each, 2x2 grid)
 #include "content/screens/screen_84.h"
 #include "content/screens/screen_85.h"
-#include "content/screens/screen_86.h"
 #include "content/screens/screen_87.h"
 
 // Boss arena platform definitions
@@ -983,22 +989,17 @@ static void AimProjectile(u8 sx, u8 sy, u8 tx, u8 ty, u8 speed, i8 *dx, i8 *dy)
 }
 
 // Clear the boss area (tile 84 = arena background) then overlay the current
-// stance rectangle sourced from sheets 85-87 (4 stances per sheet, 2x2 grid).
+// stance rectangle sourced from sheet 85 (stances 0-3) or sheet 87 (stances 4-7).
 // g_Screen84 is drawn once on entry; this only repaints the dynamic region.
 void DrawBossStance()
 {
-	u8 sheet = g_BossScreen >> 2;        // which sheet: 0=85, 1=86, 2=87
 	u8 slot  = g_BossScreen & 3;         // which slot in sheet: 0-3
 	u8 src_x = (slot & 1) ? 17 : 1;     // bit 0: col 1 or col 17
 	u8 src_y = (slot & 2) ? 13 : 1;     // bit 1: row 1 or row 13
-	const u8 *sheet_ptr;
+	const u8 *sheet_ptr = (g_BossScreen < 4) ? g_Screen85 : g_Screen87;
 
 	// Clear only the boss rectangle with the arena background tile
 	VDP_FillLayout_GM2(84, 6, 10, 20, 13);
-
-	if      (sheet == 0) sheet_ptr = g_Screen85;
-	else if (sheet == 1) sheet_ptr = g_Screen86;
-	else                 sheet_ptr = g_Screen87;
 
 	for (u8 r = 0; r < BOSS_STANCE_H; r++) {
 		VDP_WriteLayout_GM2(sheet_ptr + (u16)(src_y + r) * 32 + src_x,
@@ -1019,6 +1020,7 @@ void InitBoss()
 	g_BossSeqStep      = 1;   // step 0 consumed by the initial draw above
 	g_BossBulletActive = FALSE;
 	g_BossFireTimer    = 0;
+	g_BossFirePhase    = BOSS_FIRE_IDLE;
 	g_VortexState      = VORTEX_INACTIVE;
 	g_VortexSlotIdx    = 0;
 	g_VortexAnimFrame  = 0;
@@ -1078,11 +1080,22 @@ bool State_Boss()
 
 	DrawPlatforms(lvl, FALSE);
 
-	// Boss bullet: fire toward player (normal stances only)
-	if (g_BossScreen < BOSS_NORMAL_STANCES) {
-		g_BossFireTimer++;
-		if (g_BossFireTimer >= BOSS_FIRE_FRAMES && !g_BossBulletActive) {
-			g_BossFireTimer = 0;
+	// Boss bullet: three-phase fire sequence (IDLE → PRE-SHOOT → SHOOT)
+	if (g_BossFirePhase == BOSS_FIRE_IDLE) {
+		// Only charge the timer while patrolling normally
+		if (g_BossScreen < BOSS_NORMAL_STANCES) {
+			g_BossFireTimer++;
+			if (g_BossFireTimer >= BOSS_FIRE_FRAMES && !g_BossBulletActive) {
+				g_BossFireTimer = BOSS_FIRE_PRE_FRAMES;
+				g_BossFirePhase = BOSS_FIRE_PRE;
+				g_BossScreen    = 4;  // pre-shoot stance
+				DrawBossStance();
+			}
+		}
+	} else if (g_BossFirePhase == BOSS_FIRE_PRE) {
+		g_BossFireTimer--;
+		if (g_BossFireTimer == 0) {
+			// Fire the bullet and enter shooting pose
 			g_BossBulletActive = TRUE;
 			u8 origin_x = g_BossDstX * 8 + BOSS_HEAD_OFFSET_X + 8;
 			u8 origin_y = (BOSS_HEAD_Y1 + BOSS_HEAD_Y2) / 2;
@@ -1092,6 +1105,24 @@ bool State_Boss()
 			              g_PlayerPawn.PositionX + 8, g_PlayerPawn.PositionY + 8,
 			              BOSS_BULLET_SPEED, &g_BossBulletDX, &g_BossBulletDY);
 			FxPlay(FX_BULLET);
+			g_BossFireTimer = BOSS_FIRE_SHOOT_FRAMES;
+			g_BossFirePhase = BOSS_FIRE_SHOOT;
+			g_BossScreen    = 7;  // shooting stance
+			DrawBossStance();
+		}
+	} else {  // BOSS_FIRE_SHOOT
+		g_BossFireTimer--;
+		if (g_BossFireTimer == 0) {
+			// Return to patrol from step 0 of the current walk direction
+			g_BossFirePhase = BOSS_FIRE_IDLE;
+			g_BossFireTimer = 0;
+			g_BossFrame     = 0;
+			g_BossSeqStep   = 1;
+			{
+				const BossStep* seq = g_BossWalkDir ? g_WalkLeft : g_WalkRight;
+				g_BossScreen = seq[0].stance;
+			}
+			DrawBossStance();
 		}
 	}
 
@@ -1118,8 +1149,8 @@ bool State_Boss()
 		}
 	}
 
-	// Head hit: vulnerable on any normal stance (not during hit/defeat poses)
-	if (g_BossScreen < BOSS_NORMAL_STANCES) {
+	// Head hit: vulnerable during patrol AND pre-shoot/shoot (not during stun/defeat)
+	if (g_BossScreen != BOSS_STUN_STANCE && g_BossScreen != BOSS_DEFEAT_STANCE) {
 		u8 head_x1 = g_BossDstX * 8 + BOSS_HEAD_OFFSET_X;
 		u8 head_x2 = head_x1 + (BOSS_HEAD_X2 - BOSS_HEAD_X1);
 		if (rectCollide(g_PlayerPawn.PositionX,      g_PlayerPawn.PositionY,
@@ -1147,15 +1178,17 @@ bool State_Boss()
 				g_VortexState     = VORTEX_TO_SLOT;
 				g_VortexAnimFrame = 0;
 			}
-			g_BossFrame  = 0;
-			g_BossScreen = (g_BossHitCount >= BOSS_HITS_REQUIRED)
-			               ? BOSS_DEFEAT_STANCE : BOSS_STUN_STANCE;
+			g_BossFrame      = 0;
+			g_BossFirePhase  = BOSS_FIRE_IDLE;
+			g_BossFireTimer  = 0;
+			g_BossScreen     = (g_BossHitCount >= BOSS_HITS_REQUIRED)
+			                   ? BOSS_DEFEAT_STANCE : BOSS_STUN_STANCE;
 			DrawBossStance();
 		}
 	}
 
-	// Advance stance after BOSS_SWITCH_FRAMES frames (does NOT tick while stunned)
-	if (g_BossScreen != BOSS_STUN_STANCE) {
+	// Advance stance after BOSS_SWITCH_FRAMES frames (frozen while stunned or firing)
+	if (g_BossScreen != BOSS_STUN_STANCE && g_BossFirePhase == BOSS_FIRE_IDLE) {
 		g_BossFrame++;
 		if (g_BossFrame >= BOSS_SWITCH_FRAMES) {
 			g_BossFrame = 0;
@@ -1226,8 +1259,10 @@ bool State_Boss()
 				VDP_HideSprite(VORTEX_SPRITE_ID);
 				FxPlay(FX_STOMP_ROBOT);  // placeholder: swap for dedicated vortex SFX
 				// Resume toward center: left of center → go right, right of center → go left
-				g_BossWalkDir = (g_BossDstX < BOSS_STANCE_DST_X) ? 0 : 1;
-				g_BossSeqStep  = 1;  // step 0 consumed below
+				g_BossWalkDir   = (g_BossDstX < BOSS_STANCE_DST_X) ? 0 : 1;
+				g_BossSeqStep   = 1;  // step 0 consumed below
+				g_BossFirePhase = BOSS_FIRE_IDLE;
+				g_BossFireTimer = 0;
 				{
 					const BossStep* seq = g_BossWalkDir ? g_WalkLeft : g_WalkRight;
 					g_BossScreen = seq[0].stance;
