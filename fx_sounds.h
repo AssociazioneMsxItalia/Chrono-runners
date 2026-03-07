@@ -12,5 +12,8 @@
 #define FX_JUMP 6
 #define FX_STOMP_ROBOT 7
 #define FX_GET_CRYSTAL 8
-#define FX_VORTEX 9
+#define FX_GET_VORTEX 9
 #define FX_BULLET 10
+#define FX_ENTER_VORTEX 11
+#define FX_VORTEX_FIRE 12
+#define FX_BOSS_DEATH 13

@@ -16,7 +16,13 @@ sfxcollection/chrono_jump.afx
 sfxcollection/stomp_robot.afx
 #define FX_GET_CRYSTAL 8
 sfxcollection/cristallo.afx
-#define FX_VORTEX 9
+#define FX_GET_VORTEX 9
 sfxcollection/singularity.afx
 #define FX_BULLET 10
 sfxcollection/bullet.afx
+#define FX_ENTER_VORTEX 11
+sfxcollection/enter_vortex.afx
+#define FX_VORTEX_FIRE 12
+sfxcollection/vortex_fire.afx
+#define FX_BOSS_DEATH 13
+sfxcollection/boss_death.afx

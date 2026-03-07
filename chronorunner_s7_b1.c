@@ -1258,6 +1258,7 @@ bool State_Boss()
 			g_BossFrame = 0;
 			if (g_BossScreen == BOSS_DEFEAT_STANCE) {
 				SNDStop();
+				FxPlay(FX_BOSS_DEATH);
 				AdvanceSequence();
 				return TRUE;
 			}
@@ -1302,6 +1303,7 @@ bool State_Boss()
 			if (rectCollide(g_PlayerPawn.PositionX,      g_PlayerPawn.PositionY,
 			                g_PlayerPawn.PositionX + 15, g_PlayerPawn.PositionY + 15,
 			                (u8)g_VortexX, (u8)g_VortexY, (u8)g_VortexX + 15, (u8)g_VortexY + 15)) {
+				FxPlay(FX_VORTEX_FIRE);
 				u8 bx = g_BossDstX * 8 + BOSS_HEAD_OFFSET_X + 8;
 				u8 by = (BOSS_HEAD_Y1 + BOSS_HEAD_Y2) / 2;
 				AimProjectile(sx, sy, bx, by, BOSS_VORTEX_SPEED, &g_VortexDX, &g_VortexDY);

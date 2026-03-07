@@ -962,7 +962,7 @@ bool State_Game()
 
 	// Easter egg: vortex teleportation
 	if (bboxCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY, 0, 0)) {
-		FxPlay(FX_VORTEX);
+		FxPlay(FX_ENTER_VORTEX);
 
 		// Seleziona la giusta stanza segreta in base al livello in cui ci troviamo
 		if (g_CurrentLevelIdx < 7) {

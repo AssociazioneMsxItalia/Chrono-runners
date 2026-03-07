@@ -149,7 +149,7 @@ const CutCmd g_World1EndCutscene[] = {
 	CUT_SPRITE_WALK(&g_PlayerWalkRight, 0, 17*8, 15*8, 17*8, 2),
     CUT_SPRITE_ANIM(&g_VortexAnim, 15*8, 10*8, 60),
     CUT_SPRITE_WALK(&g_VortexAnim, 15*8, 10*8, 15*8, 17*8, 1),
-    CUT_SFX(FX_VORTEX),
+    CUT_SFX(FX_GET_VORTEX),
     CUT_SPRITE_HIDE(VORTEX_SPRITE_ID),
     CUT_TEXT_TYPE("THE TACHYON SINGULARITY FLOATS", 21),
 	CUT_TEXT_TYPE("TOWARDS YOU... IT'S WONDERFUL!", 23),
@@ -169,7 +169,7 @@ const CutCmd g_World2EndCutscene[] = {
 	CUT_SPRITE_WALK(&g_PlayerWalkRight, 0, 17*8, 15*8, 17*8, 2),
     CUT_SPRITE_ANIM(&g_VortexAnim, 15*8, 10*8, 60),
     CUT_SPRITE_WALK(&g_VortexAnim, 15*8, 10*8, 15*8, 17*8, 1),
-    CUT_SFX(FX_VORTEX),
+    CUT_SFX(FX_GET_VORTEX),
     CUT_SPRITE_HIDE(VORTEX_SPRITE_ID),
     CUT_TEXT_TYPE("YOU'RE PAST THE CHEMICAL HAZARDS", 21),
 	CUT_TEXT_TYPE("THE TACHYON SINGULARITY IS YOURS", 23),
@@ -189,7 +189,7 @@ const CutCmd g_World3EndCutscene[] = {
 	CUT_SPRITE_WALK(&g_PlayerWalkRight, 0, 17*8, 15*8, 17*8, 2),
     CUT_SPRITE_ANIM(&g_VortexAnim, 15*8, 10*8, 60),
     CUT_SPRITE_WALK(&g_VortexAnim, 15*8, 10*8, 15*8, 17*8, 1),
-    CUT_SFX(FX_VORTEX),
+    CUT_SFX(FX_GET_VORTEX),
     CUT_SPRITE_HIDE(VORTEX_SPRITE_ID),
     CUT_TEXT_TYPE("THAT WAS CLOSE! THE ELECTRICAL", 21),
 	CUT_TEXT_TYPE("ROBOTS WERE A REAL CHALLENGE.", 23),
@@ -209,7 +209,7 @@ const CutCmd g_World4EndCutscene[] = {
 	CUT_SPRITE_WALK(&g_PlayerWalkRight, 0, 17*8, 15*8, 17*8, 2),
     CUT_SPRITE_ANIM(&g_VortexAnim, 15*8, 10*8, 60),
     CUT_SPRITE_WALK(&g_VortexAnim, 15*8, 10*8, 15*8, 17*8, 1),
-    CUT_SFX(FX_VORTEX),
+    CUT_SFX(FX_GET_VORTEX),
     CUT_SPRITE_HIDE(VORTEX_SPRITE_ID),
     CUT_TEXT_TYPE("THE LAST SINGULARITY SHINES AS", 21),
 	CUT_TEXT_TYPE("IT REUNITES WITH ITS SIBLINGS.", 23),
@@ -325,7 +325,6 @@ const CutCmd g_IntroCutscene[] = {
 	CUT_TEXT("PRESS SPACE KEY", 23),
 
     CUT_WAIT_KEY(),
-    CUT_WAIT(10),
 
     // Clear and show new text
     CUT_CLEAR_TEXT(),
@@ -516,6 +515,7 @@ const CutCmd g_PreBossCutscene[] = {
 	CUT_WAIT_KEY(),
 	CUT_CLEAR_TEXT(),
 
+    CUT_SFX(FX_ENTER_VORTEX),
     CUT_SPRITE_HIDE(2),
     CUT_SPRITE_HIDE(VORTEX_SPRITE_ID),
 
@@ -528,6 +528,8 @@ const CutCmd g_PreBossCutscene[] = {
     CUT_WAIT(50),
 
     CUT_SPRITE_WALK(&g_PlayerWalkRight, 5*8, 17*8, 15*8, 17*8, 2),
+
+    CUT_SFX(FX_ENTER_VORTEX),
 
     CUT_SPRITE_HIDE(0),
     CUT_SPRITE_HIDE(1),
