@@ -1068,7 +1068,14 @@ bool State_Death()
 
 		// Scala 6 secondi per 50 volte = 5 minuti totali,
 		// con animazione visiva del conto alla rovescia
-		warpTime(FALSE);
+
+		// Il boss finale imposta a zero il tempo rimanente in modo da poter
+		// riusare questo stato e poi andare a Game Over. Però in questo caso
+		// non bisogna fare il warp altrimenti per un attimo si vede
+		// l'orologio a 00 00
+		if (g_RemainingMinutes != 0 && g_RemainingSeconds != 0) {
+			warpTime(FALSE);
+		}
 
 		// Se il tempo è esaurito, vai a Game Over
 		if (g_RemainingMinutes == 0 && g_RemainingSeconds == 0) {
