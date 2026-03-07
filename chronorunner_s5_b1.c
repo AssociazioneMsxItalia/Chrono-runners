@@ -595,7 +595,7 @@ const CutCmd g_PreFightCutscene[] = {
 //-----------------------------------------------------------------------------
 
 const CutCmd g_FinalCutscene[] = {
-    CUT_FILL(47, 0, CUTSCENE_GFX_Y, 32, CUTSCENE_GFX_ROWS),
+    CUT_FILL(CUTSCENE_TILE_EMPTY, 0, CUTSCENE_GFX_Y, 32, CUTSCENE_GFX_ROWS),
 
     CUT_TEXT_TYPE("CONGRATULATIONS!", 0),
     CUT_WAIT_KEY(),
