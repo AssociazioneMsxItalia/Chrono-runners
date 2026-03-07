@@ -443,6 +443,55 @@ void DrawEnergyFields(struct Level *lvl, bool rewind) {
 }
 
 //=============================================================================
+// INPUT FUNCTIONS
+//=============================================================================
+
+extern u8 g_row8;
+extern u8 g_joy;
+
+bool isUpPressed() {
+	return IS_KEY_PRESSED(g_row8, KEY_UP)
+		|| IS_JOY_PRESSED(g_joy, JOY_INPUT_TRIGGER_B)
+		|| IS_JOY_PRESSED(g_joy, JOY_INPUT_DIR_UP)
+		|| Keyboard_IsKeyPressed(KEY_W);
+}
+
+bool isUpReleased() {
+	return !isUpPressed();
+}
+
+bool isDownPressed() {
+	return IS_KEY_PRESSED(g_row8, KEY_DOWN)
+		|| IS_JOY_PRESSED(g_joy, JOY_INPUT_DIR_DOWN)
+		|| Keyboard_IsKeyPressed(KEY_S);
+}
+
+bool isDownReleased() {
+	return !isDownPressed();
+}
+
+bool isLeftPressed() {
+	return IS_KEY_PRESSED(g_row8, KEY_LEFT)
+		|| IS_JOY_PRESSED(g_joy, JOY_INPUT_DIR_LEFT)
+		|| Keyboard_IsKeyPressed(KEY_A);
+}
+
+bool isRightPressed() {
+	return IS_KEY_PRESSED(g_row8, KEY_RIGHT)
+		|| IS_JOY_PRESSED(g_joy, JOY_INPUT_DIR_RIGHT)
+		|| Keyboard_IsKeyPressed(KEY_D);
+}
+
+bool isSpacePressed() {
+	return IS_KEY_PRESSED(g_row8, KEY_SPACE)
+		|| IS_JOY_PRESSED(g_joy, JOY_INPUT_TRIGGER_A);
+}
+
+bool isSpaceReleased() {
+	return !isSpacePressed();
+}
+
+//=============================================================================
 // UPDATE FUNCTIONS
 //=============================================================================
 
@@ -468,18 +517,13 @@ void UpdatePlayerInput() {
 	g_PlayerInputLeft = FALSE;
 	g_PlayerInputUp = FALSE;
 
-	u8 row8 = Keyboard_Read(8);
-	u8 joy = Joystick_Read(JOY_PORT_1);
-
-	if (IS_KEY_PRESSED(row8, KEY_RIGHT) || Keyboard_IsKeyPressed(KEY_D)) {
+	if (isRightPressed()) {
 		g_PlayerInputRight = TRUE;
-	} else if (IS_KEY_PRESSED(row8, KEY_LEFT) || Keyboard_IsKeyPressed(KEY_A)) {
+	} else if (isLeftPressed()) {
 		g_PlayerInputLeft = TRUE;
 	}
 
-	if (IS_KEY_PRESSED(row8, KEY_UP)
-	|| IS_JOY_PRESSED(joy, JOY_INPUT_TRIGGER_B)
-    || Keyboard_IsKeyPressed(KEY_W)) {
+	if (isUpPressed()) {
 		g_PlayerInputUp = TRUE;
 	}
 }

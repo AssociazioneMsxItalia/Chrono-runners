@@ -35,7 +35,14 @@ void ShowSplashScreen() {
 	for (u8 ii = 0; ii < 150; ii++) {
 		Halt();
 	}
-	while (!Keyboard_IsKeyPressed(KEY_SPACE)) { Halt(); }
+
+	// Qua dovrebbe chiamare isSpacePressed(), ma non siamo ancora in modalità
+	// gioco, quindi ancora non vengono letti g_row8 e g_joy. Pace
+	while (!Keyboard_IsKeyPressed(KEY_SPACE)
+		&& !Joystick_IsButtonPressed(JOY_PORT_1, JOY_INPUT_TRIGGER_A)) {
+		Halt();
+	}
+
 	VDP_EnableVBlank(FALSE);
 	VDP_ClearVRAM();
 }

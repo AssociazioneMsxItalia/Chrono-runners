@@ -126,8 +126,7 @@ bool State_Cutscene(void) {
         return FALSE;
     }
 
-    u8 row7 = Keyboard_Read(7);
-    if (IS_KEY_PRESSED(row7, KEY_ESC)) {
+    if (Keyboard_IsKeyPressed(KEY_ESC)) {
         Cutscene_Skip();
         return TRUE;
     }
@@ -155,8 +154,7 @@ WITH_SEGMENT(5) {
                 g_Cutscene.cmdIndex++;
             }
         } else if (cmd.type == CUTCMD_WAIT_KEY) {
-            u8 row8 = Keyboard_Read(8);
-            if (IS_KEY_PRESSED(row8, KEY_SPACE)) {
+            if (isSpacePressed()) {
                 g_Cutscene.isWaiting = FALSE;
                 g_Cutscene.cmdIndex++;
             }

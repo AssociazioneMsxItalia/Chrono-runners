@@ -287,6 +287,15 @@ extern void DrawEnemies(struct Level *lvl, bool rewind);
 extern void DrawEnergyFields(struct Level *lvl, bool rewind);
 extern void DrawVortex();
 
+extern bool isUpPressed();
+extern bool isUpReleased();
+extern bool isDownPressed();
+extern bool isDownReleased();
+extern bool isLeftPressed();
+extern bool isRightPressed();
+extern bool isSpacePressed();
+extern bool isSpaceReleased();
+
 extern void UpdatePlayerInput();
 extern void UpdatePlayerGravity();
 extern void UpdatePlayerMovement(struct Platform *platform);
@@ -580,6 +589,10 @@ u8 g_EnemyAnimCounter;
 u8 g_EnemyKeyHintCounter;
 u8 g_EnergyFieldSpritesBaseID;
 u8 g_EnergyFieldAnimCounter;
+
+// Input
+u8 g_row8;
+u8 g_joy;
 
 // Cheat mode
 bool g_CheatEnabled = FALSE;
@@ -1003,8 +1016,7 @@ bool State_Game()
 	// Capture snapshot of all game objects and player state
 	Snapshot_Capture(lvl, g_PlayerPawn.PositionX, g_PlayerPawn.PositionY, g_PlayerPawn.AnimFrame);
 
-	u8 row8 = Keyboard_Read(8);
-	if (IS_KEY_PRESSED(row8, KEY_SPACE)) {
+	if (isSpacePressed()) {
 		if (g_PlayerRewindEnergy > 1 && Snapshot_GetRewindCount() >= g_PlayerRewindEnergy) {
 
 			// Sostituisce i colori dello sprite principale
@@ -1120,8 +1132,7 @@ bool State_Rewind()
 	// Usciamo dal rewind in due casi: se non abbiamo più elementi, o se il
 	// giocatore lo ha interrotto
 
-	u8 row8 = Keyboard_Read(8);
-	if (g_PlayerRewindEnergy == 0 || IS_KEY_RELEASED(row8, KEY_SPACE)) {
+	if (g_PlayerRewindEnergy == 0 || isSpaceReleased()) {
 
 		// Reimposta colori originali
 		ReinitPlayer(&g_PlayerPawn,
@@ -1202,13 +1213,14 @@ WITH_SEGMENT(1) {
         g_MenuState = 1;
     }
 
-    u8 row8 = Keyboard_Read(8);
-
     if (Keyboard_IsKeyPressed(KEY_F1))
         g_CheatEnabled = TRUE;
 
     // Wait for all keys to be released before accepting new input
-    if (g_MenuWait && IS_KEY_RELEASED(row8, KEY_UP) && IS_KEY_RELEASED(row8, KEY_DOWN) && IS_KEY_RELEASED(row8, KEY_SPACE)) {
+    if (g_MenuWait
+		&& isUpReleased()
+		&& isDownReleased()
+		&& isSpaceReleased()) {
         g_MenuWait = 0;
     }
 
@@ -1216,13 +1228,13 @@ WITH_SEGMENT(1) {
 
     u8 prev = g_MenuSelection;
 
-    if (IS_KEY_PRESSED(row8, KEY_UP) && g_MenuSelection > 0) {
+    if (isUpPressed() && g_MenuSelection > 0) {
         g_MenuSelection--;
         g_MenuWait = 1;
-    } else if (IS_KEY_PRESSED(row8, KEY_DOWN) && g_MenuSelection < MENU_NUM_OPTIONS - 1) {
+    } else if (isDownPressed() && g_MenuSelection < MENU_NUM_OPTIONS - 1) {
         g_MenuSelection++;
         g_MenuWait = 1;
-    } else if (IS_KEY_PRESSED(row8, KEY_SPACE)) {
+    } else if (isSpacePressed()) {
         if (g_MenuSelection == 0) {
 			g_MenuState = 0;
             g_SequenceIdx = 0;
@@ -1266,15 +1278,14 @@ WITH_SEGMENT(1) {
         g_SlideshowWait = 1;  // Discard the SPACE that triggered the slideshow
     }
 
-    u8 row8 = Keyboard_Read(8);
-
     if (g_SlideshowWait) {
-        if (IS_KEY_RELEASED(row8, KEY_SPACE))
+        if (isSpaceReleased()) {
             g_SlideshowWait = 0;
+		}
         return TRUE;
     }
 
-    if (IS_KEY_PRESSED(row8, KEY_SPACE)) {
+    if (isSpacePressed()) {
         if (g_SlideshowPage + 1 < g_SlideshowConfig.count) {
             g_SlideshowPage++;
 WITH_SEGMENT(1) {
@@ -1365,6 +1376,13 @@ void InterruptHook() {
 	SoundUpdate();
 	SET_BANK_SEGMENT(1, prevSeg);
 
+	// Legge nell'interrupt handler lo stato dei tasti. Tanto deve comunque
+	// leggerlo praticamente ad ogni fotogramma, vale la pena farlo
+	// nell'handler così da altrove può semplicemente assumere che i valori
+	// siano aggiornati.
+	g_row8 = Keyboard_Read(8);
+	g_joy = Joystick_Read(JOY_PORT_1);
+
 	// Se NON siamo in modalità gioco, oppure se stiamo regalando tempo bonus
 	// al giocatore, allora non dobbiamo decrementare automaticamente
 	// l'orologio
@@ -1377,6 +1395,7 @@ void InterruptHook() {
 void main()
 {
 	DEBUG_INIT();
+	Bios_SetKeyClick(FALSE);
 
 WITH_SEGMENT(4) {
 	SoundInit();
@@ -1388,8 +1407,6 @@ WITH_SEGMENT(6) {
 		ShowSplashScreen();
 	}
 }
-
-	Bios_SetKeyClick(FALSE);
 
 	Game_SetState(State_Initialize);
 	Game_SetVSyncCallback(InterruptHook);
