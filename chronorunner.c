@@ -500,19 +500,25 @@ WITH_SEGMENT(4) {
 }
 }
 
-void SetSong(u8 id) {
+void SNDSetSong(u8 id) {
 WITH_SEGMENT(4) {
 	SoundSetSong(id);
 }
 }
 
-void Play() {
+void SNDPlay() {
 WITH_SEGMENT(4) {
 	SoundPlay();
 }
 }
 
-void Loop(bool value) {
+void SNDStop() {
+WITH_SEGMENT(4) {
+	SoundStop();
+}
+}
+
+void SNDLoop(bool value) {
 WITH_SEGMENT(4) {
 	SoundLoop(value);
 }

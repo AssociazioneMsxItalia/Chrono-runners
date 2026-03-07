@@ -1020,9 +1020,10 @@ extern bool State_MessageScreen();
 extern bool State_Death();
 extern struct Platform g_RuntimePlatforms[];
 extern void AllocateCurrentLevelSprites();
-extern void SetSong(u8 id);
-extern void Loop(bool value);
-extern void Play();
+extern void SNDSetSong(u8 id);
+extern void SNDLoop(bool value);
+extern void SNDPlay();
+extern void SNDStop();
 
 bool State_Boss();
 
@@ -1125,9 +1126,9 @@ void InitBoss()
 	             g_PlayerLayers, 2,
 	             BOSS_START_X, BOSS_START_Y);
 
-	SetSong(MUSIC_BOSS);
-	Loop(TRUE);
-	Play();
+	SNDSetSong(MUSIC_BOSS);
+	SNDLoop(TRUE);
+	SNDPlay();
 
 	Game_SetState(State_Boss);
 }
@@ -1256,6 +1257,7 @@ bool State_Boss()
 		if (g_BossFrame >= BOSS_SWITCH_FRAMES) {
 			g_BossFrame = 0;
 			if (g_BossScreen == BOSS_DEFEAT_STANCE) {
+				SNDStop();
 				AdvanceSequence();
 				return TRUE;
 			}
