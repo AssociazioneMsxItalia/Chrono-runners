@@ -978,6 +978,9 @@ bool State_Game()
 		// Restituisce 5 minuti al giocatore
 		warpTime(TRUE);
 
+		// Riempie al massimo il rewind
+		g_PlayerRewindEnergy = SNAPSHOT_BUFFER_SIZE;
+
 		ChangeLevel();
 		return TRUE;
 	}
