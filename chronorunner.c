@@ -414,8 +414,8 @@ void InitLevels() {
 
 	// Final
 	ADD_CUTSCENE(g_TrueColorsCutscene);
-	ADD_LEVEL(level_map13);
 	ADD_CUTSCENE(g_PreBossCutscene);
+	ADD_LEVEL(level_map13);
 	ADD_CUTSCENE(g_PreFightCutscene);
 	ADD_BOSS();
 	ADD_CUTSCENE(g_FinalCutscene);
