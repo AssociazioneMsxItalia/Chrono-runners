@@ -982,7 +982,7 @@ static const BossStep g_WalkLeft[5] = {
 };
 
 // Minimum tiles that must be free on a side before the boss walks toward it
-#define BOSS_WALK_MARGIN  8
+#define BOSS_WALK_MARGIN 8
 
 // Boss fight: background + stance sprite sheets (4 stances each, 2x2 grid)
 #include "content/screens/screen_84.h"
@@ -1073,8 +1073,9 @@ static u8 ChooseWalkDir()
 
 // Begin a walk cycle from step 0 of the given direction (0=right, 1=left).
 // Resets the frame timer and redraws immediately. Called from init and resume points.
-static void StartBossWalkCycle(u8 dir)
+static void StartBossWalkCycle()
 {
+	u8 dir = ChooseWalkDir();
 	const BossStep* seq = dir ? g_WalkLeft : g_WalkRight;
 	g_BossWalkDir = dir;
 	g_BossSeqStep = 1;           // step 0 drawn immediately below
@@ -1120,7 +1121,7 @@ void InitBoss()
 
 	// Draw the full arena background once; DrawBossStance only refreshes the dynamic region
 	VDP_WriteLayout_GM2(g_Screen84, 0, 0, 32, 24);
-	StartBossWalkCycle(1);  // always start walking left
+	StartBossWalkCycle();
 
 	ReinitPlayer(&g_PlayerPawn,
 	             g_PlayerLayers, 2,
@@ -1186,7 +1187,7 @@ bool State_Boss()
 			// Return to patrol from step 0 of the current walk direction
 			g_BossFirePhase = BOSS_FIRE_IDLE;
 			g_BossFireTimer = 0;
-			StartBossWalkCycle(g_BossWalkDir);
+			StartBossWalkCycle();
 		}
 	}
 
@@ -1203,7 +1204,6 @@ bool State_Boss()
 		                       g_BossBulletX + 9, g_BossBulletY + 9)) {
 			g_BossBulletActive = FALSE;
 			VDP_HideSprite(VORTEX_SPRITE_ID);
-			g_PlayerDying = FALSE;  // reset so State_Death initialises properly
 			Game_SetState(State_Death);
 			return TRUE;
 		} else {
@@ -1324,7 +1324,7 @@ bool State_Boss()
 				FxPlay(FX_STOMP_ROBOT);  // placeholder: swap for dedicated vortex SFX
 				g_BossFirePhase = BOSS_FIRE_IDLE;
 				g_BossFireTimer = 0;
-				StartBossWalkCycle(ChooseWalkDir());
+				StartBossWalkCycle();
 			} else {
 				VDP_SetSpriteSM1(VORTEX_SPRITE_ID, (u8)g_VortexX, (u8)g_VortexY, vpattern, COLOR_BLACK);
 			}
