@@ -1328,7 +1328,7 @@ bool State_Boss()
 				g_BossFireTimer = 0;
 				StartBossWalkCycle();
 			} else {
-				VDP_SetSpriteSM1(VORTEX_SPRITE_ID, (u8)g_VortexX, (u8)g_VortexY, vpattern, COLOR_BLACK);
+				VDP_SetSpriteSM1(VORTEX_SPRITE_ID, (u8)g_VortexX, (u8)g_VortexY, vpattern, COLOR_LIGHT_RED);
 			}
 		}
 	}
