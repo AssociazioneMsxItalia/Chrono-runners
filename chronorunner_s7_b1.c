@@ -969,7 +969,6 @@ extern const Pawn_Sprite g_PlayerLayers[];
 extern void SetMessageScreen(const c8* text, i8 songId, u16 duration);
 extern bool State_MessageScreen();
 extern bool State_Death();
-extern u8 g_CountDownTicks;
 extern struct Platform g_RuntimePlatforms[];
 extern void AllocateCurrentLevelSprites();
 extern void SetSong(u8 id);
@@ -1049,7 +1048,6 @@ void InitBoss()
 	// Zero the timer so State_Death always routes to GAME OVER in boss mode
 	g_RemainingMinutes   = 0;
 	g_RemainingSeconds   = 0;
-	g_CountDownTicks     = 0;
 	g_PlayerDying        = FALSE;
 	g_mDX = 0;
 	g_mDY = 0;

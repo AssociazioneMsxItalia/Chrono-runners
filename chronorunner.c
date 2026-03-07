@@ -43,7 +43,8 @@ bool State_Cutscene();
 void ChangeLevel();
 void AdvanceSequence();
 
-void tick();
+void tickDir(bool up);
+void warpTime(bool up);
 
 //=============================================================================
 // READ-ONLY DATA
@@ -525,9 +526,8 @@ WITH_SEGMENT(3) {
 u8 g_RemainingMinutes;
 u8 g_RemainingSeconds;
 u8 g_RemainingFS;
+bool g_TimeWarpUpwards = FALSE;
 
-// Contatore per l'animazione dei minuti persi dopo la morte
-u8 g_CountDownTicks;
 
 // Controlla lo stato dell'intermission
 u8 g_IntermissionState = 0;
@@ -784,7 +784,6 @@ WITH_SEGMENT(seg) {
 				 start_x * 8, start_y * 8);
 
 	g_PlayerDying = FALSE;
-	g_CountDownTicks = 50 - 1;
 
 	// Initialize snapshot system for player and object rewind.
 	// Il buffer va sempre resettato perché le coordinate del livello
@@ -957,6 +956,9 @@ bool State_Game()
 			g_SecretNextLevelIdx = NUM_LEVELS + 3;
 		}
 
+		// Restituisce 5 minuti al giocatore
+		warpTime(TRUE);
+
 		ChangeLevel();
 		return TRUE;
 	}
@@ -1052,28 +1054,21 @@ bool State_Death()
 	if (g_PlayerPawn.PositionY >= 192) {
 		// Ogni morte costa al giocatore 5 minuti sul tempo totale
 
-		// Scala 6 secondi per fotogramma dal contatore, per fare un'animazione
-		// che spieghi visivamente cosa sta succedendo
-		for (u16 t=0; t < 300; t++) {
-			tick();
-		}
-		PrintTime();
+		// Scala 6 secondi per 50 volte = 5 minuti totali,
+		// con animazione visiva del conto alla rovescia
+		warpTime(FALSE);
 
-		if (g_CountDownTicks > 0) {
-			g_CountDownTicks--;
+		// Se il tempo è esaurito, vai a Game Over
+		if (g_RemainingMinutes == 0 && g_RemainingSeconds == 0) {
+			SetMessageScreen("GAME OVER", MUSIC_GAMEOVER, 500);
+			Game_SetState(State_MessageScreen);
 		} else {
-			// Se il tempo è esaurito, vai a Game Over
-			if (g_RemainingMinutes == 0 && g_RemainingSeconds == 0) {
-				SetMessageScreen("GAME OVER", MUSIC_GAMEOVER, 500);
-				Game_SetState(State_MessageScreen);
-			} else {
-				// Flash su respawn personaggio
-				VDP_SetColor(COLOR_WHITE);
-				PlayerRestart();
-				Game_SetState(State_Game);
-				Halt();
-				VDP_SetColor(COLOR_BLACK);
-			}
+			// Flash su respawn personaggio
+			VDP_SetColor(COLOR_WHITE);
+			PlayerRestart();
+			Game_SetState(State_Game);
+			Halt();
+			VDP_SetColor(COLOR_BLACK);
 		}
 	}
 	return TRUE;
@@ -1301,27 +1296,64 @@ WITH_SEGMENT(1) {
 #include "cutscene_s0.c"
 
 //=============================================================================
-// MAIN LOOP
+// TIME HANDLING
 //=============================================================================
 
-void tick() {
-	if (g_RemainingFS == 0) {
-		if (g_RemainingSeconds == 0) {
-			if (g_RemainingMinutes == 0) {
-				// Tempo esaurito
-				return;
-			} else {
-				g_RemainingMinutes--;
-			}
-			g_RemainingSeconds = 59;
-		} else {
-			g_RemainingSeconds--;
+void warpTime(bool up) {
+	g_TimeWarpUpwards = up;
+
+	// Arrotonda il conto dei 6 secondi a iterazione per far sì che il warp
+	// finisca sempre su un numero tondo al minuto
+	u16 sec6 = 300;
+	if (!up)
+		sec6 -= 1;
+	else
+		sec6 += 1;
+
+	for (u8 i = 0; i < 50; i++) {
+		for (u16 t = 0; t < sec6; t++) {
+			tickDir(up);
 		}
-		g_RemainingFS = 49;
+		PrintTime();
+	}
+	g_TimeWarpUpwards = FALSE;
+}
+
+void tickDir(bool up) {
+	if (up) {
+		if (g_RemainingFS < 49) {
+			g_RemainingFS++;
+		} else {
+			g_RemainingFS = 0;
+			if (g_RemainingSeconds < 59) {
+				g_RemainingSeconds++;
+			} else {
+				g_RemainingSeconds = 0;
+				g_RemainingMinutes++;
+			}
+		}
 	} else {
-		g_RemainingFS--;
+		if (g_RemainingFS == 0) {
+			if (g_RemainingSeconds == 0) {
+				if (g_RemainingMinutes == 0) {
+					// Tempo esaurito
+					return;
+				}
+				g_RemainingMinutes--;
+				g_RemainingSeconds = 59;
+			} else {
+				g_RemainingSeconds--;
+			}
+			g_RemainingFS = 49;
+		} else {
+			g_RemainingFS--;
+		}
 	}
 }
+
+//=============================================================================
+// MAIN LOOP
+//=============================================================================
 
 void InterruptHook() {
 	// Qua non può usare il context manager WITH_SEGMENT perché l'interruzione
@@ -1333,10 +1365,13 @@ void InterruptHook() {
 	SoundUpdate();
 	SET_BANK_SEGMENT(1, prevSeg);
 
-    if (Game_GetCurrentState() != State_Game)
+	// Se NON siamo in modalità gioco, oppure se stiamo regalando tempo bonus
+	// al giocatore, allora non dobbiamo decrementare automaticamente
+	// l'orologio
+    if (Game_GetCurrentState() != State_Game || g_TimeWarpUpwards)
         return;
 
-    tick();
+    tickDir(FALSE);
 }
 
 void main()
