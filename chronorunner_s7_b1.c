@@ -96,18 +96,23 @@ bool isPlayerHitByEnergyFields(struct Level *lvl) {
 	// Controlla i campi di forza di ciascun nemico
 	for (u8 e=0; e < lvl->num_enemies; e++) {
 
-		if (enemies[e].field_state == 1 || enemies[e].field_state == 2) {
+		// Campi di forza fissi
+		if (enemies[e].field_state == 1) {
+			if (bboxCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY,
+							enemies[e].field_x, enemies[e].field_y)) {
+				return TRUE;
+			}
+		// Proiettili mobili
+		} else if (enemies[e].field_state == 2) {
 			if (rectCollide(g_PlayerPawn.PositionX, g_PlayerPawn.PositionY,
-					        g_PlayerPawn.PositionX + 15, g_PlayerPawn.PositionY + 15,
-				        enemies[e].field_x + 2, enemies[e].field_y + 6,
-				        enemies[e].field_x + 14, enemies[e].field_y + 9)) {
+							g_PlayerPawn.PositionX + 15, g_PlayerPawn.PositionY + 15,
+							enemies[e].field_x + 6, enemies[e].field_y + 6,
+							enemies[e].field_x + 9, enemies[e].field_y + 9)) {
 
 				// Se il proiettile colpisce il personaggio, lo consuma
-				if (enemies[e].field_state == 2) {
-					enemies[e].field_state = 0;
-				}
-
+				enemies[e].field_state = 0;
 				return TRUE;
+
 			}
 		}
 	}
