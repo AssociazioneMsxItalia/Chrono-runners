@@ -5,10 +5,8 @@
 #include "cutscene.h"
 
 extern CutsceneContext g_Cutscene;
+extern void Cmd_End(void);
 
-extern void AdvanceSequence(void);
-
-void Cmd_End(void);
 void SetupAnimation(const CutSpriteAnimDef* def,
                     u8 startX, u8 startY,
                     i16 deltaX, i16 deltaY,
@@ -24,7 +22,8 @@ void Cutscene_Initialize(void) {
     g_Cutscene.cmdIndex = 0;
 }
 
-void Cutscene_Start(const CutCmd* script) {
+void Cutscene_Start(const CutCmd* script, void (*onEnd)(void)) {
+    g_Cutscene.onEnd = onEnd;
     g_Cutscene.script = script;
     g_Cutscene.cmdIndex = 0;
     g_Cutscene.frameCounter = 0;
@@ -50,17 +49,13 @@ void Cutscene_Skip(void) {
 // Command handlers
 //-----------------------------------------------------------------------------
 
-void Cmd_End(void) {
-    g_Cutscene.isActive = FALSE;
-    AdvanceSequence();
-}
-
 void Cmd_WaitFrames(void) {
     g_Cutscene.frameCounter = 0;
     g_Cutscene.isWaiting = TRUE;
 }
 
 void Cmd_WaitKey(void) {
+    g_Cutscene.needsRelease = isSpacePressed();
     g_Cutscene.isWaiting = TRUE;
 }
 

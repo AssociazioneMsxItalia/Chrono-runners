@@ -244,6 +244,7 @@ extern void S4_FxPlay(u8 id);
 // SEGMENT 5, BANK 1
 //=============================================================================
 
+extern const CutCmd g_InstructionsCutscene[];
 extern const CutCmd g_IntroCutscene[];
 extern const CutCmd g_World1MidCutscene[];
 extern const CutCmd g_World2MidCutscene[];
@@ -446,7 +447,7 @@ void AdvanceSequence()
 
 	if (entry->type == SEQ_CUTSCENE) {
 		g_SequenceIdx++;
-		Cutscene_Start(g_CutsceneScripts[entry->idx]);
+		Cutscene_Start(g_CutsceneScripts[entry->idx], AdvanceSequence);
 	} else if (entry->type == SEQ_BOSS) {
 		g_SequenceIdx++;
 		InitBoss();
@@ -1197,6 +1198,12 @@ u8 g_MenuState = 0;
 u8 g_MenuSelection = 0;
 u8 g_MenuWait = 0;
 
+// Cutscene callback: return to main menu after a menu-triggered cutscene
+void Cutscene_ReturnToMenu(void) {
+	g_MenuState = 0;
+	Game_SetState(State_Menu);
+}
+
 // Slideshow state
 typedef struct {
     const u8** screens;
@@ -1210,13 +1217,13 @@ u8 g_SlideshowWait;
 static const u8* g_CreditsScreensList[] = { g_Screen80, g_Screen81 };
 static const u8* g_RatingScreensList[]  = { g_Screen92 };
 
-// Menu option positions: (col, row) = (12,12) start, (10,14) none, (8,16) credits
-#define MENU_NUM_OPTIONS    3
+// Menu option positions: (col, row) per option
+#define MENU_NUM_OPTIONS    4
 #define MENU_HIGHLIGHT_TILE 49
 #define MENU_EMPTY_TILE     47
 
-static const u8 g_MenuRows[MENU_NUM_OPTIONS] = { 12, 14, 16 };
-static const u8 g_MenuColumns[MENU_NUM_OPTIONS] = { 12, 10, 8 };
+static const u8 g_MenuRows[MENU_NUM_OPTIONS]    = { 11, 13, 15, 17 };
+static const u8 g_MenuColumns[MENU_NUM_OPTIONS] = { 12, 10,  8,  6 };
 
 bool State_Menu()
 {
@@ -1258,12 +1265,15 @@ WITH_SEGMENT(1) {
             g_SequenceIdx = 0;
             AdvanceSequence();
         } else if (g_MenuSelection == 1) {
+            g_MenuState = 0;
+            Cutscene_Start(g_InstructionsCutscene, Cutscene_ReturnToMenu);
+        } else if (g_MenuSelection == 2) {
             g_SlideshowConfig.screens = g_RatingScreensList;
             g_SlideshowConfig.count   = 1;
             g_SlideshowPage           = 0xFF;
             g_MenuState = 0;
             Game_SetState(State_Slideshow);
-        } else if (g_MenuSelection == 2) {
+        } else if (g_MenuSelection == 3) {
             g_SlideshowConfig.screens = g_CreditsScreensList;
             g_SlideshowConfig.count   = 2;
             g_SlideshowPage           = 0xFF;

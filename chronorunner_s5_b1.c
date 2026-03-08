@@ -75,6 +75,11 @@ static const CutSpriteAnimDef g_PlayerFreaked = {
     .colors = { COLOR_BLACK, COLOR_LIGHT_YELLOW }
 };
 
+// Instructions cutscene
+#include "content/screens/screen_95.h"
+#include "content/screens/screen_98.h"
+#include "content/screens/screen_99.h"
+
 // Initial cutscene
 #include "content/screens/screen_5.h"
 
@@ -312,6 +317,49 @@ const CutCmd g_World4MidCutscene[] = {
     CUT_SPRITE_ANIM(&g_ForceFieldAnim, 4*8, 5*8, 0),
     CUT_SPRITE_HIDE(5),
     CUT_SPRITE_WALK(&g_PlayerWalkRight, 15*8, 17*8, 31*8, 17*8, 2),
+    CUT_END(),
+};
+
+//-----------------------------------------------------------------------------
+// Instructions cutscene
+//-----------------------------------------------------------------------------
+
+const CutCmd g_InstructionsCutscene[] = {
+    CUT_LOAD_LAYOUT(g_Screen95, 0, CUTSCENE_TOP_Y, CUTSCENE_SCREEN_W, CUTSCENE_SCREEN_H),
+    CUT_WAIT_KEY(),
+
+    CUT_LOAD_LAYOUT(g_Screen98, 0, CUTSCENE_TOP_Y, CUTSCENE_SCREEN_W, CUTSCENE_SCREEN_H),
+    CUT_SPRITE_SHOW(0, 23*8, 6*8 - 1, VORTEX_FRAME(0), COLOR_WHITE),
+
+    CUT_SPRITE_SHOW(1, 2*8, 17*8, PLAYER_FRAME(1), COLOR_BLACK),
+    CUT_SPRITE_SHOW(2, 13*8, 19*8 - 1, CRYSTAL_FRAME(0), COLOR_MEDIUM_RED),
+    CUT_SPRITE_SHOW(3, 2*8, 20*8, PLAYER_FRAME(1), COLOR_BLACK),
+    CUT_WAIT_KEY(),
+
+    CUT_LOAD_LAYOUT(g_Screen99, 0, CUTSCENE_TOP_Y, CUTSCENE_SCREEN_W, CUTSCENE_SCREEN_H),
+    CUT_SPRITE_SHOW(0, 1*8, 5*8 - 1, PLAYER_FRAME(3), COLOR_BLACK),
+    CUT_SPRITE_SHOW(1, 5*8, 1*8, PLAYER_FRAME(1), COLOR_BLACK),
+    CUT_SPRITE_SHOW(2, 8*8, 5*8 - 1, ENEMY_FRAME(0, 4), COLOR_MEDIUM_RED),
+    CUT_SPRITE_SHOW(3, 14*8, 5*8 - 1, KEY_FRAME(0), COLOR_BLACK),
+
+    CUT_SPRITE_SHOW(4, 23*8, 11*8 - 1, KEY_FRAME(0), COLOR_BLACK),
+    CUT_SPRITE_SHOW(5, 29*8, 11*8 - 1, PLAYER_FRAME(6), COLOR_BLACK),
+
+    CUT_SPRITE_SHOW(6, 1*8, 20*8 - 1, PLAYER_FRAME(3), COLOR_BLACK),
+    CUT_SPRITE_SHOW(7, 5*8, 16*8 - 1, PLAYER_FRAME(1), COLOR_BLACK),
+    CUT_SPRITE_SHOW(8, 8*8, 20*8 - 1, PLAYER_FRAME(3), COLOR_BLACK),
+    CUT_WAIT_KEY(),
+
+    CUT_SPRITE_HIDE(0),
+    CUT_SPRITE_HIDE(1),
+    CUT_SPRITE_HIDE(2),
+    CUT_SPRITE_HIDE(3),
+    CUT_SPRITE_HIDE(4),
+    CUT_SPRITE_HIDE(5),
+    CUT_SPRITE_HIDE(6),
+    CUT_SPRITE_HIDE(7),
+    CUT_SPRITE_HIDE(8),
+
     CUT_END(),
 };
 

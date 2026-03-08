@@ -196,13 +196,17 @@ typedef struct CutsceneContext {
     u8  walkAnimTimer;          // Timer for animation frame changes
     u8  walkAnimFrame;          // Current animation frame (0 or 1)
 
+    // Callback invoked when the cutscene ends or is skipped
+    void (*onEnd)(void);
+
     // State flags
     u8  isActive    : 1;        // Cutscene is running
     u8  isWaiting   : 1;        // Waiting for condition (frames/key)
     u8  isMoving    : 1;        // Movement in progress (simple or animated)
     u8  isTyping    : 1;        // Typewriter effect in progress
     u8  canSkip     : 1;        // Allow skip with ESC key
-    u8  reserved    : 3;
+    u8  needsRelease: 1;        // SPACE must be released before next CUT_WAIT_KEY accepts input
+    u8  reserved    : 2;
 
 } CutsceneContext;
 
@@ -215,9 +219,10 @@ typedef struct CutsceneContext {
 void Cutscene_Initialize(void);
 
 // Start a cutscene with the given script
-// script: Pointer to command array (must end with CUTCMD_END)
-// When the cutscene ends or is skipped, AdvanceSequence() is called automatically
-void Cutscene_Start(const CutCmd* script);
+// script:  Pointer to command array (must end with CUTCMD_END)
+// onEnd:   Function called when the cutscene ends or is skipped
+//          (e.g. AdvanceSequence for in-game cutscenes, or a menu-return function)
+void Cutscene_Start(const CutCmd* script, void (*onEnd)(void));
 
 // Skip current cutscene (if skippable)
 void Cutscene_Skip(void);

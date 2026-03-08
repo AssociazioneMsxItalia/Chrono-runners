@@ -9,7 +9,6 @@ CutsceneContext g_Cutscene;
 
 CutSpriteAnimDef g_animdef;
 
-extern void Cmd_End(void);
 extern void Cmd_WaitFrames(void);
 extern void Cmd_WaitKey(void);
 extern void Cmd_ClearText(void);
@@ -29,6 +28,11 @@ extern void SetupAnimation(const CutSpriteAnimDef* def,
 //-----------------------------------------------------------------------------
 // Command handlers
 //-----------------------------------------------------------------------------
+
+void Cmd_End(void) {
+    g_Cutscene.isActive = FALSE;
+    g_Cutscene.onEnd();
+}
 
 void Cmd_Text(const CutCmd* cmd) {
     c8 text[32];
@@ -154,7 +158,11 @@ WITH_SEGMENT(5) {
                 g_Cutscene.cmdIndex++;
             }
         } else if (cmd.type == CUTCMD_WAIT_KEY) {
-            if (isSpacePressed()) {
+            if (g_Cutscene.needsRelease) {
+                if (isSpaceReleased()) {
+                    g_Cutscene.needsRelease = FALSE;
+                }
+            } else if (isSpacePressed()) {
                 g_Cutscene.isWaiting = FALSE;
                 g_Cutscene.cmdIndex++;
             }
