@@ -158,7 +158,9 @@ extern const u8 g_Screen2[];
 // Credits screen
 extern const u8 g_Screen80[];
 extern const u8 g_Screen81[];
-extern const u8 g_Screen91[];
+
+// Rating
+extern const u8 g_Screen92[];
 
 // Intermission screen
 extern const u8 g_Screen15[];
@@ -1206,7 +1208,7 @@ u8 g_SlideshowPage;   // 0xFF = needs init
 u8 g_SlideshowWait;
 
 static const u8* g_CreditsScreensList[] = { g_Screen80, g_Screen81 };
-static const u8* g_RatingScreensList[]  = { g_Screen91 };
+static const u8* g_RatingScreensList[]  = { g_Screen92 };
 
 // Menu option positions: (col, row) = (12,12) start, (10,14) none, (8,16) credits
 #define MENU_NUM_OPTIONS    3
