@@ -901,6 +901,8 @@ u8 Snapshot_RewindStep() {
 
 // Frames between stance switches
 #define BOSS_SWITCH_FRAMES   25
+// Frames to linger on the defeat stance before advancing
+#define BOSS_DEFEAT_FRAMES  250
 // Number of normal (patrol) stances 0-3; used to distinguish from STUN/DEFEAT
 #define BOSS_NORMAL_STANCES   4
 // Each stance is a 14x11 tile rectangle inside a 32-wide sheet
@@ -1243,6 +1245,10 @@ bool State_Boss()
 				              BOSS_VORTEX_SPEED, &g_VortexDX, &g_VortexDY);
 				g_VortexState     = VORTEX_TO_SLOT;
 				g_VortexAnimFrame = 0;
+			} else {
+				// Boss killed!
+				SNDStop();
+				FxPlay(FX_BOSS_DEATH);
 			}
 			g_BossFrame      = 0;
 			g_BossFirePhase  = BOSS_FIRE_IDLE;
@@ -1256,11 +1262,16 @@ bool State_Boss()
 	// Advance stance after BOSS_SWITCH_FRAMES frames (frozen while stunned or firing)
 	if (g_BossScreen != BOSS_STUN_STANCE && g_BossFirePhase == BOSS_FIRE_IDLE) {
 		g_BossFrame++;
-		if (g_BossFrame >= BOSS_SWITCH_FRAMES) {
+
+		// Aspetta un intervallo più lungo (BOSS_DEFEAT_FRAMES) quando
+		// sconfigge il boss
+		u8 boss_threshold = BOSS_SWITCH_FRAMES;
+		if (g_BossScreen == BOSS_DEFEAT_STANCE) {
+			boss_threshold = BOSS_DEFEAT_FRAMES;
+		}
+		if (g_BossFrame >= boss_threshold) {
 			g_BossFrame = 0;
 			if (g_BossScreen == BOSS_DEFEAT_STANCE) {
-				SNDStop();
-				FxPlay(FX_BOSS_DEATH);
 				AdvanceSequence();
 				return TRUE;
 			}
