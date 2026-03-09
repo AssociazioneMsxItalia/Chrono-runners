@@ -925,8 +925,10 @@ u8 Snapshot_RewindStep() {
 // Pixel offset of head hitbox from stance left edge: BOSS_HEAD_X1 - BOSS_STANCE_DST_X*8
 #define BOSS_HEAD_OFFSET_X   40
 // Boss stances
-#define BOSS_STUN_STANCE    5   // boss is stunned (head stomped)
-#define BOSS_DEFEAT_STANCE  6   // boss is defeated (5th stomp)
+#define BOSS_PREFIRE_STANCE 4
+#define BOSS_FIRE_STANCE    5
+#define BOSS_STUN_STANCE    6   // boss is stunned (head stomped)
+#define BOSS_DEFEAT_STANCE  7   // boss is defeated (5th stomp)
 // Boss bullet / fire sequence
 #define BOSS_FIRE_FRAMES       200  // frames between shots (idle phase)
 #define BOSS_FIRE_PRE_FRAMES    25  // frames of pre-shoot pause (stance 4)
@@ -991,7 +993,7 @@ static const BossStep g_WalkLeft[5] = {
 // Boss fight: background + stance sprite sheets (4 stances each, 2x2 grid)
 #include "content/screens/screen_84.h"
 #include "content/screens/screen_85.h"
-#include "content/screens/screen_87.h"
+#include "content/screens/screen_89.h"
 
 // Boss arena platform definitions
 static const struct Platform g_BossPlatformsROM[] = {
@@ -1053,7 +1055,7 @@ void DrawBossStance()
 	u8 slot  = g_BossScreen & 3;         // which slot in sheet: 0-3
 	u8 src_x = (slot & 1) ? 17 : 1;     // bit 0: col 1 or col 17
 	u8 src_y = (slot & 2) ? 13 : 1;     // bit 1: row 1 or row 13
-	const u8 *sheet_ptr = (g_BossScreen < 4) ? g_Screen85 : g_Screen87;
+	const u8 *sheet_ptr = (g_BossScreen < 4) ? g_Screen85 : g_Screen89;
 
 	// Clear only the boss rectangle with the arena background tile
 	VDP_FillLayout_GM2(84, 6, 10, 20, 13);
@@ -1163,7 +1165,7 @@ bool State_Boss()
 			if (g_BossFireTimer >= BOSS_FIRE_FRAMES && !g_BossBulletActive) {
 				g_BossFireTimer = BOSS_FIRE_PRE_FRAMES;
 				g_BossFirePhase = BOSS_FIRE_PRE;
-				g_BossScreen    = 4;  // pre-shoot stance
+				g_BossScreen    = BOSS_PREFIRE_STANCE;
 				DrawBossStance();
 			}
 		}
@@ -1182,7 +1184,7 @@ bool State_Boss()
 			FxPlay(FX_BULLET);
 			g_BossFireTimer = BOSS_FIRE_SHOOT_FRAMES;
 			g_BossFirePhase = BOSS_FIRE_SHOOT;
-			g_BossScreen    = 7;  // shooting stance
+			g_BossScreen    = BOSS_FIRE_STANCE;
 			DrawBossStance();
 		}
 	} else {  // BOSS_FIRE_SHOOT
