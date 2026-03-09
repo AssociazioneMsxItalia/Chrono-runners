@@ -374,12 +374,12 @@ void InitLevels() {
 	// World 1
 	ADD_LEVEL(level_map25);
 	ADD_LEVEL(level_map4);
-	ADD_LEVEL(level_map16);
+	ADD_LEVEL(level_map7);
 	ADD_LEVEL(level_map34);
 	ADD_CUTSCENE(g_World1MidCutscene);
-	ADD_LEVEL(level_map7);
-	ADD_LEVEL(level_map6);
 	ADD_LEVEL(level_map19);
+	ADD_LEVEL(level_map6);
+	ADD_LEVEL(level_map16);
 	ADD_CUTSCENE(g_World1EndCutscene);
 
 	// World 2
