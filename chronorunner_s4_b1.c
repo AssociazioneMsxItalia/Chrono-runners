@@ -7,6 +7,7 @@
 #include "content/pt3/gameover.h"
 #include "content/pt3/german4.h"
 #include "content/pt3/hitlerfinale.h"
+#include "content/pt3/impox160_3ch2.h"
 
 #include "content/ayfx/fx_chronorunner.h"
 
@@ -22,7 +23,7 @@ void SoundUpdate();
 void S4_FxPlay(u8 id);
 
 // Songs data table
-const unsigned char* g_SongData[4];
+const unsigned char* g_SongData[5];
 
 u8   g_CurrentSong = 0;
 
@@ -47,6 +48,7 @@ void SoundInit() {
 	g_SongData[1] = g_gameover;
 	g_SongData[2] = g_german4;
 	g_SongData[3] = g_hitlerfinale;
+	g_SongData[4] = g_impox160_3ch2;
 }
 
 void SoundPlay() {

@@ -2,6 +2,7 @@
 #define MUSIC_GAMEOVER 1
 #define MUSIC_MENU 2
 #define MUSIC_BOSS 3
+#define MUSIC_INTRO 4
 
 #define FX_EXIT_DOOR 0
 #define FX_GET_KEY 1

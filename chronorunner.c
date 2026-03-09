@@ -1263,6 +1263,13 @@ WITH_SEGMENT(1) {
         if (g_MenuSelection == 0) {
 			g_MenuState = 0;
             g_SequenceIdx = 0;
+
+WITH_SEGMENT(4) {
+			SoundSetSong(MUSIC_INTRO);
+			SoundLoop(TRUE);
+			SoundPlay();
+}
+
             AdvanceSequence();
         } else if (g_MenuSelection == 1) {
             g_MenuState = 0;
