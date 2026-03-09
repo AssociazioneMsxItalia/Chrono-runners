@@ -74,6 +74,8 @@ void DrawRewindGauge() {
 	// La barra di rewind è grande 8 slot, ogni cristallo ne riempie 2.
 	u8 ntiles = g_PlayerRewindEnergy / (SNAPSHOT_BUFFER_SIZE / 8);
 
+	VDP_Poke_GM2(20, 0, 90);
+
 	if (ntiles != 0)
 		VDP_FillLayout_GM2(62, 21, 0, ntiles, 1);
 	if (ntiles != 8)
