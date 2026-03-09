@@ -15,5 +15,5 @@ struct Level level_map28 = {
 	NULL,        // enemies
 	-1,        // key_trigger_enemy (-1 = visible from start)
 	g_Screen28,   // layout
-	"GATEWAY TO WORLD 4",  // name
+	"GATEWAY TO BUILDING 4",  // name
 };
