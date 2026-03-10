@@ -15,7 +15,7 @@ struct Level level_map100 = {
 	NULL,        // enemies
 	-1,        // key_trigger_enemy (-1 = visible from start)
 	g_Screen100,   // layout
-	"CUTSCENE - LEONARDO VETTORI",  // name
+	"",  // name
 };
 
 // Unknown sprite placements:
