@@ -26,3 +26,7 @@ sfxcollection/enter_vortex.afx
 sfxcollection/vortex_fire.afx
 #define FX_BOSS_DEATH 13
 sfxcollection/boss_death.afx
+#define FX_ROBOT_ACTIVATE 14
+sfxcollection/robotbeepbeep.afx
+#define FX_ALARM 15
+sfxcollection/allarm3.afx

@@ -373,13 +373,12 @@ const CutCmd g_IntroCutscene[] = {
 	CUT_WAIT(25),
 
 	CUT_TEXT("PRESS SPACE KEY", 23),
-
     CUT_WAIT_KEY(),
-
-    // Clear and show new text
     CUT_CLEAR_TEXT(),
 
     CUT_LOAD_LAYOUT(g_Screen5, 0, CUTSCENE_GFX_Y, 32, CUTSCENE_GFX_ROWS),
+
+    CUT_SFX(FX_ALARM),
 
     CUT_SPRITE_WALK(&g_DocWalkLeft, 29*8, 17*8, 20*8, 17*8, 1),
 
@@ -558,6 +557,8 @@ const CutCmd g_PreBossCutscene[] = {
     CUT_SPRITE_WALK(&g_VortexAnim, 21*8, 5*8, 15*8, 13*8, 3),
     CUT_SPRITE_HIDE(9),
     CUT_SPRITE_WALK(&g_VortexAnim, 27*8, 5*8, 15*8, 13*8, 3),
+
+    CUT_SFX(FX_ROBOT_ACTIVATE),
 
     CUT_SPRITE_MOVE(2, 22*8, 17*8, 15*8, 13*8, 10),
 
