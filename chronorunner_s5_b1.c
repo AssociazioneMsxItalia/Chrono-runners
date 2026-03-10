@@ -474,9 +474,13 @@ const CutCmd g_TrueColorsCutscene[] = {
     CUT_SPRITE_WALK(&g_PlayerWalkRight, 0*8, 17*8, 14*8, 17*8, 2),
 
     CUT_SPRITE_WALK(&g_VortexAnim, 14*8, 17*8, 20*8, 17*8, 3),
+    CUT_SFX(FX_GET_VORTEX),
     CUT_SPRITE_WALK(&g_VortexAnim, 14*8, 17*8, 20*8, 17*8, 3),
+    CUT_SFX(FX_GET_VORTEX),
     CUT_SPRITE_WALK(&g_VortexAnim, 14*8, 17*8, 20*8, 17*8, 3),
+    CUT_SFX(FX_GET_VORTEX),
     CUT_SPRITE_WALK(&g_VortexAnim, 14*8, 17*8, 20*8, 17*8, 3),
+    CUT_SFX(FX_GET_VORTEX),
 
     CUT_SPRITE_HIDE(VORTEX_SPRITE_ID),
 
