@@ -85,6 +85,13 @@ void SoundLoop(bool enable)
 		PT3_SetFinishCB(SoundStop);
 }
 
+// Utility function, tanto chiamano tutti questa
+void SoundSwitchTo(u8 songId) {
+	SoundSetSong(songId);
+	SoundLoop(TRUE);
+	SoundPlay();
+}
+
 //-----------------------------------------------------------------------------
 // Mute one of the channels
 void SoundMute(u8 chan, bool bMute)

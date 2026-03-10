@@ -24,7 +24,7 @@
 #define SEQ_LEVEL    0
 #define SEQ_CUTSCENE 1
 #define SEQ_BOSS     2
-#define MAX_CUTSCENES 13
+#define MAX_CUTSCENES 14
 #define MAX_SEQUENCE  (NUM_LEVELS + MAX_CUTSCENES + 1) // +1 for boss entry
 
 typedef struct { u8 type; u8 idx; } SequenceEntry;
@@ -230,12 +230,9 @@ extern void AllocateSpriteIDs(struct Level *lvl);
 //=============================================================================
 
 extern void SoundInit();
-extern void SoundPlay();
-extern void SoundSetSong(u8 songId);
+extern void SoundSwitchTo(u8 songId);
 extern u8 SoundGetSong();
 extern void SoundStop();
-extern void SoundLoop(bool enable);
-extern void SoundMute(u8 chan, bool bMute);
 extern void SoundUpdate();
 
 extern void S4_FxPlay(u8 id);
@@ -258,6 +255,7 @@ extern const CutCmd g_TrueColorsCutscene[];
 extern const CutCmd g_PreBossCutscene[];
 extern const CutCmd g_PreFightCutscene[];
 extern const CutCmd g_FinalCutscene[];
+extern const CutCmd g_TrueEndingCutscene[];
 
 //=============================================================================
 // SEGMENT 6, BANK 1
@@ -422,6 +420,7 @@ void InitLevels() {
 	ADD_CUTSCENE(g_PreFightCutscene);
 	ADD_BOSS();
 	ADD_CUTSCENE(g_FinalCutscene);
+	ADD_CUTSCENE(g_TrueEndingCutscene);
 
 	g_SequenceLength = s;
 
@@ -503,27 +502,15 @@ WITH_SEGMENT(4) {
 }
 }
 
-void SNDSetSong(u8 id) {
-WITH_SEGMENT(4) {
-	SoundSetSong(id);
-}
-}
-
-void SNDPlay() {
-WITH_SEGMENT(4) {
-	SoundPlay();
-}
-}
-
 void SNDStop() {
 WITH_SEGMENT(4) {
 	SoundStop();
 }
 }
 
-void SNDLoop(bool value) {
+void SNDSwitchTo(u8 songId) {
 WITH_SEGMENT(4) {
-	SoundLoop(value);
+	SoundSwitchTo(songId);
 }
 }
 
@@ -751,9 +738,7 @@ WITH_SEGMENT(4) {
 	if (g_SequenceIdx == 0) {
 WITH_SEGMENT(4) {
 		// Start menu music
-		SoundSetSong(MUSIC_MENU);
-		SoundLoop(TRUE);
-		SoundPlay();
+		SoundSwitchTo(MUSIC_MENU);
 }
 		Game_SetState(State_Menu);
 	} else {
@@ -828,9 +813,7 @@ bool State_Intermission()
 
 WITH_SEGMENT(4) {
 		if (SoundGetSong() != 0) {
-			SoundSetSong(MUSIC_GAME);
-			SoundLoop(TRUE);
-			SoundPlay();
+			SoundSwitchTo(MUSIC_GAME);
 		}
 }
 
@@ -1119,9 +1102,7 @@ bool State_MessageScreen()
 WITH_SEGMENT(4) {
 		SoundStop();
 		if (g_MessageScreenSongId != -1) {
-			SoundSetSong(g_MessageScreenSongId);
-			SoundLoop(FALSE);
-			SoundPlay();
+			SoundSwitchTo(g_MessageScreenSongId);
 		}
 }
 
@@ -1265,9 +1246,7 @@ WITH_SEGMENT(1) {
             g_SequenceIdx = 0;
 
 WITH_SEGMENT(4) {
-			SoundSetSong(MUSIC_INTRO);
-			SoundLoop(TRUE);
-			SoundPlay();
+			SoundSwitchTo(MUSIC_INTRO);
 }
 
             AdvanceSequence();

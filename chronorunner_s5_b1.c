@@ -102,6 +102,8 @@ static const CutSpriteAnimDef g_PlayerFreaked = {
 // Prefight cutscene
 #include "content/screens/screen_90.h"
 
+// True ending cutscene
+#include "content/screens/screen_100.h"
 
 //-----------------------------------------------------------------------------
 // Vortex animation definition (for world-end cutscenes)
@@ -616,18 +618,19 @@ const CutCmd g_PreFightCutscene[] = {
     CUT_WAIT_KEY(),
     CUT_CLEAR_TEXT(),
 
-    // Doctor panics and dies
+    // Doctor panics
+    CUT_TEXT_TYPE("NO, WAIT...", 22),
     CUT_SPRITE_ANIM(&g_DocPanic, 14*8, 17*8, 60),
-    CUT_SPRITE_WALK(&g_DocPanic, 14*8, 17*8, 14*8, 13*8, 1),
-    CUT_TEXT_TYPE("NOOO!!!", 22),
-    CUT_SPRITE_ANIM(&g_DocPanic, 14*8, 13*8, 60),
+
+    // Entra Chrono
+    CUT_SPRITE_WALK(&g_PlayerWalkRight, 0*8, 17*8, 8*8, 17*8, 2),
+
+    // Doctor escapes!
+    CUT_SPRITE_WALK(&g_DocWalkRight, 14*8, 17*8, 29*8, 17*8, 2),
     CUT_SPRITE_HIDE(2),
 
     CUT_WAIT_KEY(),
     CUT_CLEAR_TEXT(),
-
-    // Entra Chrono
-    CUT_SPRITE_WALK(&g_PlayerWalkRight, 0*8, 17*8, 8*8, 17*8, 2),
 
     CUT_TEXT_TYPE("(DEM SCHICKSAL NICHT TROTZEN!", 21),
     CUT_TEXT_TYPE("DON'T OPPOSE FATE!", 23),
@@ -659,9 +662,37 @@ const CutCmd g_FinalCutscene[] = {
     CUT_TEXT_TYPE("FREE ENERGY, ENDING ALL WARS.", 12),
     CUT_WAIT_KEY(),
 
-    CUT_TEXT_TYPE("TURN YOUR COMPUTER OFF AND GO", 21),
-    CUT_TEXT_TYPE("TO SLEEP!", 23),
+    CUT_TEXT_TYPE("DR. CRAZY IS PRESUMED DEAD, HE", 15),
+    CUT_TEXT_TYPE("WON'T MESS WITH TIME ANYMORE.", 17),
+    CUT_WAIT_KEY(),
+
+    CUT_TEXT_TYPE("...OR WILL HE?", 23),
     CUT_WAIT_KEY(),
 
     CUT_END(),
+};
+
+//-----------------------------------------------------------------------------
+// True ending cutscene (after final one)
+//-----------------------------------------------------------------------------
+
+const CutCmd g_TrueEndingCutscene[] = {
+    CUT_FILL(CUTSCENE_TILE_EMPTY, 0, CUTSCENE_GFX_Y, 32, CUTSCENE_GFX_ROWS),
+
+    CUT_TEXT_TYPE("ENGLAND, 1895", 21),
+    CUT_WAIT_KEY(),
+    CUT_CLEAR_TEXT(),
+
+    CUT_LOAD_LAYOUT(g_Screen100, 0, CUTSCENE_GFX_Y, 32, CUTSCENE_GFX_ROWS),
+
+    CUT_TEXT_TYPE("H.G. WELLS' HOUSE", 23),
+    CUT_WAIT_KEY(),
+    CUT_CLEAR_TEXT(),
+
+    CUT_SPRITE_WALK(&g_DocWalkLeft, 29*8, 17*8, 20*8, 17*8, 1),
+
+    CUT_TEXT_TYPE("HERBERT... I THINK WE WILL DO", 21),
+    CUT_TEXT_TYPE("GREAT THINGS TOGETHER!", 23),
+    CUT_WAIT_KEY(),
+    CUT_CLEAR_TEXT(),
 };
