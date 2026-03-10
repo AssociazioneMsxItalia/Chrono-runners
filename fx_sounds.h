@@ -19,4 +19,3 @@
 #define FX_VORTEX_FIRE 12
 #define FX_BOSS_DEATH 13
 #define FX_ROBOT_ACTIVATE 14
-#define FX_ALARM 15
