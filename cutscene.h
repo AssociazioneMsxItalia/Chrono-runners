@@ -75,7 +75,7 @@ typedef enum CutCmd_Type {
     CUTCMD_PLAY_MUSIC,        // Start music playback
     CUTCMD_STOP_MUSIC,        // Stop music
     CUTCMD_PLAY_SFX,          // Play sound effect
-    CUTCMD_CALLBACK           // Call custom function
+    CUTCMD_PRINT_NUMBER       // Display a u8 variable's value at position
 } CutCmd_Type;
 
 //=============================================================================
@@ -164,6 +164,13 @@ typedef struct CutCmd {
         struct {
             u8 id;            // Music/SFX ID
         } sound;
+
+        // CUTCMD_PRINT_NUMBER
+        struct {
+            const u8* value;  // Pointer to the u8 variable to display
+            u8 x;             // Tile X position (0-31)
+            u8 y;             // Tile Y position (0-23)
+        } number;
     } p;  // Short name 'p' for less verbose access (cmd->p.text.x)
 } CutCmd;
 
@@ -305,3 +312,8 @@ bool State_Cutscene(void);
 // Play sound effect
 #define CUT_SFX(sid) \
     { CUTCMD_PLAY_SFX, { .sound = { (sid) } } }
+
+// Display a u8 variable's value at tile position (px, py)
+// val must be an lvalue (address taken at script-definition time; dereferenced at runtime)
+#define CUT_NUMBER(val, px, py) \
+    { CUTCMD_PRINT_NUMBER, { .number = { &(val), (px), (py) } } }

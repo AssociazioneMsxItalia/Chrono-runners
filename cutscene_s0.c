@@ -9,6 +9,7 @@ CutsceneContext g_Cutscene;
 
 CutSpriteAnimDef g_animdef;
 
+extern void PrintGFXNumber(u8 number, u8 x, u8 y);
 extern void Cmd_WaitFrames(void);
 extern void Cmd_WaitKey(void);
 extern void Cmd_ClearText(void);
@@ -110,6 +111,11 @@ void Cmd_PlayMusic(const CutCmd* cmd) {
     g_Cutscene.cmdIndex++;
 }
 
+void Cmd_PrintNumber(const CutCmd* cmd) {
+    PrintGFXNumber(*cmd->p.number.value, cmd->p.number.x, cmd->p.number.y);
+    g_Cutscene.cmdIndex++;
+}
+
 void Cmd_StopMusic(void) {
     // TODO: Implement with segment switching
     /*u8 prevSeg = GET_BANK_SEGMENT(1);
@@ -187,6 +193,7 @@ WITH_SEGMENT(5) {
         case CUTCMD_PLAY_MUSIC:     Cmd_PlayMusic(&cmd); break;
         case CUTCMD_STOP_MUSIC:     Cmd_StopMusic(); break;
         case CUTCMD_PLAY_SFX:       Cmd_PlaySfx(&cmd); break;
+        case CUTCMD_PRINT_NUMBER:   Cmd_PrintNumber(&cmd); break;
         default: g_Cutscene.cmdIndex++; break;
     }
 

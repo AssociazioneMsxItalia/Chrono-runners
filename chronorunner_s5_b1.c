@@ -650,19 +650,24 @@ const CutCmd g_PreFightCutscene[] = {
 // Final cutscene (after boss defeat)
 //-----------------------------------------------------------------------------
 
+extern u8 g_RemainingMinutesBackup;
+extern u8 g_RemainingSecondsBackup;
+
 const CutCmd g_FinalCutscene[] = {
     CUT_FILL(CUTSCENE_TILE_EMPTY, 0, CUTSCENE_GFX_Y, 32, CUTSCENE_GFX_ROWS),
 
     CUT_TEXT_TYPE("CONGRATULATIONS!", 0),
     CUT_WAIT_KEY(),
 
-    CUT_TEXT_TYPE("AFTER DEFEATING THE WUNDERWAFFE", 3),
-    CUT_TEXT_TYPE("YOU RETURN TO 2026, BRINGING", 5),
-    CUT_TEXT_TYPE("BACK THE SINGULARITIES.", 7),
+    CUT_TEXT_TYPE("SINGULARITIES RECOVERED IN:", 3),
+    CUT_TEXT("'  \"", 5),
+    CUT_NUMBER(g_RemainingMinutesBackup, 12, 5),
+    CUT_NUMBER(g_RemainingSecondsBackup, 15, 5),
     CUT_WAIT_KEY(),
 
-    CUT_TEXT_TYPE("SCIENTISTS USE THEM TO PRODUCE", 10),
-    CUT_TEXT_TYPE("FREE ENERGY, ENDING ALL WARS.", 12),
+    CUT_TEXT_TYPE("AFTER DEFEATING THE WUNDERWAFFE", 8),
+    CUT_TEXT_TYPE("YOU RETURN TO 2026, BRINGING", 10),
+    CUT_TEXT_TYPE("BACK THE SINGULARITIES.", 12),
     CUT_WAIT_KEY(),
 
     CUT_TEXT_TYPE("DR. CRAZY IS PRESUMED DEAD, HE", 15),

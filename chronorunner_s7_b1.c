@@ -969,6 +969,9 @@ i8   g_VortexDY       = 0;
 // g_VortexAnimFrame is already defined in chronorunner.c (declared extern above)
 u8   g_VortexSlotIdx  = 0;  // 0-3: which corner slot this vortex targets
 
+u8   g_RemainingMinutesBackup;
+u8   g_RemainingSecondsBackup;
+
 // Vortex corner slot positions in tiles
 static const u8 g_BossVortexPos[4][2] = {
     {  4, 19 },
@@ -1046,7 +1049,7 @@ static void AimProjectile(u8 sx, u8 sy, u8 tx, u8 ty, u8 speed, i8 *dx, i8 *dy)
 }
 
 // Clear the boss area (tile 84 = arena background) then overlay the current
-// stance rectangle sourced from sheet 85 (stances 0-3) or sheet 87 (stances 4-7).
+// stance rectangle.
 // g_Screen84 is drawn once on entry; this only repaints the dynamic region.
 void DrawBossStance()
 {
@@ -1100,6 +1103,9 @@ void InitBoss()
 	g_VortexState      = VORTEX_INACTIVE;
 	g_VortexSlotIdx    = 0;
 	g_VortexAnimFrame  = 0;
+	// Save the player remaining time (it's their score)
+	g_RemainingMinutesBackup = g_RemainingMinutes;
+	g_RemainingSecondsBackup = g_RemainingSeconds;
 	// Zero the timer so State_Death always routes to GAME OVER in boss mode
 	g_RemainingMinutes   = 0;
 	g_RemainingSeconds   = 0;
