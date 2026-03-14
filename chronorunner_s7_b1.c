@@ -954,18 +954,22 @@ u8   g_BossDstX           = 0;  // Current stance X position in tiles (runtime)
 u8   g_BossWalkDir        = 1;  // 0 = right sequence, 1 = left sequence
 u8   g_BossSeqStep        = 0;  // Current step index within the walk sequence (0-4)
 bool g_BossBulletActive   = FALSE;
-u8   g_BossBulletX        = 0;
-u8   g_BossBulletY        = 0;
-i8   g_BossBulletDX       = 0;  // pixels per frame, X
-i8   g_BossBulletDY       = 0;  // pixels per frame, Y
+u8   g_BossBulletStartX   = 0;
+u8   g_BossBulletStartY   = 0;
+u8   g_BossBulletTgtX     = 0;
+u8   g_BossBulletTgtY     = 0;
+u8   g_BossBulletFrames   = 0;
+u8   g_BossBulletIdx      = 0;
 u8   g_BossFireTimer      = 0;
 u8   g_BossFirePhase     = BOSS_FIRE_IDLE;
 // Flying vortex state machine
 u8   g_VortexState    = VORTEX_INACTIVE;
-i16  g_VortexX        = 0;
-i16  g_VortexY        = 0;
-i8   g_VortexDX       = 0;
-i8   g_VortexDY       = 0;
+u8   g_VortexStartX   = 0;
+u8   g_VortexStartY   = 0;
+u8   g_VortexTgtX     = 0;
+u8   g_VortexTgtY     = 0;
+u8   g_VortexFrames   = 0;
+u8   g_VortexFrameIdx = 0;
 // g_VortexAnimFrame is already defined in chronorunner.c (declared extern above)
 u8   g_VortexSlotIdx  = 0;  // 0-3: which corner slot this vortex targets
 
@@ -1034,18 +1038,13 @@ extern void SNDStop();
 
 bool State_Boss();
 
-// Compute Chebyshev-normalized velocity from (sx,sy) toward (tx,ty) at given speed.
-// Used by both boss bullet and flying vortex to avoid code duplication.
-static void AimProjectile(u8 sx, u8 sy, u8 tx, u8 ty, u8 speed, i8 *dx, i8 *dy)
+// Compute number of frames to travel from (sx,sy) to (tx,ty) at given speed.
+static u8 MoveFrames(u8 sx, u8 sy, u8 tx, u8 ty, u8 speed)
 {
-	i16 ddx = (i16)tx - (i16)sx;
-	i16 ddy = (i16)ty - (i16)sy;
-	i16 ax  = ddx < 0 ? -ddx : ddx;
-	i16 ay  = ddy < 0 ? -ddy : ddy;
-	i16 m   = ax > ay ? ax : ay;
-	if (m == 0) m = 1;
-	*dx = (i8)(ddx * speed / m);
-	*dy = (i8)(ddy * speed / m);
+	i16 ax = (i16)tx - (i16)sx; if (ax < 0) ax = -ax;
+	i16 ay = (i16)ty - (i16)sy; if (ay < 0) ay = -ay;
+	i16 m  = ax > ay ? ax : ay; if (m == 0) m = 1;
+	return (u8)((m + speed - 1) / speed);
 }
 
 // Clear the boss area (tile 84 = arena background) then overlay the current
@@ -1178,11 +1177,13 @@ bool State_Boss()
 			g_BossBulletActive = TRUE;
 			u8 origin_x = g_BossDstX * 8 + BOSS_HEAD_OFFSET_X + 8;
 			u8 origin_y = (BOSS_HEAD_Y1 + BOSS_HEAD_Y2) / 2;
-			g_BossBulletX = origin_x;
-			g_BossBulletY = origin_y;
-			AimProjectile(origin_x, origin_y,
-			              g_PlayerPawn.PositionX + 8, g_PlayerPawn.PositionY + 8,
-			              BOSS_BULLET_SPEED, &g_BossBulletDX, &g_BossBulletDY);
+			g_BossBulletStartX = origin_x;
+			g_BossBulletStartY = origin_y;
+			g_BossBulletTgtX   = g_PlayerPawn.PositionX + 8;
+			g_BossBulletTgtY   = g_PlayerPawn.PositionY + 8;
+			g_BossBulletFrames = MoveFrames(origin_x, origin_y,
+			                     g_BossBulletTgtX, g_BossBulletTgtY, BOSS_BULLET_SPEED);
+			g_BossBulletIdx    = 0;
 			FxPlay(FX_BULLET);
 			g_BossFireTimer = BOSS_FIRE_SHOOT_FRAMES;
 			g_BossFirePhase = BOSS_FIRE_SHOOT;
@@ -1201,22 +1202,23 @@ bool State_Boss()
 
 	// Boss bullet: move, draw, and collide
 	if (g_BossBulletActive) {
-		g_BossBulletX += g_BossBulletDX;
-		g_BossBulletY += g_BossBulletDY;
-		if (g_BossBulletX < 4 || g_BossBulletX > 248 || g_BossBulletY > 192) {
+		g_BossBulletIdx++;
+		u8 bpx = (u8)((i16)g_BossBulletStartX + ((i16)g_BossBulletTgtX - (i16)g_BossBulletStartX) * (i16)g_BossBulletIdx / (i16)g_BossBulletFrames);
+		u8 bpy = (u8)((i16)g_BossBulletStartY + ((i16)g_BossBulletTgtY - (i16)g_BossBulletStartY) * (i16)g_BossBulletIdx / (i16)g_BossBulletFrames);
+		if (g_BossBulletIdx >= g_BossBulletFrames || bpx < 4 || bpx > 248 || bpy > 192) {
 			g_BossBulletActive = FALSE;
 			VDP_HideSprite(VORTEX_SPRITE_ID);
 		} else if (rectCollide(g_PlayerPawn.PositionX,      g_PlayerPawn.PositionY,
 		                       g_PlayerPawn.PositionX + 15, g_PlayerPawn.PositionY + 15,
-		                       g_BossBulletX + 6, g_BossBulletY + 6,
-		                       g_BossBulletX + 9, g_BossBulletY + 9)) {
+		                       bpx + 6, bpy + 6,
+		                       bpx + 9, bpy + 9)) {
 			g_BossBulletActive = FALSE;
 			VDP_HideSprite(VORTEX_SPRITE_ID);
 			Game_SetState(State_Death);
 			return TRUE;
 		} else {
 			VDP_SetSpriteSM1(VORTEX_SPRITE_ID,
-			                 g_BossBulletX, g_BossBulletY,
+			                 bpx, bpy,
 			                 (u8)(BULLET_FRAME(0)), COLOR_LIGHT_RED);
 		}
 	}
@@ -1242,11 +1244,12 @@ bool State_Boss()
 				g_VortexSlotIdx   = g_BossHitCount - 1;  // stomp 1→slot 0, stomp 2→slot 1, ...
 				u8 ox = g_BossDstX * 8 + BOSS_HEAD_OFFSET_X + 8;
 				u8 oy = (BOSS_HEAD_Y1 + BOSS_HEAD_Y2) / 2;
-				g_VortexX = ox;  g_VortexY = oy;
-				AimProjectile(ox, oy,
-				              g_BossVortexPos[g_VortexSlotIdx][0] * 8,
-				              g_BossVortexPos[g_VortexSlotIdx][1] * 8,
-				              BOSS_VORTEX_SPEED, &g_VortexDX, &g_VortexDY);
+				g_VortexStartX   = ox;
+				g_VortexStartY   = oy;
+				g_VortexTgtX     = g_BossVortexPos[g_VortexSlotIdx][0] * 8;
+				g_VortexTgtY     = g_BossVortexPos[g_VortexSlotIdx][1] * 8;
+				g_VortexFrames   = MoveFrames(ox, oy, g_VortexTgtX, g_VortexTgtY, BOSS_VORTEX_SPEED);
+				g_VortexFrameIdx = 0;
 				g_VortexState     = VORTEX_TO_SLOT;
 				g_VortexAnimFrame = 0;
 			} else {
@@ -1300,44 +1303,35 @@ bool State_Boss()
 		g_VortexAnimFrame++;
 		if (g_VortexAnimFrame >= 30) g_VortexAnimFrame = 0;
 		u8 vpattern = VORTEX_FRAME(g_VortexAnimFrame / 10);
-		u8 sx = g_BossVortexPos[g_VortexSlotIdx][0] * 8;
-		u8 sy = g_BossVortexPos[g_VortexSlotIdx][1] * 8;
 
 		if (g_VortexState == VORTEX_TO_SLOT) {
-			g_VortexX += g_VortexDX;
-			g_VortexY += g_VortexDY;
-			// Arrival: each axis has reached or passed its target (no u8 wrap risk with i16)
-			u8 x_arr = (g_VortexDX == 0) || (g_VortexDX > 0 ? (g_VortexX >= (i16)sx) : (g_VortexX <= (i16)sx));
-			u8 y_arr = (g_VortexDY == 0) || (g_VortexDY > 0 ? (g_VortexY >= (i16)sy) : (g_VortexY <= (i16)sy));
-			if (x_arr && y_arr) {
-				g_VortexX = sx;  g_VortexY = sy;
-				g_VortexState = VORTEX_AT_SLOT;
-			}
-			VDP_SetSpriteSM1(VORTEX_SPRITE_ID, (u8)g_VortexX, (u8)g_VortexY, vpattern, COLOR_WHITE);
+			g_VortexFrameIdx++;
+			u8 vx = (u8)((i16)g_VortexStartX + ((i16)g_VortexTgtX - (i16)g_VortexStartX) * (i16)g_VortexFrameIdx / (i16)g_VortexFrames);
+			u8 vy = (u8)((i16)g_VortexStartY + ((i16)g_VortexTgtY - (i16)g_VortexStartY) * (i16)g_VortexFrameIdx / (i16)g_VortexFrames);
+			if (g_VortexFrameIdx >= g_VortexFrames) { g_VortexState = VORTEX_AT_SLOT; }
+			VDP_SetSpriteSM1(VORTEX_SPRITE_ID, vx, vy, vpattern, COLOR_WHITE);
 
 		} else if (g_VortexState == VORTEX_AT_SLOT) {
-			VDP_SetSpriteSM1(VORTEX_SPRITE_ID, (u8)g_VortexX, (u8)g_VortexY, vpattern, COLOR_WHITE);
+			VDP_SetSpriteSM1(VORTEX_SPRITE_ID, g_VortexTgtX, g_VortexTgtY, vpattern, COLOR_WHITE);
 			// Player touches vortex → becomes weapon, flies back to boss
 			if (rectCollide(g_PlayerPawn.PositionX,      g_PlayerPawn.PositionY,
 			                g_PlayerPawn.PositionX + 15, g_PlayerPawn.PositionY + 15,
-			                (u8)g_VortexX, (u8)g_VortexY, (u8)g_VortexX + 15, (u8)g_VortexY + 15)) {
+			                g_VortexTgtX, g_VortexTgtY, g_VortexTgtX + 15, g_VortexTgtY + 15)) {
 				FxPlay(FX_VORTEX_FIRE);
 				u8 bx = g_BossDstX * 8 + BOSS_HEAD_OFFSET_X + 8;
 				u8 by = (BOSS_HEAD_Y1 + BOSS_HEAD_Y2) / 2;
-				AimProjectile(sx, sy, bx, by, BOSS_VORTEX_SPEED, &g_VortexDX, &g_VortexDY);
-				g_VortexX = sx;  g_VortexY = sy;
-				g_VortexState = VORTEX_TO_BOSS;
+				g_VortexStartX   = g_VortexTgtX;
+				g_VortexStartY   = g_VortexTgtY;
+				g_VortexTgtX     = bx;
+				g_VortexTgtY     = by;
+				g_VortexFrames   = MoveFrames(g_VortexStartX, g_VortexStartY, bx, by, BOSS_VORTEX_SPEED);
+				g_VortexFrameIdx = 0;
+				g_VortexState    = VORTEX_TO_BOSS;
 			}
 
 		} else {  // VORTEX_TO_BOSS
-			g_VortexX += g_VortexDX;
-			g_VortexY += g_VortexDY;
-			u8 bx = g_BossDstX * 8 + BOSS_HEAD_OFFSET_X + 8;
-			u8 by = (BOSS_HEAD_Y1 + BOSS_HEAD_Y2) / 2;
-			// Arrival: each axis has reached or passed its target
-			u8 x_arr = (g_VortexDX == 0) || (g_VortexDX > 0 ? (g_VortexX >= (i16)bx) : (g_VortexX <= (i16)bx));
-			u8 y_arr = (g_VortexDY == 0) || (g_VortexDY > 0 ? (g_VortexY >= (i16)by) : (g_VortexY <= (i16)by));
-			if (x_arr && y_arr) {
+			g_VortexFrameIdx++;
+			if (g_VortexFrameIdx >= g_VortexFrames) {
 				// Vortex hits boss: boss takes damage and resumes patrol
 				g_VortexState = VORTEX_INACTIVE;
 				VDP_HideSprite(VORTEX_SPRITE_ID);
@@ -1346,7 +1340,9 @@ bool State_Boss()
 				g_BossFireTimer = 0;
 				StartBossWalkCycle();
 			} else {
-				VDP_SetSpriteSM1(VORTEX_SPRITE_ID, (u8)g_VortexX, (u8)g_VortexY, vpattern, COLOR_LIGHT_RED);
+				u8 vx = (u8)((i16)g_VortexStartX + ((i16)g_VortexTgtX - (i16)g_VortexStartX) * (i16)g_VortexFrameIdx / (i16)g_VortexFrames);
+				u8 vy = (u8)((i16)g_VortexStartY + ((i16)g_VortexTgtY - (i16)g_VortexStartY) * (i16)g_VortexFrameIdx / (i16)g_VortexFrames);
+				VDP_SetSpriteSM1(VORTEX_SPRITE_ID, vx, vy, vpattern, COLOR_LIGHT_RED);
 			}
 		}
 	}
