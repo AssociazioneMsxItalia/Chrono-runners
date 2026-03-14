@@ -567,6 +567,12 @@ bool g_KeyEnabled;
 u8 g_KeyPosX;
 u8 g_KeyPosY;
 u8 g_KeyAnimFrame;
+// Key flight animation (enemy stomp → slot)
+bool g_KeyFlying     = FALSE;
+u8   g_KeyFlyStartX  = 0;
+u8   g_KeyFlyStartY  = 0;
+u8   g_KeyFlyFrames  = 0;
+u8   g_KeyFlyFrameIdx = 0;
 
 // Crystal sprite
 bool g_CrystalEnabled;
@@ -761,6 +767,7 @@ WITH_SEGMENT(seg) {
 	g_KeyPosX = g_ActiveLevel.key_x * 8;
 	g_KeyPosY = g_ActiveLevel.key_y * 8;
 	g_KeyAnimFrame = 0;
+	g_KeyFlying    = FALSE;
 	g_KeyEnabled = (g_ActiveLevel.key_trigger_enemy == -1);
 	// Quando il giocatore viene ucciso dopo aver già recuperato la chiave,
 	// questa va di nuovo nascosta

@@ -21,6 +21,11 @@ extern i8   g_mDY;
 extern bool g_PlayerJumping;
 extern bool g_KeyEnabled;
 extern bool g_PlayerHasKey;
+extern bool g_KeyFlying;
+extern u8   g_KeyFlyStartX;
+extern u8   g_KeyFlyStartY;
+extern u8   g_KeyFlyFrames;
+extern u8   g_KeyFlyFrameIdx;
 
 extern struct Level g_ActiveLevel;
 
@@ -80,6 +85,15 @@ void DrawRewindGauge() {
 		VDP_FillLayout_GM2(62, 21, 0, ntiles, 1);
 	if (ntiles != 8)
 		VDP_FillLayout_GM2(63, 21 + ntiles, 0, 8 - ntiles, 1);
+}
+
+// Compute number of frames to travel from (sx,sy) to (tx,ty) at given speed.
+u8 MoveFrames(u8 sx, u8 sy, u8 tx, u8 ty, u8 speed)
+{
+	i16 ax = (i16)tx - (i16)sx; if (ax < 0) ax = -ax;
+	i16 ay = (i16)ty - (i16)sy; if (ay < 0) ay = -ay;
+	i16 m  = ax > ay ? ax : ay; if (m == 0) m = 1;
+	return (u8)((m + speed - 1) / speed);
 }
 
 //=============================================================================
@@ -157,9 +171,14 @@ bool isPlayerHitByEnemies(struct Level *lvl) {
 
 				FxPlay(FX_STOMP_ROBOT);
 
-				// Reveal hidden key if this is the trigger enemy
-				if (!g_KeyEnabled && !g_PlayerHasKey && (i8)e == lvl->key_trigger_enemy) {
-					g_KeyEnabled = TRUE;
+				// Reveal hidden key: fly from enemy position to its slot
+				if (!g_KeyEnabled && !g_KeyFlying && !g_PlayerHasKey && (i8)e == lvl->key_trigger_enemy) {
+					g_KeyFlyStartX   = enemies[e].pos_x;
+					g_KeyFlyStartY   = enemies[e].pos_y;
+					g_KeyFlyFrames   = MoveFrames(g_KeyFlyStartX, g_KeyFlyStartY,
+					                              lvl->key_x * 8, lvl->key_y * 8, 2);
+					g_KeyFlyFrameIdx = 0;
+					g_KeyFlying      = TRUE;
 					FxPlay(FX_SHOW_KEY);
 				}
 
@@ -261,6 +280,18 @@ extern u8 g_VortexAnimFrame;
 extern u8 g_RemainingFS;
 
 void DrawKey(struct Level *lvl) {
+	if (g_KeyFlying) {
+		g_KeyFlyFrameIdx++;
+		u8 kx = (u8)((i16)g_KeyFlyStartX + ((i16)(lvl->key_x * 8) - (i16)g_KeyFlyStartX) * (i16)g_KeyFlyFrameIdx / (i16)g_KeyFlyFrames);
+		u8 ky = (u8)((i16)g_KeyFlyStartY + ((i16)(lvl->key_y * 8) - (i16)g_KeyFlyStartY) * (i16)g_KeyFlyFrameIdx / (i16)g_KeyFlyFrames);
+		if (g_KeyFlyFrameIdx >= g_KeyFlyFrames) {
+			g_KeyFlying  = FALSE;
+			g_KeyEnabled = TRUE;
+		}
+		VDP_SetSpriteSM1(KEY_SPRITE_ID, kx, ky, KEY_PATTERN_OFFSET, COLOR_BLACK);
+		return;
+	}
+
 	if (!g_KeyEnabled)
 		return;
 
@@ -1037,15 +1068,6 @@ extern void SNDSwitchTo(u8 songId);
 extern void SNDStop();
 
 bool State_Boss();
-
-// Compute number of frames to travel from (sx,sy) to (tx,ty) at given speed.
-static u8 MoveFrames(u8 sx, u8 sy, u8 tx, u8 ty, u8 speed)
-{
-	i16 ax = (i16)tx - (i16)sx; if (ax < 0) ax = -ax;
-	i16 ay = (i16)ty - (i16)sy; if (ay < 0) ay = -ay;
-	i16 m  = ax > ay ? ax : ay; if (m == 0) m = 1;
-	return (u8)((m + speed - 1) / speed);
-}
 
 // Clear the boss area (tile 84 = arena background) then overlay the current
 // stance rectangle.
