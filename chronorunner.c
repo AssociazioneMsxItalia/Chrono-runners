@@ -1074,7 +1074,7 @@ bool State_Death()
 
 		// Se il tempo è esaurito, vai a Game Over
 		if (g_RemainingMinutes == 0 && g_RemainingSeconds == 0) {
-			SetMessageScreen("GAME OVER", MUSIC_GAMEOVER, 500);
+			SetMessageScreen("GAME OVER", MUSIC_GAMEOVER, 425);
 			Game_SetState(State_MessageScreen);
 		} else {
 			// Flash su respawn personaggio
