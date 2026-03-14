@@ -1068,7 +1068,7 @@ bool State_Death()
 		// riusare questo stato e poi andare a Game Over. Però in questo caso
 		// non bisogna fare il warp altrimenti per un attimo si vede
 		// l'orologio a 00 00
-		if (g_RemainingMinutes != 0 && g_RemainingSeconds != 0) {
+		if (!(g_RemainingMinutes == 0 && g_RemainingSeconds == 0)) {
 			warpTime(FALSE);
 		}
 
