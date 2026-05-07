@@ -2,13 +2,13 @@
 
 **By Associazione MSX Italia**
 
-> Placed **10th out of 50 entries** in the [MSXDev'25](https://www.msxdev.org/2026/03/14/msxdev25-38-chrono-runner/) competition — and it's **playable right now** in your browser on the contest page!
+> Placed **10th out of 50 entries** in the [MSXDev'25](https://www.msxdev.org/2026/05/03/msxdev25-results/) competition. **Playable right now** in your browser on the [contest page](https://www.msxdev.org/2026/03/14/msxdev25-38-chrono-runner/)through WebMSX.
 
 ---
 
 ## About the Game
 
-Chrono Runner is a platformer for MSX1 computers in which you control a time-travelling runner racing through four worlds of increasingly dangerous levels. Your goal is simple: reach the exit of each stage. What makes it unique is your ability to **rewind time** — when you die or get stuck, you can reverse your steps and try a different path, giving the game its signature puzzle-platformer twist.
+Chrono Runner is a platformer for MSX1 computers in which you control a time-travelling runner racing through four worlds of increasingly dangerous levels. Your goal is simple: reach the exit of each stage. What makes it unique is your ability to **rewind time**: when you die or get stuck, you can reverse your steps and try a different path, giving the game its signature puzzle-platformer twist.
 
 The game features moving platforms, hazardous mines, and four types of enemies with distinct behaviours, from patrolling guards to enemies that project energy fields. Between worlds, story cutscenes advance a light narrative that ties the time-travel theme together, and a final boss level caps the adventure.
 
@@ -28,15 +28,23 @@ Chrono Runner is built on the **[MSXgl](https://github.com/aoineko-fr/MSXgl)** g
 
 ## Building
 
-Prerequisites: MSXgl toolchain (SDCC, MSXtk), Python 3.
+Prerequisites: [MSXgl](https://github.com/aoineko-fr/MSXgl) (includes SDCC and MSXtk), Python 3 if you want to update assets with the `Toolkit/` utilities.
 
-```console
-# macOS / Linux
-./build.sh
+1. Clone or download MSXgl locally.
+2. Clone this repository into MSXgl's `projects/` directory:
+   ```console
+   cd MSXgl/projects
+   git clone <this-repo-url> Chrono-runners
+   ```
+3. Run the build script from inside the project directory:
+   ```console
+   # macOS / Linux
+   cd Chrono-runners
+   ./build.sh
 
-# Windows
-build.bat
-```
+   # Windows
+   build.bat
+   ```
 
 The build produces a ROM image in `out/` that can be run in any MSX emulator (e.g. openMSX) or on real hardware via a FlashROM cartridge.
 
