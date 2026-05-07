@@ -2,7 +2,7 @@
 
 **By Associazione MSX Italia**
 
-> Placed **10th out of 50 entries** in the [MSXDev'25](https://www.msxdev.org/2026/05/03/msxdev25-results/) competition. **Playable right now** in your browser on the [contest page](https://www.msxdev.org/2026/03/14/msxdev25-38-chrono-runner/)through WebMSX.
+> Placed **10th out of 50 entries** in the [MSXDev'25](https://www.msxdev.org/2026/05/03/msxdev25-results/) competition. **Playable right now** in your browser on the [contest page](https://www.msxdev.org/2026/03/14/msxdev25-38-chrono-runner/) through WebMSX.
 
 ---
 
