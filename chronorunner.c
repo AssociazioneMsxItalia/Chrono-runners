@@ -26,6 +26,8 @@
 #define SEQ_BOSS     2
 #define MAX_CUTSCENES 14
 #define MAX_SEQUENCE  (NUM_LEVELS + MAX_CUTSCENES + 1) // +1 for boss entry
+#define SKIP_LEVEL_KEY KEY_F4
+#define CHEAT_TOGGLE_KEY KEY_F4
 
 typedef struct { u8 type; u8 idx; } SequenceEntry;
 
@@ -865,7 +867,7 @@ WITH_SEGMENT(next_lvl_seg) {
 
 	g_IntermissionState++;
 
-	if (g_IntermissionState > 100 || (g_CheatEnabled && Keyboard_IsKeyPressed(KEY_F1))) {
+	if (g_IntermissionState > 100 || (g_CheatEnabled && Keyboard_IsKeyPressed(SKIP_LEVEL_KEY))) {
 		g_IntermissionState = 0;
 		ChangeLevel();
 		return FALSE;
@@ -1009,7 +1011,7 @@ bool State_Game()
     }
 
 	// Controlla se il giocatore ha raggiunto l'uscita
-	if (isPlayerAtExit() || (g_CheatEnabled && Keyboard_IsKeyPressed(KEY_F1))) {
+	if (isPlayerAtExit() || (g_CheatEnabled && Keyboard_IsKeyPressed(SKIP_LEVEL_KEY))) {
 		FxPlay(FX_EXIT_DOOR);
 		AdvanceSequence();
 		return TRUE;
@@ -1226,7 +1228,7 @@ WITH_SEGMENT(1) {
         g_MenuState = 1;
     }
 
-    if (Keyboard_IsKeyPressed(KEY_F1))
+    if (Keyboard_IsKeyPressed(CHEAT_TOGGLE_KEY))
         g_CheatEnabled = TRUE;
 
     // Wait for all keys to be released before accepting new input
