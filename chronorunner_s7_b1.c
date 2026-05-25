@@ -8,6 +8,7 @@
 #include "PawnData.h"
 #include "snapshot.h"
 #include "fx_sounds.h"
+#include "game_defines.h"
 
 extern void AdvanceSequence();
 
@@ -529,9 +530,22 @@ bool isSpaceReleased() {
 	return !isSpacePressed();
 }
 
+bool isSkipKeyReleased() {
+	static bool wasPressed = FALSE;
+	bool isPressed = Keyboard_IsKeyPressed(SKIP_LEVEL_KEY);
+	
+	// Ritorna TRUE solo quando il tasto passa da premuto a non-premuto
+	if (wasPressed && !isPressed) {
+		wasPressed = FALSE;
+		return TRUE;
+	}
+	wasPressed = isPressed;
+	return FALSE;
+}
+
 //=============================================================================
 // UPDATE FUNCTIONS
-//=============================================================================
+//===============================================================================
 
 extern bool g_PlayerInputRight;
 extern bool g_PlayerInputLeft;

@@ -13,6 +13,7 @@
 #include "snapshot.h"
 #include "cutscene.h"
 #include "fx_sounds.h"
+#include "game_defines.h"
 
 //=============================================================================
 // DEFINES
@@ -26,8 +27,6 @@
 #define SEQ_BOSS     2
 #define MAX_CUTSCENES 14
 #define MAX_SEQUENCE  (NUM_LEVELS + MAX_CUTSCENES + 1) // +1 for boss entry
-#define SKIP_LEVEL_KEY KEY_F4
-#define CHEAT_TOGGLE_KEY KEY_F4
 
 typedef struct { u8 type; u8 idx; } SequenceEntry;
 
@@ -298,6 +297,7 @@ extern bool isLeftPressed();
 extern bool isRightPressed();
 extern bool isSpacePressed();
 extern bool isSpaceReleased();
+extern bool isSkipKeyReleased();
 
 extern void UpdatePlayerInput();
 extern void UpdatePlayerGravity();
@@ -867,7 +867,7 @@ WITH_SEGMENT(next_lvl_seg) {
 
 	g_IntermissionState++;
 
-	if (g_IntermissionState > 100 || (g_CheatEnabled && Keyboard_IsKeyPressed(SKIP_LEVEL_KEY))) {
+	if (g_IntermissionState > 100 || (g_CheatEnabled && isSkipKeyReleased())) {
 		g_IntermissionState = 0;
 		ChangeLevel();
 		return FALSE;
@@ -1011,7 +1011,7 @@ bool State_Game()
     }
 
 	// Controlla se il giocatore ha raggiunto l'uscita
-	if (isPlayerAtExit() || (g_CheatEnabled && Keyboard_IsKeyPressed(SKIP_LEVEL_KEY))) {
+	if (isPlayerAtExit() || (g_CheatEnabled && isSkipKeyReleased())) {
 		FxPlay(FX_EXIT_DOOR);
 		AdvanceSequence();
 		return TRUE;
