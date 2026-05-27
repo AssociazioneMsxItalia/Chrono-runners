@@ -1416,6 +1416,7 @@ void InterruptHook() {
 void main()
 {
 	DEBUG_INIT();
+	DEBUG_LOG("Hello, world!");
 	Bios_SetKeyClick(FALSE);
 
 WITH_SEGMENT(4) {
