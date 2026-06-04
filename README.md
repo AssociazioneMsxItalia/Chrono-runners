@@ -58,10 +58,11 @@ python3 Toolkit/spr2msx.py <exported_assembly_file>
 
 This produces `data_sprt_layer.h`; move it to `content/sprite/` before rebuilding.
 
-Level maps are extracted from Magellan `.mag` files with:
+Screen maps and level definitions are extracted from Magellan `.mag` files with:
 
 ```console
-python3 Toolkit/extract_levels.py <mag_file>
+python3 Toolkit/extract_screens.sh <mag_file>
+python3 Toolkit/extract_levels.sh <mag_file>
 ```
 
 ## License
