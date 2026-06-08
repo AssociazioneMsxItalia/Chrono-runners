@@ -37,6 +37,7 @@ bool State_Slideshow();
 bool State_Game();
 bool State_Death();
 bool State_Rewind();
+bool State_Pause();
 bool State_Intermission();
 bool State_MessageScreen();
 bool State_Cutscene();
@@ -547,6 +548,9 @@ const c8* g_MessageScreenText = NULL;
 i8 g_MessageScreenSongId = 1;
 u16 g_MessageScreenDuration = 500;
 
+// Stato di pausa
+u8 g_GamePaused = 0;
+
 Pawn g_PlayerPawn;
 u8	 g_PlayerAction;
 bool g_PlayerMovingRight = FALSE;
@@ -911,6 +915,13 @@ WITH_SEGMENT(3) {
 
 bool State_Game()
 {
+
+	if (Keyboard_IsKeyPressed(PAUSE_KEY)) {
+		g_GamePaused = 1;
+		Game_SetState(State_Pause);
+		return TRUE;
+	}
+
 	// Recupera livello corrente per passarlo esplicitamente alle funzioni che
 	// ne hanno bisogno
 	struct Level *lvl = &g_ActiveLevel;
@@ -1178,6 +1189,53 @@ bool State_Rewind()
 	DrawEnergyFields(lvl, TRUE);
 
 	return TRUE;
+}
+
+//=============================================================================
+// PAUSE STATE
+//=============================================================================
+
+bool State_Pause()
+{
+	
+	switch (g_GamePaused)
+	{
+		case 1:
+			for (u8 y = 9; y < 15; y++) {
+				for (u8 x = 7; x < 25; x++) {
+					VDP_Poke_GM2(x, y, TILE_EMPTY);
+				}
+			}
+
+			PrintGFXText("PAUSED", 13, 12);
+			g_GamePaused = 2;
+			return TRUE;
+
+		case 2:
+			if (!Keyboard_IsKeyPressed(PAUSE_KEY))
+			{
+				g_GamePaused = 3;
+			}
+			return TRUE;
+	
+		case 3:
+			if (Keyboard_IsKeyPressed(PAUSE_KEY))
+			{
+				g_GamePaused = 4;
+			}
+			return TRUE;
+		default:
+			if (!Keyboard_IsKeyPressed(PAUSE_KEY))
+			{
+				u8 seg = SegmentForLevel(g_CurrentLevelIdx);
+				WITH_SEGMENT(seg) {
+					VDP_WriteLayout_GM2(g_ActiveLevel.layout, 0, 2, 32, 24);
+				}
+				g_GamePaused = 4;
+				Game_SetState(State_Game);
+			}
+			return TRUE;
+	}
 }
 
 //=============================================================================
