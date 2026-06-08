@@ -550,6 +550,7 @@ u16 g_MessageScreenDuration = 500;
 
 // Stato di pausa
 u8 g_GamePaused = 0;
+u8 g_PausedMusicId = 0;  // Salva quale canzone stava suonando prima della pausa
 
 Pawn g_PlayerPawn;
 u8	 g_PlayerAction;
@@ -1201,6 +1202,12 @@ bool State_Pause()
 	switch (g_GamePaused)
 	{
 		case 1:
+			WITH_SEGMENT(4) {
+				g_PausedMusicId = SoundGetSong();
+				SoundStop();
+				FxPlay(SND_FX_PAUSE);
+			}
+
 			for (u8 y = 9; y < 15; y++) {
 				for (u8 x = 7; x < 25; x++) {
 					VDP_Poke_GM2(x, y, TILE_EMPTY);
@@ -1227,6 +1234,12 @@ bool State_Pause()
 		default:
 			if (!Keyboard_IsKeyPressed(PAUSE_KEY))
 			{
+				// Ripristina la musica che stava suonando prima della pausa
+				WITH_SEGMENT(4) {
+					SoundSwitchTo(g_PausedMusicId);
+					FxPlay(SND_FX_UNPAUSE);
+				}
+
 				u8 seg = SegmentForLevel(g_CurrentLevelIdx);
 				WITH_SEGMENT(seg) {
 					VDP_WriteLayout_GM2(g_ActiveLevel.layout, 0, 2, 32, 24);
