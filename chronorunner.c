@@ -13,7 +13,7 @@
 #include "snapshot.h"
 #include "cutscene.h"
 #include "fx_sounds.h"
-#include "game_defines.h"
+#include "keys.h"
 
 //=============================================================================
 // DEFINES
@@ -298,7 +298,6 @@ extern bool isLeftPressed();
 extern bool isRightPressed();
 extern bool isSpacePressed();
 extern bool isSpaceReleased();
-extern bool isSkipKeyReleased();
 
 extern void UpdatePlayerInput();
 extern void UpdatePlayerGravity();
@@ -549,7 +548,7 @@ i8 g_MessageScreenSongId = 1;
 u16 g_MessageScreenDuration = 500;
 
 // Stato di pausa
-u8 g_GamePaused = 0;
+u8 g_PauseState = 0;
 u8 g_PausedMusicId = 0;  // Salva quale canzone stava suonando prima della pausa
 
 Pawn g_PlayerPawn;
@@ -872,7 +871,7 @@ WITH_SEGMENT(next_lvl_seg) {
 
 	g_IntermissionState++;
 
-	if (g_IntermissionState > 100 || (g_CheatEnabled && isSkipKeyReleased())) {
+	if (g_IntermissionState > 100 || (g_CheatEnabled && Keyboard_IsKeyPressed(SKIP_LEVEL_KEY))) {
 		g_IntermissionState = 0;
 		ChangeLevel();
 		return FALSE;
@@ -918,7 +917,7 @@ bool State_Game()
 {
 
 	if (Keyboard_IsKeyPressed(PAUSE_KEY)) {
-		g_GamePaused = 1;
+		g_PauseState = 1;
 		Game_SetState(State_Pause);
 		return TRUE;
 	}
@@ -1023,7 +1022,7 @@ bool State_Game()
     }
 
 	// Controlla se il giocatore ha raggiunto l'uscita
-	if (isPlayerAtExit() || (g_CheatEnabled && isSkipKeyReleased())) {
+	if (isPlayerAtExit() || (g_CheatEnabled && Keyboard_IsKeyPressed(SKIP_LEVEL_KEY))) {
 		FxPlay(FX_EXIT_DOOR);
 		AdvanceSequence();
 		return TRUE;
@@ -1198,57 +1197,46 @@ bool State_Rewind()
 
 bool State_Pause()
 {
-	
-	switch (g_GamePaused)
+	if (g_PauseState == 1)
 	{
-		case 1:
-			WITH_SEGMENT(4) {
-				g_PausedMusicId = SoundGetSong();
+WITH_SEGMENT(4) {
 				SoundStop();
 				FxPlay(SND_FX_PAUSE);
-			}
+}
 
-			for (u8 y = 9; y < 15; y++) {
-				for (u8 x = 7; x < 25; x++) {
-					VDP_Poke_GM2(x, y, TILE_EMPTY);
-				}
-			}
-
-			PrintGFXText("PAUSED", 13, 12);
-			g_GamePaused = 2;
-			return TRUE;
-
-		case 2:
-			if (!Keyboard_IsKeyPressed(PAUSE_KEY))
-			{
-				g_GamePaused = 3;
-			}
-			return TRUE;
-	
-		case 3:
-			if (Keyboard_IsKeyPressed(PAUSE_KEY))
-			{
-				g_GamePaused = 4;
-			}
-			return TRUE;
-		default:
-			if (!Keyboard_IsKeyPressed(PAUSE_KEY))
-			{
-				// Ripristina la musica che stava suonando prima della pausa
-				WITH_SEGMENT(4) {
-					SoundSwitchTo(g_PausedMusicId);
-					FxPlay(SND_FX_UNPAUSE);
-				}
-
-				u8 seg = SegmentForLevel(g_CurrentLevelIdx);
-				WITH_SEGMENT(seg) {
-					VDP_WriteLayout_GM2(g_ActiveLevel.layout, 0, 2, 32, 24);
-				}
-				g_GamePaused = 4;
-				Game_SetState(State_Game);
-			}
-			return TRUE;
+		PrintGFXText("PAUSED     ", 2, 0);
+		g_PauseState++;
 	}
+	else if (g_PauseState == 2)
+	{
+		if (!Keyboard_IsKeyPressed(PAUSE_KEY))
+		{
+			g_PauseState++;
+		}
+	}
+	else if (g_PauseState == 3)
+	{
+		if (Keyboard_IsKeyPressed(PAUSE_KEY))
+		{
+			g_PauseState++;
+		}
+	}
+	else if (g_PauseState == 4)
+	{
+		if (!Keyboard_IsKeyPressed(PAUSE_KEY))
+		{
+			// Ripristina la musica che stava suonando prima della pausa
+WITH_SEGMENT(4) {
+				extern u8 g_CurrentSong;
+				SoundSwitchTo(g_CurrentSong);
+				FxPlay(SND_FX_UNPAUSE);
+}
+				PrintGFXText("TIME   '  \"", 2, 0);
+				g_PauseState = 0;
+				Game_RestoreState();
+		}
+	}
+	return TRUE;
 }
 
 //=============================================================================

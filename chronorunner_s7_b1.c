@@ -8,7 +8,7 @@
 #include "PawnData.h"
 #include "snapshot.h"
 #include "fx_sounds.h"
-#include "game_defines.h"
+#include "keys.h"
 
 extern void AdvanceSequence();
 
@@ -528,19 +528,6 @@ bool isSpacePressed() {
 
 bool isSpaceReleased() {
 	return !isSpacePressed();
-}
-
-bool isSkipKeyReleased() {
-	static bool wasPressed = FALSE;
-	bool isPressed = Keyboard_IsKeyPressed(SKIP_LEVEL_KEY);
-	
-	// Ritorna TRUE solo quando il tasto passa da premuto a non-premuto
-	if (wasPressed && !isPressed) {
-		wasPressed = FALSE;
-		return TRUE;
-	}
-	wasPressed = isPressed;
-	return FALSE;
 }
 
 //=============================================================================
@@ -1076,6 +1063,7 @@ extern const Pawn_Sprite g_PlayerLayers[];
 extern void SetMessageScreen(const c8* text, i8 songId, u16 duration);
 extern bool State_MessageScreen();
 extern bool State_Death();
+extern bool State_Pause();
 extern struct Platform g_RuntimePlatforms[];
 extern void AllocateCurrentLevelSprites();
 extern void SNDSwitchTo(u8 songId);
@@ -1179,6 +1167,12 @@ void InitBoss()
 
 bool State_Boss()
 {
+	extern u8 g_PauseState;
+	if (Keyboard_IsKeyPressed(PAUSE_KEY)) {
+		g_PauseState = 1;
+		Game_SetState(State_Pause);
+		return TRUE;
+	}
 	struct Level *lvl = &g_ActiveLevel;
 
 	UpdatePlayerInput();
