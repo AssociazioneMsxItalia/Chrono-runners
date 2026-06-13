@@ -239,6 +239,8 @@ extern void SoundUpdate();
 
 extern void S4_FxPlay(u8 id);
 
+extern u8 g_CurrentSong;
+
 //=============================================================================
 // SEGMENT 5, BANK 1
 //=============================================================================
@@ -1223,15 +1225,17 @@ WITH_SEGMENT(4) {
 	{
 		if (!Keyboard_IsKeyPressed(PAUSE_KEY))
 		{
-			// Ripristina la musica che stava suonando prima della pausa
 WITH_SEGMENT(4) {
-				extern u8 g_CurrentSong;
-				SoundSwitchTo(g_CurrentSong);
-				FxPlay(FX_UNPAUSE);
+			// Ripristina la musica che stava suonando prima della pausa
+			SoundSwitchTo(g_CurrentSong);
+			FxPlay(FX_UNPAUSE);
 }
-				PrintGFXText("TIME   '  \"", 2, 0);
-				g_PauseState = 0;
-				Game_RestoreState();
+			// Ripristina il contatore del tempo rimanente
+			PrintGFXText("TIME   '  \"", 2, 0);
+			PrintTime();
+
+			g_PauseState = 0;
+			Game_RestoreState();
 		}
 	}
 	return TRUE;
