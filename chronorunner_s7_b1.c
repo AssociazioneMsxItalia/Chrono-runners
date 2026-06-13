@@ -16,6 +16,8 @@ extern u8 g_RemainingMinutes;
 extern u8 g_RemainingSeconds;
 extern u8 g_PlayerRewindEnergy;
 
+extern u8 g_PauseState;
+
 extern Pawn g_PlayerPawn;
 extern i8   g_VelocityY;
 extern i8   g_mDY;
@@ -1167,7 +1169,6 @@ void InitBoss()
 
 bool State_Boss()
 {
-	extern u8 g_PauseState;
 	if (Keyboard_IsKeyPressed(PAUSE_KEY)) {
 		g_PauseState = 1;
 		Game_SetState(State_Pause);
