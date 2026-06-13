@@ -74,8 +74,12 @@ void PrintGFXNumber(u8 number, u8 x, u8 y) {
 }
 
 void PrintTime() {
-	PrintGFXNumber(g_RemainingMinutes, 7, 0);
-	PrintGFXNumber(g_RemainingSeconds, 10, 0);
+	// Legge minuti e secondi in due variabili locali per limitare il rischio
+	// (comunque presente) di una torn read dovuta a InterruptHook.
+	u8 min = g_RemainingMinutes;
+	u8 sec = g_RemainingSeconds;
+	PrintGFXNumber(min, 7, 0);
+	PrintGFXNumber(sec, 10, 0);
 }
 
 void DrawRewindGauge() {
