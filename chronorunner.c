@@ -1197,6 +1197,8 @@ bool State_Rewind()
 
 bool State_Pause()
 {
+	bool is_pause_pressed = Keyboard_IsKeyPressed(PAUSE_KEY);
+
 	if (g_PauseState == 1)
 	{
 WITH_SEGMENT(4) {
@@ -1209,21 +1211,21 @@ WITH_SEGMENT(4) {
 	}
 	else if (g_PauseState == 2)
 	{
-		if (!Keyboard_IsKeyPressed(PAUSE_KEY))
+		if (!is_pause_pressed)
 		{
 			g_PauseState++;
 		}
 	}
 	else if (g_PauseState == 3)
 	{
-		if (Keyboard_IsKeyPressed(PAUSE_KEY))
+		if (is_pause_pressed)
 		{
 			g_PauseState++;
 		}
 	}
 	else if (g_PauseState == 4)
 	{
-		if (!Keyboard_IsKeyPressed(PAUSE_KEY))
+		if (!is_pause_pressed)
 		{
 WITH_SEGMENT(4) {
 			// Ripristina la musica che stava suonando prima della pausa
