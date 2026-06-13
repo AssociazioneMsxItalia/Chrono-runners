@@ -536,7 +536,7 @@ u8 g_RemainingMinutes;
 u8 g_RemainingSeconds;
 u8 g_RemainingFS;
 bool g_TimeWarpUpwards = FALSE;
-
+const c8 *g_TimeHUD = "TIME   '  \"";
 
 // Controlla lo stato dell'intermission
 u8 g_IntermissionState = 0;
@@ -852,7 +852,7 @@ WITH_SEGMENT(1) {
 		PrintGFXNumber(g_NextLevelIdx + 1, 10, 18);
 
 		// Tempo rimanente
-		PrintGFXText("TIME   '  \"", 18, 18);
+		PrintGFXText(g_TimeHUD, 18, 18);
 		PrintGFXNumber(g_RemainingMinutes, 23, 18);
 		PrintGFXNumber(g_RemainingSeconds, 26, 18);
 
@@ -908,7 +908,7 @@ WITH_SEGMENT(3) {
 	AllocateSpriteIDs(&g_ActiveLevel);
 }
 
-	PrintGFXText("TIME   '  \"", 2, 0);
+	PrintGFXText(g_TimeHUD, 2, 0);
 	PrintTime();
 
 	Game_SetState(State_Game);
@@ -1201,12 +1201,13 @@ bool State_Pause()
 
 	if (g_PauseState == 1)
 	{
+
 WITH_SEGMENT(4) {
 		SoundStop();
 		FxPlay(FX_PAUSE);
 }
 
-		PrintGFXText("PAUSED     ", 2, 0);
+		PrintGFXText("  PAUSED   ", 2, 0);
 		g_PauseState++;
 	}
 	else if (g_PauseState == 2)
@@ -1227,13 +1228,14 @@ WITH_SEGMENT(4) {
 	{
 		if (!is_pause_pressed)
 		{
+
 WITH_SEGMENT(4) {
 			// Ripristina la musica che stava suonando prima della pausa
 			SoundSwitchTo(g_CurrentSong);
 			FxPlay(FX_UNPAUSE);
 }
 			// Ripristina il contatore del tempo rimanente
-			PrintGFXText("TIME   '  \"", 2, 0);
+			PrintGFXText(g_TimeHUD, 2, 0);
 			PrintTime();
 
 			g_PauseState = 0;
