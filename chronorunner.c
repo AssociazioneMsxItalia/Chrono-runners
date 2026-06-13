@@ -549,7 +549,6 @@ u16 g_MessageScreenDuration = 500;
 
 // Stato di pausa
 u8 g_PauseState = 0;
-u8 g_PausedMusicId = 0;  // Salva quale canzone stava suonando prima della pausa
 
 Pawn g_PlayerPawn;
 u8	 g_PlayerAction;
