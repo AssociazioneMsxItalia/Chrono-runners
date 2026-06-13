@@ -7,9 +7,5 @@
 			"path": "."
 		}
 	],
-	"settings": {
-		"[m68k]": {
-			"editor.rulers": []
-		}
-	}
+	"settings": {}
 }

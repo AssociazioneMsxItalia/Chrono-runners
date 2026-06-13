@@ -914,7 +914,6 @@ WITH_SEGMENT(3) {
 
 bool State_Game()
 {
-
 	if (Keyboard_IsKeyPressed(PAUSE_KEY)) {
 		g_PauseState = 1;
 		Game_SetState(State_Pause);
@@ -1199,8 +1198,8 @@ bool State_Pause()
 	if (g_PauseState == 1)
 	{
 WITH_SEGMENT(4) {
-				SoundStop();
-				FxPlay(SND_FX_PAUSE);
+		SoundStop();
+		FxPlay(FX_PAUSE);
 }
 
 		PrintGFXText("PAUSED     ", 2, 0);
@@ -1228,7 +1227,7 @@ WITH_SEGMENT(4) {
 WITH_SEGMENT(4) {
 				extern u8 g_CurrentSong;
 				SoundSwitchTo(g_CurrentSong);
-				FxPlay(SND_FX_UNPAUSE);
+				FxPlay(FX_UNPAUSE);
 }
 				PrintGFXText("TIME   '  \"", 2, 0);
 				g_PauseState = 0;
