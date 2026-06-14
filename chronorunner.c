@@ -1199,35 +1199,24 @@ bool State_Pause()
 {
 	bool is_pause_pressed = Keyboard_IsKeyPressed(PAUSE_KEY);
 
+	// Arriviamo qua dopo la prima chiamata: il tasto pause è sicuramente
+	// premuto.
 	if (g_PauseState == 1)
 	{
-
 WITH_SEGMENT(4) {
 		SoundStop();
 		FxPlay(FX_PAUSE);
 }
-
 		PrintGFXText("  PAUSED   ", 2, 0);
 		g_PauseState++;
 	}
-	else if (g_PauseState == 2)
-	{
-		if (!is_pause_pressed)
-		{
-			g_PauseState++;
-		}
-	}
-	else if (g_PauseState == 3)
-	{
-		if (is_pause_pressed)
-		{
-			g_PauseState++;
-		}
-	}
-	else if (g_PauseState == 4)
-	{
-		if (!is_pause_pressed)
-		{
+
+	// State 2: (pari, avanza su rilascio)
+	// State 3: (dispari, avanza su pressione)
+	// State 4: (pari, avanza su rilascio)
+	if (is_pause_pressed == (g_PauseState & 1)) {
+		g_PauseState++;
+		if (g_PauseState == 5) {
 
 WITH_SEGMENT(4) {
 			// Ripristina la musica che stava suonando prima della pausa
