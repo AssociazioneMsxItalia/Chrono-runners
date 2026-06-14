@@ -1234,9 +1234,16 @@ WITH_SEGMENT(4) {
 			SoundSwitchTo(g_CurrentSong);
 			FxPlay(FX_UNPAUSE);
 }
-			// Ripristina il contatore del tempo rimanente
-			PrintGFXText(g_TimeHUD, 2, 0);
-			PrintTime();
+			// Intanto rimuove la scritta PAUSED. Se siamo in modalità boss
+			// è sufficiente far questo.
+			VDP_FillLayout_GM2(TILE_EMPTY, 2, 0, 10, 1);
+
+			if (g_RemainingMinutes != 0 && g_RemainingSeconds != 0) {
+				// Siamo in modalità gioco, ripristina il contatore del tempo
+				// rimanente subito, senza aspettare il prossimo secondo
+				PrintGFXText(g_TimeHUD, 2, 0);
+				PrintTime();
+			}
 
 			g_PauseState = 0;
 			Game_RestoreState();
