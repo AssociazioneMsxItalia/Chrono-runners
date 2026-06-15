@@ -16,3 +16,9 @@ Toolkit/ExtractTilesMagellan/bin/
 
 # Configurazione locale
 chronorunner.js
+
+# Report di analisi memoria
+rom_analysis/
+
+# Cache Python
+__pycache__/

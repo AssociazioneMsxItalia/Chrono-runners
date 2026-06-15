@@ -13,6 +13,7 @@
 #include "snapshot.h"
 #include "cutscene.h"
 #include "fx_sounds.h"
+#include "keys.h"
 
 //=============================================================================
 // DEFINES
@@ -36,6 +37,7 @@ bool State_Slideshow();
 bool State_Game();
 bool State_Death();
 bool State_Rewind();
+bool State_Pause();
 bool State_Intermission();
 bool State_MessageScreen();
 bool State_Cutscene();
@@ -236,6 +238,8 @@ extern void SoundStop();
 extern void SoundUpdate();
 
 extern void S4_FxPlay(u8 id);
+
+extern u8 g_CurrentSong;
 
 //=============================================================================
 // SEGMENT 5, BANK 1
@@ -532,7 +536,7 @@ u8 g_RemainingMinutes;
 u8 g_RemainingSeconds;
 u8 g_RemainingFS;
 bool g_TimeWarpUpwards = FALSE;
-
+const c8 *g_TimeHUD = "TIME   '  \"";
 
 // Controlla lo stato dell'intermission
 u8 g_IntermissionState = 0;
@@ -544,6 +548,9 @@ u16 g_MessageScreenCounter = 0;
 const c8* g_MessageScreenText = NULL;
 i8 g_MessageScreenSongId = 1;
 u16 g_MessageScreenDuration = 500;
+
+// Stato di pausa
+u8 g_PauseState = 0;
 
 Pawn g_PlayerPawn;
 u8	 g_PlayerAction;
@@ -845,7 +852,7 @@ WITH_SEGMENT(1) {
 		PrintGFXNumber(g_NextLevelIdx + 1, 10, 18);
 
 		// Tempo rimanente
-		PrintGFXText("TIME   '  \"", 18, 18);
+		PrintGFXText(g_TimeHUD, 18, 18);
 		PrintGFXNumber(g_RemainingMinutes, 23, 18);
 		PrintGFXNumber(g_RemainingSeconds, 26, 18);
 
@@ -865,7 +872,7 @@ WITH_SEGMENT(next_lvl_seg) {
 
 	g_IntermissionState++;
 
-	if (g_IntermissionState > 100 || (g_CheatEnabled && Keyboard_IsKeyPressed(KEY_F1))) {
+	if (g_IntermissionState > 100 || (g_CheatEnabled && Keyboard_IsKeyPressed(SKIP_LEVEL_KEY))) {
 		g_IntermissionState = 0;
 		ChangeLevel();
 		return FALSE;
@@ -901,7 +908,7 @@ WITH_SEGMENT(3) {
 	AllocateSpriteIDs(&g_ActiveLevel);
 }
 
-	PrintGFXText("TIME   '  \"", 2, 0);
+	PrintGFXText(g_TimeHUD, 2, 0);
 	PrintTime();
 
 	Game_SetState(State_Game);
@@ -909,6 +916,12 @@ WITH_SEGMENT(3) {
 
 bool State_Game()
 {
+	if (Keyboard_IsKeyPressed(PAUSE_KEY)) {
+		g_PauseState = 1;
+		Game_SetState(State_Pause);
+		return TRUE;
+	}
+
 	// Recupera livello corrente per passarlo esplicitamente alle funzioni che
 	// ne hanno bisogno
 	struct Level *lvl = &g_ActiveLevel;
@@ -1009,7 +1022,7 @@ bool State_Game()
     }
 
 	// Controlla se il giocatore ha raggiunto l'uscita
-	if (isPlayerAtExit() || (g_CheatEnabled && Keyboard_IsKeyPressed(KEY_F1))) {
+	if (isPlayerAtExit() || (g_CheatEnabled && Keyboard_IsKeyPressed(SKIP_LEVEL_KEY))) {
 		FxPlay(FX_EXIT_DOOR);
 		AdvanceSequence();
 		return TRUE;
@@ -1179,6 +1192,56 @@ bool State_Rewind()
 }
 
 //=============================================================================
+// PAUSE STATE
+//=============================================================================
+
+bool State_Pause()
+{
+	bool is_pause_pressed = Keyboard_IsKeyPressed(PAUSE_KEY);
+
+	// Arriviamo qua dopo la prima chiamata: il tasto pause è sicuramente
+	// premuto.
+	if (g_PauseState == 1)
+	{
+WITH_SEGMENT(4) {
+		SoundStop();
+		FxPlay(FX_PAUSE);
+}
+		PrintGFXText("  PAUSED   ", 2, 0);
+		g_PauseState++;
+	}
+
+	// State 2: (pari, avanza su rilascio)
+	// State 3: (dispari, avanza su pressione)
+	// State 4: (pari, avanza su rilascio)
+	if (is_pause_pressed == (g_PauseState & 1)) {
+		g_PauseState++;
+		if (g_PauseState == 5) {
+
+WITH_SEGMENT(4) {
+			// Ripristina la musica che stava suonando prima della pausa
+			SoundSwitchTo(g_CurrentSong);
+			FxPlay(FX_UNPAUSE);
+}
+			// Intanto rimuove la scritta PAUSED. Se siamo in modalità boss
+			// è sufficiente far questo.
+			VDP_FillLayout_GM2(TILE_EMPTY, 2, 0, 10, 1);
+
+			if (g_RemainingMinutes != 0 && g_RemainingSeconds != 0) {
+				// Siamo in modalità gioco, ripristina il contatore del tempo
+				// rimanente subito, senza aspettare il prossimo secondo
+				PrintGFXText(g_TimeHUD, 2, 0);
+				PrintTime();
+			}
+
+			g_PauseState = 0;
+			Game_RestoreState();
+		}
+	}
+	return TRUE;
+}
+
+//=============================================================================
 // MENU STATE
 //=============================================================================
 
@@ -1226,7 +1289,7 @@ WITH_SEGMENT(1) {
         g_MenuState = 1;
     }
 
-    if (Keyboard_IsKeyPressed(KEY_F1))
+    if (Keyboard_IsKeyPressed(CHEAT_TOGGLE_KEY))
         g_CheatEnabled = TRUE;
 
     // Wait for all keys to be released before accepting new input

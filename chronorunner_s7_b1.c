@@ -8,12 +8,15 @@
 #include "PawnData.h"
 #include "snapshot.h"
 #include "fx_sounds.h"
+#include "keys.h"
 
 extern void AdvanceSequence();
 
 extern u8 g_RemainingMinutes;
 extern u8 g_RemainingSeconds;
 extern u8 g_PlayerRewindEnergy;
+
+extern u8 g_PauseState;
 
 extern Pawn g_PlayerPawn;
 extern i8   g_VelocityY;
@@ -71,8 +74,12 @@ void PrintGFXNumber(u8 number, u8 x, u8 y) {
 }
 
 void PrintTime() {
-	PrintGFXNumber(g_RemainingMinutes, 7, 0);
-	PrintGFXNumber(g_RemainingSeconds, 10, 0);
+	// Legge minuti e secondi in due variabili locali per limitare il rischio
+	// (comunque presente) di una torn read dovuta a InterruptHook.
+	u8 min = g_RemainingMinutes;
+	u8 sec = g_RemainingSeconds;
+	PrintGFXNumber(min, 7, 0);
+	PrintGFXNumber(sec, 10, 0);
 }
 
 void DrawRewindGauge() {
@@ -1062,6 +1069,7 @@ extern const Pawn_Sprite g_PlayerLayers[];
 extern void SetMessageScreen(const c8* text, i8 songId, u16 duration);
 extern bool State_MessageScreen();
 extern bool State_Death();
+extern bool State_Pause();
 extern struct Platform g_RuntimePlatforms[];
 extern void AllocateCurrentLevelSprites();
 extern void SNDSwitchTo(u8 songId);
@@ -1165,6 +1173,11 @@ void InitBoss()
 
 bool State_Boss()
 {
+	if (Keyboard_IsKeyPressed(PAUSE_KEY)) {
+		g_PauseState = 1;
+		Game_SetState(State_Pause);
+		return TRUE;
+	}
 	struct Level *lvl = &g_ActiveLevel;
 
 	UpdatePlayerInput();
