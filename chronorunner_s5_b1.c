@@ -392,7 +392,7 @@ const CutCmd g_IntroCutscene[] = {
 	CUT_CLEAR_TEXT(),
 
 	// Entra Chrono
-    CUT_SPRITE_WALK(&g_PlayerWalkRight, 0*8, 16*8, 14*8, 17*8, 2),
+    CUT_SPRITE_WALK(&g_PlayerWalkRight, 0*8, 17*8, 14*8, 17*8, 2),
 
 	CUT_TEXT_TYPE("AT LAST. AGENT, THIS WILL BE", 21),
 	CUT_TEXT_TYPE("YOUR HARDEST MISSION SO FAR.", 23),
@@ -446,7 +446,7 @@ const CutCmd g_IntroCutscene[] = {
 	CUT_CLEAR_TEXT(),
 
     // Chrono esce
-    CUT_SPRITE_WALK(&g_PlayerWalkLeft, 14*8, 16*8, 0*8, 17*8, 2),
+    CUT_SPRITE_WALK(&g_PlayerWalkLeft, 14*8, 17*8, 0*8, 17*8, 2),
 	CUT_SPRITE_HIDE(0),
 	CUT_SPRITE_HIDE(1),
 
@@ -454,7 +454,7 @@ const CutCmd g_IntroCutscene[] = {
 	CUT_TEXT_TYPE("FINALLY.", 23),
 	CUT_WAIT_KEY(),
 
-	CUT_SPRITE_WALK(&g_DocWalkRight, 20*8, 16*8, 29*8, 17*8, 1),
+	CUT_SPRITE_WALK(&g_DocWalkRight, 20*8, 17*8, 29*8, 17*8, 1),
     
 	CUT_WAIT(10),
 
