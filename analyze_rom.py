@@ -183,13 +183,12 @@ def main():
     # requires a path separator for CreateProcess to resolve .bat files
     script_dir = os.path.dirname(os.path.abspath(__file__))
     os.chdir(script_dir)  # ensure we're always in the right directory
-    if os.path.isfile("build.bat"):
-        build_cmd = [os.path.abspath("build.bat")]
-    elif os.path.isfile("build.sh"):
-        build_cmd = ["bash", os.path.abspath("build.sh")]
-    else:
-        print("ERROR: No build script found.", file=sys.stderr)
+
+    script = "build.bat" if os.name == "nt" else "build.sh"
+    if not os.path.isfile(script):
+        print(f"ERROR: Build script '{script}' not found.", file=sys.stderr)
         sys.exit(1)
+    build_cmd = [os.path.abspath(script)]
 
     # Stash local changes (only if we're going to actually build something)
     needs_build = any(c["sha"] not in cache for c in commits)
