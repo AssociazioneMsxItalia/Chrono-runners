@@ -373,20 +373,19 @@ const CutCmd g_IntroCutscene[] = {
 	CUT_WAIT(25),
 
     CUT_TEXT("PRESS ESC TO SKIP", 23), 
-    CUT_WAIT(50),
+    CUT_WAIT(100),
     CUT_CLEAR_TEXT(),
 
     CUT_LOAD_LAYOUT(g_Screen5, 0, CUTSCENE_GFX_Y, 32, CUTSCENE_GFX_ROWS),
 
     CUT_SPRITE_WALK(&g_DocWalkLeft, 29*8, 17*8, 20*8, 17*8, 1),
 
-    CUT_TEXT_TYPE("TIME IS RUNNING OUT...", 21),
-    CUT_TEXT("- PRESS SPACE KEY -", 23),
-
+    CUT_TEXT("- PRESS SPACE KEY -", 22),
     CUT_WAIT_KEY(),
-
     CUT_CLEAR_TEXT(),
-	CUT_TEXT_TYPE("...WHERE IS CHRONO RUNNER?", 21),
+
+    CUT_TEXT_TYPE("TIME IS RUNNING OUT...", 21),
+	CUT_TEXT_TYPE("...WHERE IS CHRONO RUNNER?", 23),
 
 	CUT_WAIT_KEY(),
 	CUT_CLEAR_TEXT(),
@@ -453,10 +452,9 @@ const CutCmd g_IntroCutscene[] = {
 	CUT_TEXT_TYPE("...THIS WILL BE OUR TRIUMPH...", 21),
 	CUT_TEXT_TYPE("FINALLY.", 23),
 	CUT_WAIT_KEY(),
+    CUT_CLEAR_TEXT(),
 
 	CUT_SPRITE_WALK(&g_DocWalkRight, 20*8, 17*8, 29*8, 17*8, 1),
-    
-	CUT_WAIT(10),
 
     CUT_END(),
 };
